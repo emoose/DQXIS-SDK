@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{956e32b9-5320-4bd6-99bb-d0e6c26a9a05}</ProjectGuid>
+    <RootNamespace>DQXISDK</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DQXISDK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;DQXISDK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>
+      </GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;DQXISDK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;DQXISDK_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>
+      </GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
+      <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="SDK.h" />
+    <ClInclude Include="SDK\AIModule_classes.h" />
+    <ClInclude Include="SDK\AIModule_parameters.h" />
+    <ClInclude Include="SDK\AIModule_structs.h" />
+    <ClInclude Include="SDK\AnimationCore_classes.h" />
+    <ClInclude Include="SDK\AnimationCore_parameters.h" />
+    <ClInclude Include="SDK\AnimationCore_structs.h" />
+    <ClInclude Include="SDK\AnimGraphRuntime_classes.h" />
+    <ClInclude Include="SDK\AnimGraphRuntime_parameters.h" />
+    <ClInclude Include="SDK\AnimGraphRuntime_structs.h" />
+    <ClInclude Include="SDK\ApexDestruction_classes.h" />
+    <ClInclude Include="SDK\ApexDestruction_parameters.h" />
+    <ClInclude Include="SDK\ApexDestruction_structs.h" />
+    <ClInclude Include="SDK\ArchVisCharacter_classes.h" />
+    <ClInclude Include="SDK\ArchVisCharacter_parameters.h" />
+    <ClInclude Include="SDK\ArchVisCharacter_structs.h" />
+    <ClInclude Include="SDK\AssetRegistry_classes.h" />
+    <ClInclude Include="SDK\AssetRegistry_parameters.h" />
+    <ClInclude Include="SDK\AssetRegistry_structs.h" />
+    <ClInclude Include="SDK\AudioMixer_classes.h" />
+    <ClInclude Include="SDK\AudioMixer_parameters.h" />
+    <ClInclude Include="SDK\AudioMixer_structs.h" />
+    <ClInclude Include="SDK\Basic.h" />
+    <ClInclude Include="SDK\BP_ActionCameraParameter_classes.h" />
+    <ClInclude Include="SDK\BP_ActionCameraParameter_parameters.h" />
+    <ClInclude Include="SDK\BP_ActionCameraParameter_structs.h" />
+    <ClInclude Include="SDK\BP_BattleGroupParameter_classes.h" />
+    <ClInclude Include="SDK\BP_BattleGroupParameter_parameters.h" />
+    <ClInclude Include="SDK\BP_BattleGroupParameter_structs.h" />
+    <ClInclude Include="SDK\BP_BattleResultParameter_classes.h" />
+    <ClInclude Include="SDK\BP_BattleResultParameter_parameters.h" />
+    <ClInclude Include="SDK\BP_BattleResultParameter_structs.h" />
+    <ClInclude Include="SDK\BP_BCAI_Friend_classes.h" />
+    <ClInclude Include="SDK\BP_BCAI_Friend_parameters.h" />
+    <ClInclude Include="SDK\BP_BCAI_Friend_structs.h" />
+    <ClInclude Include="SDK\BP_BCAI_Konran_classes.h" />
+    <ClInclude Include="SDK\BP_BCAI_Konran_parameters.h" />
+    <ClInclude Include="SDK\BP_BCAI_Konran_structs.h" />
+    <ClInclude Include="SDK\BP_BCAI_Monster_classes.h" />
+    <ClInclude Include="SDK\BP_BCAI_Monster_parameters.h" />
+    <ClInclude Include="SDK\BP_BCAI_Monster_structs.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_L_classes.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_L_parameters.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_L_structs.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_M_classes.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_M_parameters.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_M_structs.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_S_classes.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_S_parameters.h" />
+    <ClInclude Include="SDK\BP_CameraShake_Preset_S_structs.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Base_classes.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Base_parameters.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Base_structs.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Friend_classes.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Friend_parameters.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Friend_structs.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Monster_classes.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Monster_parameters.h" />
+    <ClInclude Include="SDK\BP_COMP_BCAI_Monster_structs.h" />
+    <ClInclude Include="SDK\BP_MonsterBtController_classes.h" />
+    <ClInclude Include="SDK\BP_MonsterBtController_parameters.h" />
+    <ClInclude Include="SDK\BP_MonsterBtController_structs.h" />
+    <ClInclude Include="SDK\BuildPatchServices_classes.h" />
+    <ClInclude Include="SDK\BuildPatchServices_parameters.h" />
+    <ClInclude Include="SDK\BuildPatchServices_structs.h" />
+    <ClInclude Include="SDK\CableComponent_classes.h" />
+    <ClInclude Include="SDK\CableComponent_parameters.h" />
+    <ClInclude Include="SDK\CableComponent_structs.h" />
+    <ClInclude Include="SDK\CinematicCamera_classes.h" />
+    <ClInclude Include="SDK\CinematicCamera_parameters.h" />
+    <ClInclude Include="SDK\CinematicCamera_structs.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntimeInterface_classes.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntimeInterface_parameters.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntimeInterface_structs.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntime_classes.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntime_parameters.h" />
+    <ClInclude Include="SDK\ClothingSystemRuntime_structs.h" />
+    <ClInclude Include="SDK\CoreUObject_classes.h" />
+    <ClInclude Include="SDK\CoreUObject_parameters.h" />
+    <ClInclude Include="SDK\CoreUObject_structs.h" />
+    <ClInclude Include="SDK\CriWareRuntime_classes.h" />
+    <ClInclude Include="SDK\CriWareRuntime_parameters.h" />
+    <ClInclude Include="SDK\CriWareRuntime_structs.h" />
+    <ClInclude Include="SDK\CustomMeshComponent_classes.h" />
+    <ClInclude Include="SDK\CustomMeshComponent_parameters.h" />
+    <ClInclude Include="SDK\CustomMeshComponent_structs.h" />
+    <ClInclude Include="SDK\DmgTypeBP_Environmental_classes.h" />
+    <ClInclude Include="SDK\DmgTypeBP_Environmental_parameters.h" />
+    <ClInclude Include="SDK\DmgTypeBP_Environmental_structs.h" />
+    <ClInclude Include="SDK\EngineMessages_classes.h" />
+    <ClInclude Include="SDK\EngineMessages_parameters.h" />
+    <ClInclude Include="SDK\EngineMessages_structs.h" />
+    <ClInclude Include="SDK\EngineSettings_classes.h" />
+    <ClInclude Include="SDK\EngineSettings_parameters.h" />
+    <ClInclude Include="SDK\EngineSettings_structs.h" />
+    <ClInclude Include="SDK\Engine_classes.h" />
+    <ClInclude Include="SDK\Engine_parameters.h" />
+    <ClInclude Include="SDK\Engine_structs.h" />
+    <ClInclude Include="SDK\FacialAnimation_classes.h" />
+    <ClInclude Include="SDK\FacialAnimation_parameters.h" />
+    <ClInclude Include="SDK\FacialAnimation_structs.h" />
+    <ClInclude Include="SDK\Foliage_classes.h" />
+    <ClInclude Include="SDK\Foliage_parameters.h" />
+    <ClInclude Include="SDK\Foliage_structs.h" />
+    <ClInclude Include="SDK\GameplayTags_classes.h" />
+    <ClInclude Include="SDK\GameplayTags_parameters.h" />
+    <ClInclude Include="SDK\GameplayTags_structs.h" />
+    <ClInclude Include="SDK\GameplayTasks_classes.h" />
+    <ClInclude Include="SDK\GameplayTasks_parameters.h" />
+    <ClInclude Include="SDK\GameplayTasks_structs.h" />
+    <ClInclude Include="SDK\GeometryCache_classes.h" />
+    <ClInclude Include="SDK\GeometryCache_parameters.h" />
+    <ClInclude Include="SDK\GeometryCache_structs.h" />
+    <ClInclude Include="SDK\HeadMountedDisplay_classes.h" />
+    <ClInclude Include="SDK\HeadMountedDisplay_parameters.h" />
+    <ClInclude Include="SDK\HeadMountedDisplay_structs.h" />
+    <ClInclude Include="SDK\ImmediatePhysics_classes.h" />
+    <ClInclude Include="SDK\ImmediatePhysics_parameters.h" />
+    <ClInclude Include="SDK\ImmediatePhysics_structs.h" />
+    <ClInclude Include="SDK\InputCore_classes.h" />
+    <ClInclude Include="SDK\InputCore_parameters.h" />
+    <ClInclude Include="SDK\InputCore_structs.h" />
+    <ClInclude Include="SDK\JackAnimNodeRuntime_classes.h" />
+    <ClInclude Include="SDK\JackAnimNodeRuntime_parameters.h" />
+    <ClInclude Include="SDK\JackAnimNodeRuntime_structs.h" />
+    <ClInclude Include="SDK\JackGame_classes.h" />
+    <ClInclude Include="SDK\JackGame_parameters.h" />
+    <ClInclude Include="SDK\JackGame_structs.h" />
+    <ClInclude Include="SDK\JsonUtilities_classes.h" />
+    <ClInclude Include="SDK\JsonUtilities_parameters.h" />
+    <ClInclude Include="SDK\JsonUtilities_structs.h" />
+    <ClInclude Include="SDK\Landscape_classes.h" />
+    <ClInclude Include="SDK\Landscape_parameters.h" />
+    <ClInclude Include="SDK\Landscape_structs.h" />
+    <ClInclude Include="SDK\LevelSequence_classes.h" />
+    <ClInclude Include="SDK\LevelSequence_parameters.h" />
+    <ClInclude Include="SDK\LevelSequence_structs.h" />
+    <ClInclude Include="SDK\LightPropagationVolumeRuntime_classes.h" />
+    <ClInclude Include="SDK\LightPropagationVolumeRuntime_parameters.h" />
+    <ClInclude Include="SDK\LightPropagationVolumeRuntime_structs.h" />
+    <ClInclude Include="SDK\LocationServicesBPLibrary_classes.h" />
+    <ClInclude Include="SDK\LocationServicesBPLibrary_parameters.h" />
+    <ClInclude Include="SDK\LocationServicesBPLibrary_structs.h" />
+    <ClInclude Include="SDK\MaterialShaderQualitySettings_classes.h" />
+    <ClInclude Include="SDK\MaterialShaderQualitySettings_parameters.h" />
+    <ClInclude Include="SDK\MaterialShaderQualitySettings_structs.h" />
+    <ClInclude Include="SDK\MediaAssets_classes.h" />
+    <ClInclude Include="SDK\MediaAssets_parameters.h" />
+    <ClInclude Include="SDK\MediaAssets_structs.h" />
+    <ClInclude Include="SDK\MediaCompositing_classes.h" />
+    <ClInclude Include="SDK\MediaCompositing_parameters.h" />
+    <ClInclude Include="SDK\MediaCompositing_structs.h" />
+    <ClInclude Include="SDK\MobilePatchingUtils_classes.h" />
+    <ClInclude Include="SDK\MobilePatchingUtils_parameters.h" />
+    <ClInclude Include="SDK\MobilePatchingUtils_structs.h" />
+    <ClInclude Include="SDK\MoviePlayer_classes.h" />
+    <ClInclude Include="SDK\MoviePlayer_parameters.h" />
+    <ClInclude Include="SDK\MoviePlayer_structs.h" />
+    <ClInclude Include="SDK\MovieSceneCapture_classes.h" />
+    <ClInclude Include="SDK\MovieSceneCapture_parameters.h" />
+    <ClInclude Include="SDK\MovieSceneCapture_structs.h" />
+    <ClInclude Include="SDK\MovieSceneTracks_classes.h" />
+    <ClInclude Include="SDK\MovieSceneTracks_parameters.h" />
+    <ClInclude Include="SDK\MovieSceneTracks_structs.h" />
+    <ClInclude Include="SDK\MovieScene_classes.h" />
+    <ClInclude Include="SDK\MovieScene_parameters.h" />
+    <ClInclude Include="SDK\MovieScene_structs.h" />
+    <ClInclude Include="SDK\MRMesh_classes.h" />
+    <ClInclude Include="SDK\MRMesh_parameters.h" />
+    <ClInclude Include="SDK\MRMesh_structs.h" />
+    <ClInclude Include="SDK\OnlineSubsystemSteam_classes.h" />
+    <ClInclude Include="SDK\OnlineSubsystemSteam_parameters.h" />
+    <ClInclude Include="SDK\OnlineSubsystemSteam_structs.h" />
+    <ClInclude Include="SDK\OnlineSubsystemUtils_classes.h" />
+    <ClInclude Include="SDK\OnlineSubsystemUtils_parameters.h" />
+    <ClInclude Include="SDK\OnlineSubsystemUtils_structs.h" />
+    <ClInclude Include="SDK\OnlineSubsystem_classes.h" />
+    <ClInclude Include="SDK\OnlineSubsystem_parameters.h" />
+    <ClInclude Include="SDK\OnlineSubsystem_structs.h" />
+    <ClInclude Include="SDK\OSDKModule_classes.h" />
+    <ClInclude Include="SDK\OSDKModule_parameters.h" />
+    <ClInclude Include="SDK\OSDKModule_structs.h" />
+    <ClInclude Include="SDK\Overlay_classes.h" />
+    <ClInclude Include="SDK\Overlay_parameters.h" />
+    <ClInclude Include="SDK\Overlay_structs.h" />
+    <ClInclude Include="SDK\PacketHandler_classes.h" />
+    <ClInclude Include="SDK\PacketHandler_parameters.h" />
+    <ClInclude Include="SDK\PacketHandler_structs.h" />
+    <ClInclude Include="SDK\Paper2D_classes.h" />
+    <ClInclude Include="SDK\Paper2D_parameters.h" />
+    <ClInclude Include="SDK\Paper2D_structs.h" />
+    <ClInclude Include="SDK\PhysXVehicles_classes.h" />
+    <ClInclude Include="SDK\PhysXVehicles_parameters.h" />
+    <ClInclude Include="SDK\PhysXVehicles_structs.h" />
+    <ClInclude Include="SDK\ProceduralMeshComponent_classes.h" />
+    <ClInclude Include="SDK\ProceduralMeshComponent_parameters.h" />
+    <ClInclude Include="SDK\ProceduralMeshComponent_structs.h" />
+    <ClInclude Include="SDK\Renderer_classes.h" />
+    <ClInclude Include="SDK\Renderer_parameters.h" />
+    <ClInclude Include="SDK\Renderer_structs.h" />
+    <ClInclude Include="SDK\Serialization_classes.h" />
+    <ClInclude Include="SDK\Serialization_parameters.h" />
+    <ClInclude Include="SDK\Serialization_structs.h" />
+    <ClInclude Include="SDK\SessionMessages_classes.h" />
+    <ClInclude Include="SDK\SessionMessages_parameters.h" />
+    <ClInclude Include="SDK\SessionMessages_structs.h" />
+    <ClInclude Include="SDK\SlateCore_classes.h" />
+    <ClInclude Include="SDK\SlateCore_parameters.h" />
+    <ClInclude Include="SDK\SlateCore_structs.h" />
+    <ClInclude Include="SDK\Slate_classes.h" />
+    <ClInclude Include="SDK\Slate_parameters.h" />
+    <ClInclude Include="SDK\Slate_structs.h" />
+    <ClInclude Include="SDK\SQEXSEAD_classes.h" />
+    <ClInclude Include="SDK\SQEXSEAD_parameters.h" />
+    <ClInclude Include="SDK\SQEXSEAD_structs.h" />
+    <ClInclude Include="SDK\TcpMessaging_classes.h" />
+    <ClInclude Include="SDK\TcpMessaging_parameters.h" />
+    <ClInclude Include="SDK\TcpMessaging_structs.h" />
+    <ClInclude Include="SDK\Triple_classes.h" />
+    <ClInclude Include="SDK\Triple_parameters.h" />
+    <ClInclude Include="SDK\Triple_structs.h" />
+    <ClInclude Include="SDK\UdpMessaging_classes.h" />
+    <ClInclude Include="SDK\UdpMessaging_parameters.h" />
+    <ClInclude Include="SDK\UdpMessaging_structs.h" />
+    <ClInclude Include="SDK\UMG_classes.h" />
+    <ClInclude Include="SDK\UMG_parameters.h" />
+    <ClInclude Include="SDK\UMG_structs.h" />
+    <ClInclude Include="SDK\WmfMediaFactory_classes.h" />
+    <ClInclude Include="SDK\WmfMediaFactory_parameters.h" />
+    <ClInclude Include="SDK\WmfMediaFactory_structs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="proxy.cpp" />
+    <ClCompile Include="SDK\AIModule_functions.cpp" />
+    <ClCompile Include="SDK\AnimationCore_functions.cpp" />
+    <ClCompile Include="SDK\AnimGraphRuntime_functions.cpp" />
+    <ClCompile Include="SDK\ApexDestruction_functions.cpp" />
+    <ClCompile Include="SDK\ArchVisCharacter_functions.cpp" />
+    <ClCompile Include="SDK\AssetRegistry_functions.cpp" />
+    <ClCompile Include="SDK\AudioMixer_functions.cpp" />
+    <ClCompile Include="SDK\Basic.cpp" />
+    <ClCompile Include="SDK\BP_ActionCameraParameter_functions.cpp" />
+    <ClCompile Include="SDK\BP_BattleGroupParameter_functions.cpp" />
+    <ClCompile Include="SDK\BP_BattleResultParameter_functions.cpp" />
+    <ClCompile Include="SDK\BP_BCAI_Friend_functions.cpp" />
+    <ClCompile Include="SDK\BP_BCAI_Konran_functions.cpp" />
+    <ClCompile Include="SDK\BP_BCAI_Monster_functions.cpp" />
+    <ClCompile Include="SDK\BP_CameraShake_Preset_L_functions.cpp" />
+    <ClCompile Include="SDK\BP_CameraShake_Preset_M_functions.cpp" />
+    <ClCompile Include="SDK\BP_CameraShake_Preset_S_functions.cpp" />
+    <ClCompile Include="SDK\BP_COMP_BCAI_Base_functions.cpp" />
+    <ClCompile Include="SDK\BP_COMP_BCAI_Friend_functions.cpp" />
+    <ClCompile Include="SDK\BP_COMP_BCAI_Monster_functions.cpp" />
+    <ClCompile Include="SDK\BP_MonsterBtController_functions.cpp" />
+    <ClCompile Include="SDK\BuildPatchServices_functions.cpp" />
+    <ClCompile Include="SDK\CableComponent_functions.cpp" />
+    <ClCompile Include="SDK\CinematicCamera_functions.cpp" />
+    <ClCompile Include="SDK\ClothingSystemRuntimeInterface_functions.cpp" />
+    <ClCompile Include="SDK\ClothingSystemRuntime_functions.cpp" />
+    <ClCompile Include="SDK\CoreUObject_functions.cpp" />
+    <ClCompile Include="SDK\CriWareRuntime_functions.cpp" />
+    <ClCompile Include="SDK\CustomMeshComponent_functions.cpp" />
+    <ClCompile Include="SDK\DmgTypeBP_Environmental_functions.cpp" />
+    <ClCompile Include="SDK\EngineMessages_functions.cpp" />
+    <ClCompile Include="SDK\EngineSettings_functions.cpp" />
+    <ClCompile Include="SDK\Engine_functions.cpp" />
+    <ClCompile Include="SDK\FacialAnimation_functions.cpp" />
+    <ClCompile Include="SDK\Foliage_functions.cpp" />
+    <ClCompile Include="SDK\GameplayTags_functions.cpp" />
+    <ClCompile Include="SDK\GameplayTasks_functions.cpp" />
+    <ClCompile Include="SDK\GeometryCache_functions.cpp" />
+    <ClCompile Include="SDK\HeadMountedDisplay_functions.cpp" />
+    <ClCompile Include="SDK\ImmediatePhysics_functions.cpp" />
+    <ClCompile Include="SDK\InputCore_functions.cpp" />
+    <ClCompile Include="SDK\JackAnimNodeRuntime_functions.cpp" />
+    <ClCompile Include="SDK\JackGame_functions.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="SDK\JsonUtilities_functions.cpp" />
+    <ClCompile Include="SDK\Landscape_functions.cpp" />
+    <ClCompile Include="SDK\LevelSequence_functions.cpp" />
+    <ClCompile Include="SDK\LightPropagationVolumeRuntime_functions.cpp" />
+    <ClCompile Include="SDK\LocationServicesBPLibrary_functions.cpp" />
+    <ClCompile Include="SDK\MaterialShaderQualitySettings_functions.cpp" />
+    <ClCompile Include="SDK\MediaAssets_functions.cpp" />
+    <ClCompile Include="SDK\MediaCompositing_functions.cpp" />
+    <ClCompile Include="SDK\MobilePatchingUtils_functions.cpp" />
+    <ClCompile Include="SDK\MoviePlayer_functions.cpp" />
+    <ClCompile Include="SDK\MovieSceneCapture_functions.cpp" />
+    <ClCompile Include="SDK\MovieSceneTracks_functions.cpp" />
+    <ClCompile Include="SDK\MovieScene_functions.cpp" />
+    <ClCompile Include="SDK\MRMesh_functions.cpp" />
+    <ClCompile Include="SDK\OnlineSubsystemSteam_functions.cpp" />
+    <ClCompile Include="SDK\OnlineSubsystemUtils_functions.cpp" />
+    <ClCompile Include="SDK\OnlineSubsystem_functions.cpp" />
+    <ClCompile Include="SDK\OSDKModule_functions.cpp" />
+    <ClCompile Include="SDK\Overlay_functions.cpp" />
+    <ClCompile Include="SDK\PacketHandler_functions.cpp" />
+    <ClCompile Include="SDK\Paper2D_functions.cpp" />
+    <ClCompile Include="SDK\PhysXVehicles_functions.cpp" />
+    <ClCompile Include="SDK\ProceduralMeshComponent_functions.cpp" />
+    <ClCompile Include="SDK\Renderer_functions.cpp" />
+    <ClCompile Include="SDK\Serialization_functions.cpp" />
+    <ClCompile Include="SDK\SessionMessages_functions.cpp" />
+    <ClCompile Include="SDK\SlateCore_functions.cpp" />
+    <ClCompile Include="SDK\Slate_functions.cpp" />
+    <ClCompile Include="SDK\SQEXSEAD_functions.cpp" />
+    <ClCompile Include="SDK\TcpMessaging_functions.cpp" />
+    <ClCompile Include="SDK\Triple_functions.cpp" />
+    <ClCompile Include="SDK\UdpMessaging_functions.cpp" />
+    <ClCompile Include="SDK\UMG_functions.cpp" />
+    <ClCompile Include="SDK\WmfMediaFactory_functions.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="proxy.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
