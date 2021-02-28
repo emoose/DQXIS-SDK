@@ -13251,6 +13251,16 @@ public:
 
 };
 
+// name is a guess
+struct UJackLoadReductionComponentLOD
+{
+	float Distance;
+	unsigned char Unk4; // checked by something
+	unsigned char Unk5; // checked by something
+	unsigned char Unk6;
+	unsigned char Unk7;
+};
+
 
 // Class JackGame.JackLoadReductionComponent
 // 0x0090 (0x0230 - 0x01A0)
@@ -13259,7 +13269,9 @@ class UJackLoadReductionComponent : public UJackCharacterComponent
 public:
 	TArray<class UActorComponent*>                     ControlComponents;                                        // 0x01A0(0x0010) (ExportObject, ZeroConstructor)
 	TArray<class USkeletalMeshComponent*>              ControlSkeletalMeshComponents;                            // 0x01B0(0x0010) (ExportObject, ZeroConstructor)
-	unsigned char                                      UnknownData00[0x64];                                      // 0x01C0(0x0064) MISSED OFFSET
+	UJackLoadReductionComponentLOD                     Levels[8]; // level 5 is the one that chooses visibility?
+	float																							 UnkFloat200;
+	unsigned char                                      UnknownData00[0x20];                                      // 0x01C0(0x0064) MISSED OFFSET
 	unsigned char																			 bDisabled; // set by DisableLoadReductionForNPC cmd
 	unsigned char                                      bUnknown225;
 	unsigned char                                      bUnknown226;

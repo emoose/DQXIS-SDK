@@ -6431,7 +6431,11 @@ public:
 	unsigned char                                      bAutoScaling : 1;                                         // 0x0104(0x0001) (Edit, DisableEditOnInstance)
 	unsigned char                                      UnknownData03[0x3];                                       // 0x0105(0x0003) MISSED OFFSET
 	TEnumAsByte<EPixelFormat>                          OverrideFormat;                                           // 0x0108(0x0001) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData04[0x17];                                      // 0x0109(0x0017) MISSED OFFSET
+	unsigned char                                      UnknownData04[0x7];                                       // 0x0109(0x007) MISSED OFFSET
+	int JackTargetSizeX; // ??
+	int JackTargetSizeY;
+	int Unk118;
+	int Unk11C;
 
 	static UClass* StaticClass()
 	{
