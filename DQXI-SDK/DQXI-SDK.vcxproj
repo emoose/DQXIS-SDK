@@ -114,8 +114,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>
-      </GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
@@ -153,8 +152,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>
-      </GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
@@ -162,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffer.h" />
+    <ClInclude Include="ConsoleVariable.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="hde\hde32.h" />
     <ClInclude Include="hde\hde64.h" />
