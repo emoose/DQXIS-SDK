@@ -19,6 +19,8 @@ namespace SDK
 class UObject
 {
 public:
+	static bool AllowFunctionCalls;
+
 	static FUObjectArray*                              GObjects;                                                 // 0x0000(0x0000)
 	void*                                              Vtable;                                                   // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            ObjectFlags;                                              // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
@@ -44,7 +46,8 @@ public:
 		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + 0xEF12A0);
 		//auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
 
-		return fn(this, function, parms);
+		if(AllowFunctionCalls)
+			fn(this, function, parms);
 	}
 
 	template<typename T>

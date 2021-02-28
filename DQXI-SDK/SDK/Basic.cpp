@@ -13,6 +13,7 @@ namespace SDK
 
 TNameEntryArray* FName::GNames = nullptr;
 FUObjectArray* UObject::GObjects = nullptr;
+bool UObject::AllowFunctionCalls = false;
 
 //---------------------------------------------------------------------------
 bool FWeakObjectPtr::IsValid() const

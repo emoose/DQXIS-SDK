@@ -118,6 +118,7 @@
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -156,6 +157,7 @@
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>proxy.def</ModuleDefinitionFile>
       <OutputFile>$(OutDir)xinput1_3$(TargetExt)</OutputFile>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
