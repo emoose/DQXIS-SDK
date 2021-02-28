@@ -5,9 +5,11 @@
 
 using namespace SDK;
 
+uintptr_t mBaseAddress;
+
 DWORD WINAPI DoStuff(LPVOID lpParameter)
 {
-  auto mBaseAddress = reinterpret_cast<uintptr_t>(GetModuleHandleA("DRAGON QUEST XI S.exe"));
+  mBaseAddress = reinterpret_cast<uintptr_t>(GetModuleHandleA("DRAGON QUEST XI S.exe"));
 
   auto gObjects = reinterpret_cast<SDK::FUObjectArray*>(mBaseAddress + 0x5D83BF8);
   auto gNames = reinterpret_cast<SDK::TNameEntryArray*>(mBaseAddress + 0x5D7AE20);
@@ -58,6 +60,8 @@ DWORD WINAPI DoStuff(LPVOID lpParameter)
 
   return 0;
 }
+
+// Some test code, not included in Release unless called from DoStuff
 
 DWORD WINAPI DoStuffTest(LPVOID lpParameter)
 {

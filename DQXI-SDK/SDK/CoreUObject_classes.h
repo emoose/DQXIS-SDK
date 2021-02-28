@@ -6,6 +6,8 @@
 	#pragma pack(push, 0x8)
 #endif
 
+extern uintptr_t mBaseAddress;
+
 namespace SDK
 {
 //---------------------------------------------------------------------------
@@ -39,8 +41,8 @@ public:
 
 	inline void ProcessEvent(class UFunction* function, void* parms) {
 
-		ProcessEventFn fn = (ProcessEventFn)0x140EF12A0;
-		auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
+		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + 0xEF12A0);
+		//auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
 
 		return fn(this, function, parms);
 	}
