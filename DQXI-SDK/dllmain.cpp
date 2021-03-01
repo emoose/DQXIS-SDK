@@ -11,7 +11,7 @@ uintptr_t mBaseAddress;
 
 struct BindActionFnPtr
 {
-  uintptr_t FnPtr;
+  void* FnPtr;
   uint64_t unused;
 };
 
@@ -23,46 +23,87 @@ BindActionFn BindAction = nullptr;
 typedef FName* (*FNameCreateFn)(FName* thisptr, const char* Name, int FindType);
 FNameCreateFn FNameCreate = nullptr;
 
+// Cached things so we don't need any lookups during runtime
 FName FirstPersonView;
+UJackGameplayStatics* StaticFuncs;
 
-// TODO: these probably should check game state and make sure we're not in any menus etc...
-void FirstPersonCamera(AJackFieldPlayerController* a1)
+bool IsPlayerMovementEnabled(AActor* actor)
 {
-  a1->Camera(FirstPersonView);
+  auto player = StaticFuncs->STATIC_GetJackGamePlayer(actor);
+
+  if (!player)
+    return false;
+
+  auto condition = player->GamePlayerCondition;
+  if (!condition)
+    return false;
+
+  if (condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable)
+    || condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled))
+    return false;
+
+  return true;
 }
 
-void EnterNakamaKaiwa(AJackFieldPlayerController* a1)
+void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
-  a1->NakamaKaiwa();
+  if (!IsPlayerMovementEnabled(playerController))
+    return;
+
+  playerController->Camera(FirstPersonView);
+
+  // TODO: these allow player to move in first-person view, but camera doesn't follow...
+  //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
+  //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
+}
+
+void EnterPartyChat(AJackFieldPlayerController* playerController)
+{
+  if (!IsPlayerMovementEnabled(playerController))
+    return;
+
+  playerController->NakamaKaiwa();
 }
 
 typedef void (*InitActionMappingsFn)(AActor* thisptr);
-InitActionMappingsFn InitActionMappings_Orig;
+InitActionMappingsFn InitActionMappings_Field_Orig;
 
-void InitActionMappings_Hook(AActor* thisptr)
+void InitActionMappings_Field_Hook(AActor* thisptr)
 {
-  InitActionMappings_Orig(thisptr);
+  InitActionMappings_Field_Orig(thisptr);
 
   FName name;
 
   FNameCreate(&name, "FirstPersonCamera", 1);
-  BindActionFnPtr fnptr = { (uintptr_t)FirstPersonCamera, 0 };
+  BindActionFnPtr fnptr = { FirstPersonCamera };
   BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
 
+  FNameCreate(&name, "EnterPartyChat", 1);
+  fnptr = { EnterPartyChat };
+  BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
+
+  // EnterNakamaKaiwa is apparently original name, based on INI files
   FNameCreate(&name, "EnterNakamaKaiwa", 1);
-  fnptr = { (uintptr_t)EnterNakamaKaiwa, 0 };
+  fnptr = { EnterPartyChat };
   BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
 
   // Cache our UFunctions & FNames
   {
     FNameCreate(&FirstPersonView, "FirstPersonView", 1);
+    StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
 
-    // Prevent UFunctions from actually being called, we just want to cache the addr of them
+    // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
     UObject::AllowFunctionCalls = false;
 
     AJackFieldPlayerController playerController;
-    playerController.Camera(0);
+    playerController.Camera(nullptr);
     playerController.NakamaKaiwa();
+
+    UJackGameplayStatics statics;
+    statics.STATIC_GetJackGamePlayer(nullptr);
+
+    UJackGamePlayerCondition condition;
+    condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
 
     UObject::AllowFunctionCalls = true;
   }
@@ -123,9 +164,9 @@ void InitPlugin()
   if (!mBaseAddress)
     return;
 
+  UObject::AllowFunctionCalls = false;
   UObject::GObjects = reinterpret_cast<FUObjectArray*>(mBaseAddress + 0x5D83BF8);
   FName::GNames = reinterpret_cast<TNameEntryArray*>(mBaseAddress + 0x5D7AE20);
-  UObject::AllowFunctionCalls = false;
 
   BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + 0x6AA7A0);
   FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + 0xD697D0);
@@ -133,7 +174,7 @@ void InitPlugin()
   MH_Initialize();
 
   MH_CreateHook((LPVOID)(mBaseAddress + 0x914E60), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Hook, (LPVOID*)&InitActionMappings_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
 
   MH_EnableHook(MH_ALL_HOOKS);
 }
@@ -150,7 +191,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     case DLL_PROCESS_ATTACH:
       ourModule = hModule;
 
-      bool Proxy_Attach();
+      bool Proxy_Attach(); // proxy.cpp
       Proxy_Attach();
 
       InitPlugin();
@@ -165,4 +206,3 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
-
