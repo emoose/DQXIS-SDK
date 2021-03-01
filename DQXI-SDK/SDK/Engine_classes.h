@@ -3490,11 +3490,11 @@ class APlayerCameraManager : public AActor
 public:
 	class APlayerController*                           PCOwner;                                                  // 0x0398(0x0008) (ZeroConstructor, Transient, IsPlainOldData)
 	class USceneComponent*                             TransformComponent;                                       // 0x03A0(0x0008) (Edit, BlueprintVisi, ExportObject, BlueprintReadOnly, ZeroConstructor, EditConst, InstancedReference, IsPlainOldData)
-	unsigned char                                      UnknownData00[0x8];                                       // 0x03A8(0x0008) MISSED OFFSET
+	FName					                                     CameraStyle;                                              // 0x03A8(0x0008)
 	float                                              DefaultFOV;                                               // 0x03B0(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData01[0x4];                                       // 0x03B4(0x0004) MISSED OFFSET
+	float                                              LockedFOV;                                                // 0x03B4(0x0004)
 	float                                              DefaultOrthoWidth;                                        // 0x03B8(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData02[0x4];                                       // 0x03BC(0x0004) MISSED OFFSET
+	float                                              LockedOrthoWidth;                                         // 0x03BC(0x0004)
 	float                                              DefaultAspectRatio;                                       // 0x03C0(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
 	unsigned char                                      UnknownData03[0x4C];                                      // 0x03C4(0x004C) MISSED OFFSET
 	struct FCameraCacheEntry                           CameraCache;                                              // 0x0410(0x0560) (Transient)
