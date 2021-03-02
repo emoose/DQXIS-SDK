@@ -157,6 +157,15 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   SetsCharacterViewerResolution_Orig(camera, rdx);
 }
 
+template <typename T>
+void SafeWrite(uintptr_t address, T value)
+{
+  DWORD oldProtect = 0;
+  VirtualProtect((LPVOID)address, sizeof(T), PAGE_READWRITE, &oldProtect);
+  *reinterpret_cast<T*>(address) = value;
+  VirtualProtect((LPVOID)address, sizeof(T), oldProtect, &oldProtect);
+}
+
 void InitPlugin()
 {
   mBaseAddress = reinterpret_cast<uintptr_t>(GetModuleHandleA("DRAGON QUEST XI S.exe"));
@@ -177,6 +186,10 @@ void InitPlugin()
   MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
 
   MH_EnableHook(MH_ALL_HOOKS);
+
+  // Disable ExcludedDebugPackage* variables by renaming them
+  SafeWrite<uint8_t>(mBaseAddress + 0x367FA48, 0x44);
+  SafeWrite<uint8_t>(mBaseAddress + 0x3680100, 0x44);
 }
 
 HMODULE ourModule;
