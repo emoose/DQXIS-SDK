@@ -7,6 +7,7 @@
 
 using namespace SDK;
 
+HMODULE GameHModule;
 uintptr_t mBaseAddress;
 
 struct BindActionFnPtr
@@ -43,6 +44,12 @@ bool IsPlayerMovementEnabled(AActor* actor)
     return false;
 
   return true;
+}
+
+bool FileExists(const WCHAR* Filename)
+{
+  DWORD dwAttrib = GetFileAttributesW(Filename);
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
@@ -160,6 +167,8 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
 // UGameViewportClient::SetupInitialLocalPlayer hook, allows us to set ViewportConsole
 // and with that, the UE4 dev console will be available even in Shipping builds!
 typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
+StaticConstructObject_InternalFn StaticConstructObject_Internal = nullptr;
+
 typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
 UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
 
@@ -168,8 +177,6 @@ void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thi
   auto ret = UGameViewportClient__SetupInitialLocalPlayer_Orig(thisptr, OutError);
 
   if (!thisptr->ViewportConsole) {
-    auto StaticConstructObject_Internal = (StaticConstructObject_InternalFn)(mBaseAddress + 0xF16220);
-
     auto engines = UObject::FindObjects<UEngine>();
     for (auto engine : engines)
     {
@@ -199,12 +206,8 @@ void* FPakPlatformFile__FindFileInPakFiles_Hook(void* Paks, const TCHAR* Filenam
   if (OutPakFile)
     *OutPakFile = nullptr;
 
-  if (Filename && wcsstr(Filename, gameDataStart))
-  {
-    DWORD dwAttrib = GetFileAttributesW(Filename);
-    if (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
+  if (Filename && wcsstr(Filename, gameDataStart) && FileExists(Filename))
       return 0; // file exists, tell game it's not in pak
-  }
 
   return FPakPlatformFile__FindFileInPakFiles_Orig(Paks, Filename, OutPakFile);
 }
@@ -224,34 +227,95 @@ void SafeWrite(uintptr_t address, T value)
   VirtualProtect((LPVOID)address, sizeof(T), oldProtect, &oldProtect);
 }
 
+struct {
+  bool RenderFix = true;
+  bool CustomActions = true;
+  bool EnableDevConsole = true;
+  bool LoadUnpackedFiles = true;
+  bool AllowDebugPackages = true;
+} Options;
+
+WCHAR IniPath[4096];
+WCHAR IniData[256];
+bool INI_GetBool(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, bool DefaultValue)
+{
+  bool retVal = false;
+  if (GetPrivateProfileString(Section, Key, DefaultValue ? L"true" : L"false", IniData, 256, IniPath) > 0)
+    retVal = (wcscmp(IniData, L"true") == 0 || wcscmp(IniData, L"1") == 0 || wcscmp(IniData, L"yes") == 0);
+  return retVal;
+}
+
 void InitPlugin()
 {
-  mBaseAddress = reinterpret_cast<uintptr_t>(GetModuleHandleA("DRAGON QUEST XI S.exe"));
+  GameHModule = GetModuleHandleA("DRAGON QUEST XI S.exe");
 
-  if (!mBaseAddress)
+  if (!GameHModule)
     return;
 
-  UObject::AllowFunctionCalls = false;
+  mBaseAddress = reinterpret_cast<uintptr_t>(GameHModule);
+
+  // Get folder path of currently running EXE
+  GetModuleFileName(GameHModule, IniPath, 4096);
+  int len = wcslen(IniPath);
+  int lastPathSep = -1;
+  for (int i = len - 2; i >= 0; i--)
+  {
+    if (IniPath[i] == '\\' || IniPath[i] == '/')
+    {
+      lastPathSep = i;
+      break;
+    }
+  }
+
+  if (lastPathSep >= 0)
+  {
+    IniPath[lastPathSep + 1] = 0;
+
+    // Read config INI from EXE's folder
+    swprintf_s(IniPath, L"%sDQXIS-SDK.ini", IniPath);
+
+    if (FileExists(IniPath))
+    {
+      Options.RenderFix = INI_GetBool(IniPath, L"Patches", L"RenderFix", true);
+      Options.CustomActions = INI_GetBool(IniPath, L"Patches", L"CustomActions", true);
+      Options.EnableDevConsole = INI_GetBool(IniPath, L"Patches", L"EnableDevConsole", true);
+      Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", true);
+      Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", true);
+    }
+  }
+
   UObject::GObjects = reinterpret_cast<FUObjectArray*>(mBaseAddress + 0x5D83BF8);
   FName::GNames = reinterpret_cast<TNameEntryArray*>(mBaseAddress + 0x5D7AE20);
 
   BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + 0x6AA7A0);
   FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + 0xD697D0);
+  StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + 0xF16220);
 
   MH_Initialize();
 
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x914E60), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
+  if (Options.RenderFix)
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x914E60), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
 
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
+  if (Options.CustomActions)
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
 
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x1F653E0), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
+  if (Options.EnableDevConsole)
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
+
+  if (Options.LoadUnpackedFiles)
+  {
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F653E0), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
+  }
+
   MH_EnableHook(MH_ALL_HOOKS);
 
   // Disable ExcludedDebugPackage* variables by renaming them
-  SafeWrite<uint8_t>(mBaseAddress + 0x367FA48, 0x44);
-  SafeWrite<uint8_t>(mBaseAddress + 0x3680100, 0x44);
+  if (Options.AllowDebugPackages)
+  {
+    SafeWrite<uint8_t>(mBaseAddress + 0x367FA48, 0x44);
+    SafeWrite<uint8_t>(mBaseAddress + 0x3680100, 0x44);
+  }
 }
 
 HMODULE ourModule;
