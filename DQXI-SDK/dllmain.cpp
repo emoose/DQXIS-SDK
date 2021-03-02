@@ -157,6 +157,33 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   SetsCharacterViewerResolution_Orig(camera, rdx);
 }
 
+// Hook SetupInitialLocalPlayer for us to set ViewportConsole, enables UE4 dev console in shipping builds:
+typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
+typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
+UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
+
+void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thisptr, void* OutError)
+{
+  auto ret = UGameViewportClient__SetupInitialLocalPlayer_Orig(thisptr, OutError);
+
+  if (!thisptr->ViewportConsole) {
+    auto StaticConstructObject_Internal = (StaticConstructObject_InternalFn)(mBaseAddress + 0xF16220);
+
+    auto engines = UObject::FindObjects<UEngine>();
+    for (auto engine : engines)
+    {
+      // First UEngine is usually a dud
+      if (!engine->ConsoleClass)
+        continue;
+
+      thisptr->ViewportConsole = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
+      break;
+    }
+  }
+
+  return ret;
+}
+
 template <typename T>
 void SafeWrite(uintptr_t address, T value)
 {
@@ -184,6 +211,8 @@ void InitPlugin()
 
   MH_CreateHook((LPVOID)(mBaseAddress + 0x914E60), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
   MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
+
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
 
   MH_EnableHook(MH_ALL_HOOKS);
 
