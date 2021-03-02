@@ -157,7 +157,8 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   SetsCharacterViewerResolution_Orig(camera, rdx);
 }
 
-// Hook SetupInitialLocalPlayer for us to set ViewportConsole, enables UE4 dev console in shipping builds:
+// UGameViewportClient::SetupInitialLocalPlayer hook, allows us to set ViewportConsole
+// and with that, the UE4 dev console will be available even in Shipping builds!
 typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
 typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
 UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
@@ -182,6 +183,36 @@ void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thi
   }
 
   return ret;
+}
+
+typedef void* (*FPakPlatformFile__FindFileInPakFilesFn)(void* Paks, const TCHAR* Filename, void** OutPakFile);
+typedef bool (*FPakPlatformFile__IsNonPakFilenameAllowedFn)(void* thisptr, const FString& InFilename);
+
+const wchar_t* gameDataStart = L"../../../"; // seems to be at the start of every game path
+
+// FPakPlatformFile::FindFileInPakFiles hook: this will check for any loose file with the same filename
+// If a loose file is found will return null (ie: saying that the .pak doesn't contain it)
+// 90% of UE4 games will then try loading loose files, luckily DQXI is part of that 90% :D
+FPakPlatformFile__FindFileInPakFilesFn FPakPlatformFile__FindFileInPakFiles_Orig;
+void* FPakPlatformFile__FindFileInPakFiles_Hook(void* Paks, const TCHAR* Filename, void** OutPakFile)
+{
+  if (OutPakFile)
+    *OutPakFile = nullptr;
+
+  if (Filename && wcsstr(Filename, gameDataStart))
+  {
+    DWORD dwAttrib = GetFileAttributesW(Filename);
+    if (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
+      return 0; // file exists, tell game it's not in pak
+  }
+
+  return FPakPlatformFile__FindFileInPakFiles_Orig(Paks, Filename, OutPakFile);
+}
+
+FPakPlatformFile__IsNonPakFilenameAllowedFn FPakPlatformFile__IsNonPakFilenameAllowed_Orig;
+bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString& InFilename)
+{
+  return 1;
 }
 
 template <typename T>
@@ -214,6 +245,8 @@ void InitPlugin()
 
   MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
 
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x1F653E0), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
   MH_EnableHook(MH_ALL_HOOKS);
 
   // Disable ExcludedDebugPackage* variables by renaming them
