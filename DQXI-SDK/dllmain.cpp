@@ -10,6 +10,15 @@ using namespace SDK;
 HMODULE GameHModule;
 uintptr_t mBaseAddress;
 
+struct {
+  bool RenderFix = true;
+  bool CustomActions = true;
+  bool EnableDevConsole = true;
+  bool LoadUnpackedFiles = true;
+  bool AllowDebugPackages = true;
+  bool FixCommonMisconfigs = true;
+} Options;
+
 struct BindActionFnPtr
 {
   void* FnPtr;
@@ -50,6 +59,28 @@ bool FileExists(const WCHAR* Filename)
 {
   DWORD dwAttrib = GetFileAttributesW(Filename);
   return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+template <typename T>
+void SafeWrite(uintptr_t address, T value)
+{
+  DWORD oldProtect = 0;
+  VirtualProtect((LPVOID)address, sizeof(T), PAGE_READWRITE, &oldProtect);
+  *reinterpret_cast<T*>(address) = value;
+  VirtualProtect((LPVOID)address, sizeof(T), oldProtect, &oldProtect);
+}
+
+template <typename T>
+void SafeWriteModule(uintptr_t offset, T value)
+{
+  SafeWrite<T>(mBaseAddress + offset, value);
+}
+
+// Same as SafeWrite but doesn't VirtualProtect first, more efficient if you already know the memory is writable!
+template <typename T>
+inline void UnsafeWriteModule(uintptr_t offset, T value)
+{
+  *reinterpret_cast<T*>(mBaseAddress + offset) = value;
 }
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
@@ -119,8 +150,28 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
   // Doesn't seem to ever get changed, maybe something was broken during UE4 engine update
   // CharacterCaptureCamera calc uses (720 / this) as a render scale, was maybe meant to be (this / 720)?
   // Setting it to 1280x720 should allow things to render at 1x scale
-  *(DWORD*)(mBaseAddress + 0x5896CC0) = 1280;
-  *(DWORD*)(mBaseAddress + 0x5896CC4) = 720;
+  UnsafeWriteModule<int32_t>(0x5896CC0, 1280);
+  UnsafeWriteModule<int32_t>(0x5896CC4, 720);
+
+  // Fixes for some common misconfigurations
+  // TODO: move these to an AfterConfigIniRead hook, so they only get applied once per session
+  if(Options.FixCommonMisconfigs)
+  {
+    // set r.JackLoadReduction.DisableMovementModeOptimization to 0, fixes floating NPCs
+    auto* disableMovementModeOptimization = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDB8);
+    if (disableMovementModeOptimization && disableMovementModeOptimization->GetInt() != 0)
+        disableMovementModeOptimization->Set(L"0");
+
+    // set r.JackLoadReduction.DisableDitherHidden to 0, allows NPCs to fade in/out instead of popping
+    auto* disableDitherHidden = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDE8);
+    if (disableDitherHidden && disableDitherHidden->GetInt() != 0)
+      disableDitherHidden->Set(L"0");
+
+    // set r.Shadow.FilterMethod to 0 as 1 seems to break shadows (but still gets recommended by some ancient UE4 mod guides...)
+    auto* shadowFilterMethod = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5E18AD0);
+    if (shadowFilterMethod && shadowFilterMethod->GetInt() != 0)
+      shadowFilterMethod->Set(L"0");
+  }
 }
 
 typedef void (*SetsCharacterViewerResolutionFn)(AJackCharacterCaptureCamera*, void*);
@@ -146,10 +197,10 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   if (userResolutionX && userResolutionY)
   {
     // Multiply resolution by screen percentage cvar
-    auto* screenPercentage = *(TConsoleVariableData<float>**)(mBaseAddress + 0x5C48818); // r.ScreenPercentage address
+    auto* screenPercentageCVar = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5C48810); // r.ScreenPercentage address
 
     // Scale display width/height by percentage
-    float screenPercentageMult = max(screenPercentage->GetValueOnGameThread(), 1) / 100.f;
+    float screenPercentageMult = max(screenPercentageCVar->GetFloat(), 1) / 100.f;
     screenPercentageMult = min(screenPercentageMult, 4); // 400% seems to be max allowed by UE4, so we'll limit to that too
 
     userResolutionX = (int)((float)userResolutionX * screenPercentageMult);
@@ -185,7 +236,8 @@ void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thi
         continue;
 
       thisptr->ViewportConsole = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
-      break;
+      if(thisptr->ViewportConsole)
+        break;
     }
   }
 
@@ -217,23 +269,6 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
 {
   return 1;
 }
-
-template <typename T>
-void SafeWrite(uintptr_t address, T value)
-{
-  DWORD oldProtect = 0;
-  VirtualProtect((LPVOID)address, sizeof(T), PAGE_READWRITE, &oldProtect);
-  *reinterpret_cast<T*>(address) = value;
-  VirtualProtect((LPVOID)address, sizeof(T), oldProtect, &oldProtect);
-}
-
-struct {
-  bool RenderFix = true;
-  bool CustomActions = true;
-  bool EnableDevConsole = true;
-  bool LoadUnpackedFiles = true;
-  bool AllowDebugPackages = true;
-} Options;
 
 WCHAR IniPath[4096];
 WCHAR IniData[256];
@@ -276,11 +311,12 @@ void InitPlugin()
 
     if (FileExists(IniPath))
     {
-      Options.RenderFix = INI_GetBool(IniPath, L"Patches", L"RenderFix", true);
-      Options.CustomActions = INI_GetBool(IniPath, L"Patches", L"CustomActions", true);
-      Options.EnableDevConsole = INI_GetBool(IniPath, L"Patches", L"EnableDevConsole", true);
-      Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", true);
-      Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", true);
+      Options.RenderFix = INI_GetBool(IniPath, L"Patches", L"RenderFix", Options.RenderFix);
+      Options.CustomActions = INI_GetBool(IniPath, L"Patches", L"CustomActions", Options.CustomActions);
+      Options.EnableDevConsole = INI_GetBool(IniPath, L"Patches", L"EnableDevConsole", Options.EnableDevConsole);
+      Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", Options.LoadUnpackedFiles);
+      Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
+      Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
     }
   }
 
@@ -313,8 +349,8 @@ void InitPlugin()
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)
   {
-    SafeWrite<uint8_t>(mBaseAddress + 0x367FA48, 0x44);
-    SafeWrite<uint8_t>(mBaseAddress + 0x3680100, 0x44);
+    SafeWriteModule<uint8_t>(0x367FA48, 0x44);
+    SafeWriteModule<uint8_t>(0x3680100, 0x44);
   }
 }
 
