@@ -102,18 +102,26 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
     static float OrigCapsuleHeight = 0; // todo: replace with constant
 
     auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
-
-    bool IsFirstPerson = camera && camera->CameraStyle == CamStyle_FirstPerson;
-    IsFirstPerson = !IsFirstPerson; // toggle
-    newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
-
-    auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
-    if (chara && chara->CapsuleComponent)
+    if (camera)
     {
-      if (OrigCapsuleHeight == 0)
-        OrigCapsuleHeight = chara->CapsuleComponent->CapsuleHalfHeight;
+      bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
+      IsFirstPerson = !IsFirstPerson; // toggle
 
-      chara->CapsuleComponent->SetCapsuleHalfHeight(IsFirstPerson ? Options.FirstPersonMovableHeight : OrigCapsuleHeight, 1);
+      newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
+      camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
+
+      auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
+      if (chara && chara->CapsuleComponent)
+      {
+        if (OrigCapsuleHeight == 0)
+          OrigCapsuleHeight = chara->CapsuleComponent->CapsuleHalfHeight;
+
+        // Fix camera height, 155 is pretty close to chara's eye position
+        chara->CapsuleComponent->SetCapsuleHalfHeight(IsFirstPerson ? Options.FirstPersonMovableHeight : OrigCapsuleHeight, 1);
+
+        // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
+        chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, IsFirstPerson, IsFirstPerson);
+      }
     }
   }
 
@@ -165,9 +173,15 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
     // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
     UObject::AllowFunctionCalls = false;
 
+    AJackCharacter character;
+    character.SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__LVD, false, false);
+
     AJackFieldPlayerController playerController;
     playerController.Camera(nullptr);
     playerController.NakamaKaiwa();
+
+    AJackPlayerCameraManager cameraManager;
+    cameraManager.SetHiddenControlBeginOverlapEnabled(true);
 
     UJackGameplayStatics statics;
     statics.STATIC_GetJackGamePlayer(nullptr);
