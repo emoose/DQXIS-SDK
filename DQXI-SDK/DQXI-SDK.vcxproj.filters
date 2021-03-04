@@ -989,6 +989,9 @@
     <ClCompile Include="trampoline.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultInputIni.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="proxy.def">

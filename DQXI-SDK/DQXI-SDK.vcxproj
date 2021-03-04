@@ -404,6 +404,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="buffer.c" />
+    <ClCompile Include="DefaultInputIni.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hde\hde32.c" />
     <ClCompile Include="hde\hde64.c" />

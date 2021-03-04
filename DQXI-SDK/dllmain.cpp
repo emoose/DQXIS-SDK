@@ -4,6 +4,7 @@
 #include <fstream>
 #include "MinHook.h"
 #include "ConsoleVariable.h"
+#include <sstream>
 
 using namespace SDK;
 
@@ -271,6 +272,75 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
   return 1;
 }
 
+// Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
+typedef FString(*FPaths__GeneratedConfigDirFn)();
+FPaths__GeneratedConfigDirFn FPaths__GeneratedConfigDir_Orig;
+FString FPaths__GeneratedConfigDir_Hook()
+{
+  static bool UserWarned = false;
+
+  auto configDir = FPaths__GeneratedConfigDir_Orig();
+  if (UserWarned)
+    return configDir;
+
+  UserWarned = true;
+
+  std::wstring configPath = configDir.c_str();
+  configPath += L"WindowsNoEditor/Input.ini";
+
+  bool hasActionBind = false;
+  bool hasAxisBind = false;
+  const std::string actionBind = "ActionMappings=";
+  const std::string axisBind = "AxisMappings=";
+
+  std::ifstream iniStream(configPath);
+  if (iniStream.is_open())
+  {
+    // Search for any action/axis binds
+    std::string line;
+    while (std::getline(iniStream, line))
+    {
+      if (!hasActionBind && line.substr(0, actionBind.length()) == actionBind)
+        hasActionBind = true;
+      if (!hasAxisBind && line.substr(0, axisBind.length()) == axisBind)
+        hasAxisBind = true;
+
+      if (hasActionBind && hasAxisBind)
+        break; // found both types :)
+    }
+  }
+  iniStream.close();
+
+  if (hasActionBind && hasAxisBind)
+    return configDir;
+
+  std::wstringstream warning;
+  warning << L"Warning: you're using 'BindFromInputIniOnly' without setting up binds inside Input.ini!\r\n";
+  warning << L"Do you want DQXIS-SDK to set up a default Input.ini file?\r\n";
+  warning << L"(DQXI won't respond properly without these binds being setup)\r\n";
+  warning << L"INI path: " << configPath;
+  if (MessageBoxW(NULL, warning.str().c_str(), L"DQXIS-SDK", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+  {
+    std::ofstream iniOutStream(configPath, std::ios::trunc);
+    if (!iniOutStream.is_open())
+    {
+      warning.clear();
+      warning << L"Error: failed to open Input.ini file for writing...\r\n";
+      warning << L"Game likely still won't respond properly!\r\n";
+      warning << L"INI path: " << configPath;
+      MessageBoxW(NULL, warning.str().c_str(), L"DQXIS-SDK", MB_ICONEXCLAMATION);
+    }
+    else
+    {
+      extern const char* DefaultInputIni;
+      iniOutStream << DefaultInputIni;
+      iniOutStream.close();
+    }
+  }
+
+  return configDir;
+}
+
 typedef FString(*GetSourceIniFilenameFn)(const TCHAR* ConfigDir, const TCHAR* Prefix, const TCHAR* BaseIniName);
 GetSourceIniFilenameFn GetSourceIniFilename_Orig;
 static FString GetSourceIniFilename_Hook(const TCHAR* ConfigDir, const TCHAR* Prefix, const TCHAR* BaseIniName)
@@ -378,6 +448,9 @@ void InitPlugin()
     // Hook GetSourceIniFilename so we can make game ignore DefaultInput.ini
     // (We only want Input.ini to be the source of bindings)
     MH_CreateHook((LPVOID)(mBaseAddress + 0xD2E700), GetSourceIniFilename_Hook, (LPVOID*)&GetSourceIniFilename_Orig);
+
+    // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
+    MH_CreateHook((LPVOID)(mBaseAddress + 0xD4F480), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
   }
 
   MH_EnableHook(MH_ALL_HOOKS);
