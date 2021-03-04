@@ -16,7 +16,7 @@ struct {
   bool CustomActions = true;
   bool FirstPersonWherever = false;
   bool FirstPersonMovable = false;
-  float FirstPersonMovableHeight = 155.f;
+  float FirstPersonMovableHeight = 64.f;
   bool EnableDevConsole = true;
   bool LoadUnpackedFiles = true;
   bool AllowDebugPackages = true;
@@ -99,8 +99,6 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
   FName newStyle = CamStyle_FirstPersonView;
   if (Options.FirstPersonMovable)
   {
-    static float OrigCapsuleHeight = 0; // todo: replace with constant
-
     auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
     if (camera)
     {
@@ -110,23 +108,19 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
       newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
       camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
 
+      // Fix camera height, 64 is pretty close to chara's eye position
+      auto pawn = StaticFuncs->STATIC_GetPlayerPawn(playerController, EJackPlayerController::EJackPlayerController__Player1);
+      if (pawn)
+        pawn->BaseEyeHeight = IsFirstPerson ? Options.FirstPersonMovableHeight : 0;
+
+      // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
       auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
-      if (chara && chara->CapsuleComponent)
-      {
-        if (OrigCapsuleHeight == 0)
-          OrigCapsuleHeight = chara->CapsuleComponent->CapsuleHalfHeight;
-
-        // Fix camera height, 155 is pretty close to chara's eye position
-        chara->CapsuleComponent->SetCapsuleHalfHeight(IsFirstPerson ? Options.FirstPersonMovableHeight : OrigCapsuleHeight, 1);
-
-        // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
+      if (chara)
         chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, IsFirstPerson, IsFirstPerson);
-      }
     }
   }
 
   playerController->Camera(newStyle);
-
 }
 
 void EnterPartyChat(AJackFieldPlayerController* playerController)
@@ -184,6 +178,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
     statics.STATIC_GetJackGamePlayer(nullptr);
     statics.STATIC_GetJackPlayerCameraManager(nullptr);
     statics.STATIC_GetJackPlayerCharacter(nullptr, 1);
+    statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::EJackPlayerController__Player1);
 
     UCapsuleComponent capsule;
     capsule.SetCapsuleHalfHeight(0, false);
