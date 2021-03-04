@@ -17,7 +17,7 @@ struct {
   bool LoadUnpackedFiles = true;
   bool AllowDebugPackages = true;
   bool FixCommonMisconfigs = true;
-  bool BindFromIniOnly = false;
+  bool BindFromInputIniOnly = false;
 } Options;
 
 struct BindActionFnPtr
@@ -271,6 +271,18 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
   return 1;
 }
 
+typedef FString(*GetSourceIniFilenameFn)(const TCHAR* ConfigDir, const TCHAR* Prefix, const TCHAR* BaseIniName);
+GetSourceIniFilenameFn GetSourceIniFilename_Orig;
+static FString GetSourceIniFilename_Hook(const TCHAR* ConfigDir, const TCHAR* Prefix, const TCHAR* BaseIniName)
+{
+  // Check if this is INI we want to ignore
+  if (wcscmp(BaseIniName, L"Input") == 0 && wcscmp(Prefix, L"Default") == 0 && wcscmp(ConfigDir, L"../../../Game/Config/") == 0)
+    // Change BaseIniName to prevent default ini from being loaded
+    BaseIniName = L"InputForced";
+
+  return GetSourceIniFilename_Orig(ConfigDir, Prefix, BaseIniName);
+}
+
 WCHAR IniPath[4096];
 WCHAR IniData[256];
 bool INI_GetBool(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, bool DefaultValue)
@@ -318,7 +330,11 @@ void InitPlugin()
       Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", Options.LoadUnpackedFiles);
       Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
       Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
-      Options.BindFromIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", Options.BindFromIniOnly);
+      Options.BindFromInputIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromInputIniOnly", Options.BindFromInputIniOnly);
+
+      // Check old INI names
+      if (INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", false))
+        Options.BindFromInputIniOnly = true;
     }
   }
 
@@ -346,8 +362,6 @@ void InitPlugin()
     MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
   }
 
-  MH_EnableHook(MH_ALL_HOOKS);
-
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)
   {
@@ -355,12 +369,18 @@ void InitPlugin()
     SafeWriteModule<uint8_t>(0x3680100, 0x44);
   }
 
-  // Only allows bindings from Input.ini/DefaultInput.ini, prevents game EXE from creating any that could collide with any custom binds
-  if (Options.BindFromIniOnly)
+  // Only allows bindings from Input.ini, prevents game EXE from creating any that could collide with any custom binds
+  if (Options.BindFromInputIniOnly)
   {
     SafeWriteModule<uint8_t>(0x75A200, 0xC3);
     SafeWriteModule<uint8_t>(0x7D0DF0, 0xC3);
+
+    // Hook GetSourceIniFilename so we can make game ignore DefaultInput.ini
+    // (We only want Input.ini to be the source of bindings)
+    MH_CreateHook((LPVOID)(mBaseAddress + 0xD2E700), GetSourceIniFilename_Hook, (LPVOID*)&GetSourceIniFilename_Orig);
   }
+
+  MH_EnableHook(MH_ALL_HOOKS);
 }
 
 HMODULE ourModule;
