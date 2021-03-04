@@ -17,6 +17,7 @@ struct {
   bool LoadUnpackedFiles = true;
   bool AllowDebugPackages = true;
   bool FixCommonMisconfigs = true;
+  bool BindFromIniOnly = false;
 } Options;
 
 struct BindActionFnPtr
@@ -317,6 +318,7 @@ void InitPlugin()
       Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", Options.LoadUnpackedFiles);
       Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
       Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
+      Options.BindFromIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", Options.BindFromIniOnly);
     }
   }
 
@@ -351,6 +353,13 @@ void InitPlugin()
   {
     SafeWriteModule<uint8_t>(0x367FA48, 0x44);
     SafeWriteModule<uint8_t>(0x3680100, 0x44);
+  }
+
+  // Only allows bindings from Input.ini/DefaultInput.ini, prevents game EXE from creating any that could collide with any custom binds
+  if (Options.BindFromIniOnly)
+  {
+    SafeWriteModule<uint8_t>(0x75A200, 0xC3);
+    SafeWriteModule<uint8_t>(0x7D0DF0, 0xC3);
   }
 }
 
