@@ -16,7 +16,7 @@ struct {
   bool CustomActions = true;
   bool FirstPersonWherever = false;
   bool FirstPersonMovable = false;
-  float FirstPersonMovableHeight = 150.f;
+  float FirstPersonMovableHeight = 155.f;
   bool EnableDevConsole = true;
   bool LoadUnpackedFiles = true;
   bool AllowDebugPackages = true;
