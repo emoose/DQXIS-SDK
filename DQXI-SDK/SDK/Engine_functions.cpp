@@ -16,7 +16,7 @@ std::string FInputActionKeyMapping::GetIniMapping()
 {
 	std::stringstream ret;
 	ret << "(ActionName=\"";
-	ret << std::string(ActionName.GetName();
+	ret << std::string(ActionName.GetName());
 	ret << "\",Key=";
 	ret << Key.SafeName();
 	if (bAlt != 0)
