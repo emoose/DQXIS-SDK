@@ -3,6 +3,10 @@ const char* DefaultInputIni = "; Only edit this file while game is closed, as ga
 ; If you want to prevent the game from colliding with any of your binds, make sure BindFromInputIniOnly inside DQXIS-SDK.ini is set to true!\n\
 \n\
 [/Script/Engine.InputSettings]\n\
+; Key to toggle dev-console, can be changed here\n\
+; (Some keyboard layouts won't work with Tilde, hopefully changing this key should let it work fine)\n\
+ConsoleKeys=Tilde\n\
+\n\
 ; Custom action bindings:\n\
 ActionMappings=(ActionName=\"FirstPersonCamera\", Key=N)\n\
 ActionMappings=(ActionName=\"EnterPartyChat\", Key=M)\n\

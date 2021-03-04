@@ -127,9 +127,6 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
 
   playerController->Camera(newStyle);
 
-  // TODO: these allow player to move in FirstPersonView, but camera doesn't follow...
-  //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
-  //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
 }
 
 void EnterPartyChat(AJackFieldPlayerController* playerController)
