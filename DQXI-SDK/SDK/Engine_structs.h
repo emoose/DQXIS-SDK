@@ -6987,6 +6987,8 @@ struct FInputActionKeyMapping
 	unsigned char                                      bIgnoreCtrl : 1;                                          // 0x0020(0x0001) (Edit, BlueprintVisi)
 	unsigned char                                      bDebugOnly : 1;                                           // 0x0020(0x0001) (Edit, BlueprintVisi)
 	unsigned char                                      UnknownData00[0x7];                                       // 0x0021(0x0007) MISSED OFFSET
+
+	std::string GetIniMapping();
 };
 
 // ScriptStruct Engine.InputAxisKeyMapping
@@ -6998,6 +7000,8 @@ struct FInputAxisKeyMapping
 	float                                              Scale;                                                    // 0x0020(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
 	unsigned char                                      bDebugOnly : 1;                                           // 0x0024(0x0001) (Edit)
 	unsigned char                                      UnknownData00[0x3];                                       // 0x0025(0x0003) MISSED OFFSET
+
+	std::string GetIniMapping();
 };
 
 // ScriptStruct Engine.BlueprintInputTouchDelegateBinding

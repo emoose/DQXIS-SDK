@@ -1,6 +1,8 @@
 
 #include "../SDK.h"
 
+#include <sstream>
+
 // Name: DQXIS, Version: 1.0.0
 
 #ifdef _MSC_VER
@@ -9,6 +11,69 @@
 
 namespace SDK
 {
+
+std::string FInputActionKeyMapping::GetIniMapping()
+{
+	std::stringstream ret;
+	ret << "(ActionName=\"";
+	ret << std::string(ActionName.GetName();
+	ret << "\",Key=";
+	ret << Key.SafeName();
+	if (bAlt != 0)
+		ret << ",bAlt=True";
+	if (bCmd != 0)
+		ret << ",bCmd=True";
+	if (bCtrl != 0)
+		ret << ",bCtrl=True";
+	if (bShift != 0)
+		ret << ",bShift=True";
+	if (bIgnoreCtrl != 0)
+		ret << ",bIgnoreCtrl=True";
+	if (bDebugOnly != 0)
+		ret << ",bDebugOnly=True";
+	ret << ")";
+	return ret.str();
+}
+
+std::string FInputAxisKeyMapping::GetIniMapping()
+{
+	std::stringstream ret;
+	ret << "(AxisName=\"";
+	ret << AxisName.GetName();
+	ret << "\",Key=";
+	ret << Key.SafeName();
+	if (Scale != 0)
+	{
+		ret << ",Scale=";
+		ret << Scale;
+		ret << "f";
+	}
+	if (bDebugOnly != 0)
+		ret << ",bDebugOnly=True";
+	ret << ")";
+	return ret.str();
+}
+
+std::string UInputSettings::GetIniMappings()
+{
+	std::stringstream ret;
+
+	for (int i = 0; i < ActionMappings.Num(); i++)
+	{
+		ret << "ActionMappings=";
+		ret << ActionMappings[i].GetIniMapping();
+		ret << "\r\n";
+	}
+	for (int i = 0; i < AxisMappings.Num(); i++)
+	{
+		ret << "AxisMappings=";
+		ret << AxisMappings[i].GetIniMapping();
+		ret << "\r\n";
+	}
+
+	return ret.str();
+}
+
 //---------------------------------------------------------------------------
 // Functions
 //---------------------------------------------------------------------------

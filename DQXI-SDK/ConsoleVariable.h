@@ -60,13 +60,13 @@ public:
 	virtual EConsoleVariableFlags GetFlags() const = 0;
 	virtual void SetFlags(const EConsoleVariableFlags Value) = 0;
 
-	virtual class IConsoleVariable* AsVariable() = 0;
+	virtual IConsoleVariable* AsVariable() = 0;
 	virtual bool IsVariableInt() const = 0;
 
-	virtual class TConsoleVariableData<int32_t>* AsVariableInt() = 0;
-	virtual class TConsoleVariableData<float>* AsVariableFloat() = 0;
-	virtual class TConsoleVariableData<SDK::FString>* AsVariableString() = 0;
-	virtual struct IConsoleCommand* AsCommand() = 0;
+	virtual TConsoleVariableData<int32_t>* AsVariableInt() = 0;
+	virtual TConsoleVariableData<float>* AsVariableFloat() = 0;
+	virtual TConsoleVariableData<SDK::FString>* AsVariableString() = 0;
+	virtual IConsoleCommand* AsCommand() = 0;
 
 	virtual void Release() = 0;
 };

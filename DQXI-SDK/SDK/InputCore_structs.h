@@ -88,6 +88,15 @@ struct FKey
 {
 	struct FName                                       KeyName;                                                  // 0x0000(0x0008) (ZeroConstructor, IsPlainOldData)
 	unsigned char                                      UnknownData00[0x10];                                      // 0x0008(0x0010) MISSED OFFSET
+
+	std::string SafeName()
+	{
+		std::string name = KeyName.GetName();
+		// Only add quotes if contains space or comma
+		if (name.find_first_of(' ') != std::string::npos || name.find_first_of(',') != std::string::npos)
+			return std::string("\"") + name + std::string("\"");
+		return name;
+	}
 };
 
 }

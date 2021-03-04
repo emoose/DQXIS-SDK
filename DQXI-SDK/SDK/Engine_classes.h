@@ -9060,6 +9060,8 @@ public:
 	void ForceRebuildKeymaps();
 	void AddAxisMapping(const struct FInputAxisKeyMapping& KeyMapping, bool bForceRebuildKeymaps);
 	void AddActionMapping(const struct FInputActionKeyMapping& KeyMapping, bool bForceRebuildKeymaps);
+
+	std::string GetIniMappings();
 };
 
 
