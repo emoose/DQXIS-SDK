@@ -14,6 +14,9 @@ uintptr_t mBaseAddress;
 struct {
   bool RenderFix = true;
   bool CustomActions = true;
+  bool FirstPersonWherever = false;
+  bool FirstPersonMovable = false;
+  float FirstPersonMovableHeight = 150.f;
   bool EnableDevConsole = true;
   bool LoadUnpackedFiles = true;
   bool AllowDebugPackages = true;
@@ -36,7 +39,10 @@ typedef FName* (*FNameCreateFn)(FName* thisptr, const char* Name, int FindType);
 FNameCreateFn FNameCreate = nullptr;
 
 // Cached things so we don't need any lookups during runtime
-FName FirstPersonView;
+FName CamStyle_FirstPersonView;
+FName CamStyle_FirstPerson;
+FName CamStyle_Normal;
+
 UJackGameplayStatics* StaticFuncs;
 
 bool IsPlayerMovementEnabled(AActor* actor)
@@ -87,12 +93,33 @@ inline void UnsafeWriteModule(uintptr_t offset, T value)
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
-  if (!IsPlayerMovementEnabled(playerController))
+  if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController))
     return;
 
-  playerController->Camera(FirstPersonView);
+  FName newStyle = CamStyle_FirstPersonView;
+  if (Options.FirstPersonMovable)
+  {
+    static float OrigCapsuleHeight = 0; // todo: replace with constant
 
-  // TODO: these allow player to move in first-person view, but camera doesn't follow...
+    auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
+
+    bool IsFirstPerson = camera && camera->CameraStyle == CamStyle_FirstPerson;
+    IsFirstPerson = !IsFirstPerson; // toggle
+    newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
+
+    auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
+    if (chara && chara->CapsuleComponent)
+    {
+      if (OrigCapsuleHeight == 0)
+        OrigCapsuleHeight = chara->CapsuleComponent->CapsuleHalfHeight;
+
+      chara->CapsuleComponent->SetCapsuleHalfHeight(IsFirstPerson ? Options.FirstPersonMovableHeight : OrigCapsuleHeight, 1);
+    }
+  }
+
+  playerController->Camera(newStyle);
+
+  // TODO: these allow player to move in FirstPersonView, but camera doesn't follow...
   //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
   //condition->SetCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable, EJackGamePlayerConditionControlPurpose::EJackGamePlayerConditionControlPurpose__FirstParsonCamera, false);
 }
@@ -129,7 +156,10 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
 
   // Cache our UFunctions & FNames
   {
-    FNameCreate(&FirstPersonView, "FirstPersonView", 1);
+    FNameCreate(&CamStyle_FirstPersonView, "FirstPersonView", 1);
+    FNameCreate(&CamStyle_FirstPerson, "FirstPerson", 1);
+    FNameCreate(&CamStyle_Normal, "Normal", 1);
+
     StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
 
     // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
@@ -141,6 +171,11 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
 
     UJackGameplayStatics statics;
     statics.STATIC_GetJackGamePlayer(nullptr);
+    statics.STATIC_GetJackPlayerCameraManager(nullptr);
+    statics.STATIC_GetJackPlayerCharacter(nullptr, 1);
+
+    UCapsuleComponent capsule;
+    capsule.SetCapsuleHalfHeight(0, false);
 
     UJackGamePlayerCondition condition;
     condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
@@ -299,7 +334,7 @@ FString FPaths__GeneratedConfigDir_Hook()
     // Search for any action/axis binds
     std::string line;
     while (std::getline(iniStream, line))
-    {
+    { 
       if (!hasActionBind && line.substr(0, actionBind.length()) == actionBind)
         hasActionBind = true;
       if (!hasAxisBind && line.substr(0, axisBind.length()) == axisBind)
@@ -363,6 +398,14 @@ bool INI_GetBool(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, b
   return retVal;
 }
 
+float INI_GetFloat(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, float DefaultValue)
+{
+  float retVal = false;
+  if (GetPrivateProfileString(Section, Key, std::to_wstring(DefaultValue).c_str(), IniData, 256, IniPath) > 0)
+    retVal = std::stof(IniData);
+  return retVal;
+}
+
 void InitPlugin()
 {
   GameHModule = GetModuleHandleA("DRAGON QUEST XI S.exe");
@@ -401,6 +444,10 @@ void InitPlugin()
       Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
       Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
       Options.BindFromInputIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromInputIniOnly", Options.BindFromInputIniOnly);
+
+      Options.FirstPersonWherever = INI_GetBool(IniPath, L"FirstPerson", L"UseWherever", Options.FirstPersonWherever);
+      Options.FirstPersonMovable = INI_GetBool(IniPath, L"FirstPerson", L"UseMovableCamera", Options.FirstPersonMovable);
+      Options.FirstPersonMovableHeight = INI_GetFloat(IniPath, L"FirstPerson", L"MovableCameraHeight", Options.FirstPersonMovableHeight);
 
       // Check old INI names
       if (INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", false))
