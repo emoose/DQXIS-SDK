@@ -402,6 +402,39 @@ static FString GetSourceIniFilename_Hook(const TCHAR* ConfigDir, const TCHAR* Pr
   return GetSourceIniFilename_Orig(ConfigDir, Prefix, BaseIniName);
 }
 
+typedef void(*AJackPlayerController__PushCameraMode_Fn)(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds, bool bKeepOldCameraView);
+AJackPlayerController__PushCameraMode_Fn AJackPlayerController__PushCameraMode_Orig;
+void AJackPlayerController__PushCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds, bool bKeepOldCameraView)
+{
+  AJackPlayerController__PushCameraMode_Orig(thisptr, InMode, InterpSeconds, bKeepOldCameraView);
+
+  auto currentCam = thisptr->CurrentCameraMode();
+  if (currentCam == EJackCameraMode::EJackCameraMode__FirstPersonView)
+  {
+    // Entering first-person mode, stop NPCs from fading/dithering when up close
+    ((AJackPlayerCameraManager*)thisptr->PlayerCameraManager)->SetHiddenControlBeginOverlapEnabled(false);
+  }
+}
+
+typedef void(*AJackPlayerController__PopCameraMode_Fn)(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds);
+AJackPlayerController__PopCameraMode_Fn AJackPlayerController__PopCameraMode_Orig;
+void AJackPlayerController__PopCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds)
+{
+  auto prevCam = thisptr->CurrentCameraMode();
+
+  AJackPlayerController__PopCameraMode_Orig(thisptr, InMode, InterpSeconds);
+
+  if (prevCam != EJackCameraMode::EJackCameraMode__FirstPersonView)
+    return;
+
+  auto currentCam = thisptr->CurrentCameraMode();
+  if(prevCam != currentCam)
+  {
+    // Leaving first-person mode, allow NPCs to fade/dither away
+    ((AJackPlayerCameraManager*)thisptr->PlayerCameraManager)->SetHiddenControlBeginOverlapEnabled(true);
+  }
+}
+
 WCHAR IniPath[4096];
 WCHAR IniData[256];
 bool INI_GetBool(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, bool DefaultValue)
@@ -512,6 +545,13 @@ void InitPlugin()
 
     // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
     MH_CreateHook((LPVOID)(mBaseAddress + 0xD4F480), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
+  }
+
+  if (!Options.FirstPersonMovable)
+  {
+    // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FPS camera
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x652850), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x651C60), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
   }
 
   MH_EnableHook(MH_ALL_HOOKS);

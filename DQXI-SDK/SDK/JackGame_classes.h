@@ -5879,6 +5879,11 @@ public:
 	int GetAICalcActionStrideTableCountMax();
 };
 
+struct CameraModeStackEntry
+{
+	TEnumAsByte<EJackCameraMode> Mode;
+	unsigned char Unk1[3];
+};
 
 // Class JackGame.JackPlayerController
 // 0x01F0 (0x0930 - 0x0740)
@@ -5893,7 +5898,16 @@ public:
 	float                                              ControlRotationInertia;                                   // 0x07AC(0x0004) (Edit, BlueprintVisi, BlueprintReadOnly, ZeroConstructor, IsPlainOldData)
 	unsigned char                                      UnknownData02[0xE0];                                      // 0x07B0(0x00E0) MISSED OFFSET
 	float                                              AutoRunCancelThreshould;                                  // 0x0890(0x0004) (Edit, ZeroConstructor, DisableEditOnInstance, IsPlainOldData)
-	unsigned char                                      UnknownData03[0x9C];                                      // 0x0894(0x009C) MISSED OFFSET
+	unsigned char                                      UnknownData03[0x1C];                                      // 0x0894(0x009C) MISSED OFFSET
+	TArray<CameraModeStackEntry>                       CameraModes;                                              // 0x08B0
+	unsigned char                                      UnknownData04[0x70];                                      // 0x08C0
+
+	EJackCameraMode CurrentCameraMode()
+	{
+		if (CameraModes.Num())
+			return CameraModes[CameraModes.Num() - 1].Mode;
+		return EJackCameraMode::EJackCameraMode__None;
+	}
 
 	static UClass* StaticClass()
 	{
