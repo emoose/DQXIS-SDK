@@ -108,10 +108,17 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
       newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
       camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
 
+      auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
+
+      // Increase eye height if player is in a vehicle (horse etc)
+      auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(playerController);
+      if (gamePlayer && gamePlayer->GamePlayerCondition->RidingVehicleType != EJackVehicle::EJackVehicle__None)
+        firstPersonEyeHeight *= 2;
+
       // Fix camera height, 64 is pretty close to chara's eye position
       auto pawn = StaticFuncs->STATIC_GetPlayerPawn(playerController, EJackPlayerController::EJackPlayerController__Player1);
       if (pawn)
-        pawn->BaseEyeHeight = IsFirstPerson ? Options.FirstPersonMovableHeight : 0;
+        pawn->BaseEyeHeight = IsFirstPerson ? firstPersonEyeHeight : 0;
 
       // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
       auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
