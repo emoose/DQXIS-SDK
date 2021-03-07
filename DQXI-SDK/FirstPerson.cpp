@@ -124,8 +124,8 @@ bool g_shouldRestoreFirstPerson = false;
 
 typedef void (*AJackBattleManager__ClassFn)(AJackBattleManager* thisptr);
 
-AJackBattleManager__ClassFn AJackBattleManager__BattleInitialize_Orig;
-void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
+AJackBattleManager__ClassFn AJackBattleManager__MonsterAppearStart_Orig;
+void AJackBattleManager__MonsterAppearStart_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
 {
   auto camera = g_StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
   if (camera->CameraStyle == CamStyle_FirstPerson)
@@ -134,7 +134,7 @@ void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // T
     g_shouldRestoreFirstPerson = true;
   }
 
-  AJackBattleManager__BattleInitialize_Orig(thisptr);
+  AJackBattleManager__MonsterAppearStart_Orig(thisptr);
 }
 
 AJackBattleManager__ClassFn AJackBattleManager__BattleFinalize_Orig;
@@ -157,6 +157,6 @@ void Init_FirstPerson()
   MH_CreateHook((LPVOID)(mBaseAddress + 0x1C49F30), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
 
   // Hook BattleManager so we know when battle begins/ends
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6FE0), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x4D8200), AJackBattleManager__MonsterAppearStart_Hook, (LPVOID*)&AJackBattleManager__MonsterAppearStart_Orig);
   MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6A50), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
 }
