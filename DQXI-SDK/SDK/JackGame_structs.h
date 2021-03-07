@@ -939,17 +939,17 @@ enum class EJackVehicleModelId : uint8_t
 enum class EJackVehicle : uint8_t
 {
 	EJackVehicle__None             = 0,
-	EJackVehicle__Uma              = 1,
-	EJackVehicle__Eggurobo         = 2,
-	EJackVehicle__Sukaruraida      = 3,
-	EJackVehicle__Doragonraida     = 4,
-	EJackVehicle__Biraida          = 5,
-	EJackVehicle__Dexyurahanraido  = 6,
-	EJackVehicle__Herukattya       = 7,
+	EJackVehicle__Uma              = 1, // Horse
+	EJackVehicle__Eggurobo         = 2, // Eggsoskeleton
+	EJackVehicle__Sukaruraida      = 3, // Skullrider's Steed
+	EJackVehicle__Doragonraida     = 4, // Dragon Rider
+	EJackVehicle__Biraida          = 5, // Horknight Hornet
+	EJackVehicle__Dexyurahanraido  = 6, // Headless Horseman Horse?
+	EJackVehicle__Herukattya       = 7, // Face Invader
 	EJackVehicle__UrufuDoragon     = 8,
 	EJackVehicle__MeidenDooru      = 9,
 	EJackVehicle__KiRaaPansar      = 10,
-	EJackVehicle__SuraimuNaito     = 11,
+	EJackVehicle__SuraimuNaito     = 11, // Slime Knight
 	EJackVehicle__Gorem            = 12,
 	EJackVehicle__Gondora          = 13,
 	EJackVehicle__Ship             = 14,

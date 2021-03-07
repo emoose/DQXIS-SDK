@@ -22,7 +22,7 @@ public:
 	static bool AllowFunctionCalls;
 
 	static FUObjectArray*                              GObjects;                                                 // 0x0000(0x0000)
-	void*                                              Vtable;                                                   // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
+	uint64_t*                                          Vtable;                                                   // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            ObjectFlags;                                              // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            InternalIndex;                                            // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY
 	class UClass*                                      Class;                                                    // 0x0000(0x0000) NOT AUTO-GENERATED PROPERTY

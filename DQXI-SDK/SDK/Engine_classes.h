@@ -6685,6 +6685,18 @@ public:
 		return ptr;
 	}
 
+	void OutputText(const FString& Text)
+	{
+		typedef void(*UConsole__OutputText_Fn)(UConsole* thisptr, const FString& Text);
+		auto UConsole__OutputText = (UConsole__OutputText_Fn)Vtable[0x268 / 8];
+		UConsole__OutputText(this, Text);
+	}
+
+	void OutputText(const wchar_t* Text)
+	{
+		FString text = Text;
+		OutputText(text);
+	}
 };
 
 

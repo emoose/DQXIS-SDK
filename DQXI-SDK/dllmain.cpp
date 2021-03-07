@@ -9,6 +9,11 @@ using namespace SDK;
 HMODULE GameHModule;
 uintptr_t mBaseAddress;
 
+UConsole* g_Console = nullptr;
+
+typedef void(*FStringPrintf_Fn)(FString* fstring, const TCHAR* format, ...);
+FStringPrintf_Fn FStringPrintf = nullptr;
+
 struct {
   bool RenderFix = true;
   bool CustomActions = true;
@@ -108,6 +113,15 @@ void UJackGamePlayer__UpdatingRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnum
   thisptr->GamePlayerCondition->RidingVehicleModelType = VehicleModelType;
 
   // Our code
+#ifdef _DEBUG
+  if (g_Console)
+  {
+    FString debugText;
+    FStringPrintf(&debugText, L">>> VehicleType changed to %d", (int32_t)VehicleType.GetValue());
+    g_Console->OutputText(debugText);
+  }
+#endif
+
   auto pawn = StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
   auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
   if (pawn && camera)
@@ -323,7 +337,7 @@ void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thi
       if (!engine->ConsoleClass)
         continue;
 
-      thisptr->ViewportConsole = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
+      thisptr->ViewportConsole = g_Console = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
       if(thisptr->ViewportConsole)
         break;
     }
@@ -545,6 +559,7 @@ void InitPlugin()
   BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + 0x6AA7A0);
   FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + 0xD697D0);
   StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + 0xF16220);
+  FStringPrintf = reinterpret_cast<FStringPrintf_Fn>(mBaseAddress + 0xCAAC00);
 
   MH_Initialize();
 
