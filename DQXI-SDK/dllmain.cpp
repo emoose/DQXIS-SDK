@@ -94,14 +94,33 @@ inline void UnsafeWriteModule(uintptr_t offset, T value)
   *reinterpret_cast<T*>(mBaseAddress + offset) = value;
 }
 
-
 void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> VehicleType, FName CameraStyle)
 {
   auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
-  if (VehicleType != EJackVehicle::EJackVehicle__None)
-    firstPersonEyeHeight *= 2;
+  if (VehicleType == EJackVehicle::EJackVehicle__Herukattya)
+    firstPersonEyeHeight *= 1.5f;
+  else if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo)
+    firstPersonEyeHeight *= 2.1;
 
   Pawn->BaseEyeHeight = (CameraStyle == CamStyle_FirstPerson) ? firstPersonEyeHeight : 0;
+
+  bool HideModel = (CameraStyle == CamStyle_FirstPerson);
+  bool HideCharaModel = HideModel;
+  if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo && VehicleType != EJackVehicle::EJackVehicle__Herukattya)
+    HideModel = false; // don't hide vehicles
+
+  // Hide character/vehicle model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
+  auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, false);
+  if (chara)
+    chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideModel, HideModel);
+
+  // Hide character model
+  if (VehicleType != EJackVehicle::EJackVehicle__None)
+  {
+    chara = StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, true);
+    if (chara)
+      chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideCharaModel, HideCharaModel);
+  }
 }
 
 typedef void (*UJackGamePlayer__UpdatingRidingVehicle_Fn)(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> Vehicle, TEnumAsByte<EJackVehicleModelId> VehicleModel);
@@ -171,11 +190,6 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
         if (pawn)
           PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, newStyle);
       }
-
-      // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
-      auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
-      if (chara)
-        chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, IsFirstPerson, IsFirstPerson);
     }
   }
 
