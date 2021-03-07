@@ -1,7 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include <fstream>
-#include "MinHook.h"
 #include <sstream>
 
 using namespace SDK;
@@ -10,22 +9,11 @@ HMODULE GameHModule;
 uintptr_t mBaseAddress;
 
 UConsole* g_Console = nullptr;
+UJackGameplayStatics* g_StaticFuncs = nullptr;
 
-typedef void(*FStringPrintf_Fn)(FString* fstring, const TCHAR* format, ...);
 FStringPrintf_Fn FStringPrintf = nullptr;
 
-struct {
-  bool RenderFix = true;
-  bool CustomActions = true;
-  bool FirstPersonWherever = false;
-  bool FirstPersonMovable = false;
-  float FirstPersonMovableHeight = 64.f;
-  bool EnableDevConsole = true;
-  bool LoadUnpackedFiles = true;
-  bool AllowDebugPackages = true;
-  bool FixCommonMisconfigs = true;
-  bool BindFromInputIniOnly = false;
-} Options;
+IniSettings Options;
 
 struct BindActionFnPtr
 {
@@ -42,209 +30,9 @@ typedef FName* (*FNameCreateFn)(FName* thisptr, const char* Name, int FindType);
 FNameCreateFn FNameCreate = nullptr;
 
 // Cached things so we don't need any lookups during runtime
-FName CamStyle_FirstPersonView;
-FName CamStyle_FirstPerson;
-FName CamStyle_Normal;
-
-UJackGameplayStatics* StaticFuncs;
-
-bool IsPlayerMovementEnabled(AActor* actor)
-{
-  auto player = StaticFuncs->STATIC_GetJackGamePlayer(actor);
-
-  if (!player)
-    return false;
-
-  auto condition = player->GamePlayerCondition;
-  if (!condition)
-    return false;
-
-  if (condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable)
-    || condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled))
-    return false;
-
-  return true;
-}
-
-bool FileExists(const WCHAR* Filename)
-{
-  DWORD dwAttrib = GetFileAttributesW(Filename);
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-template <typename T>
-void SafeWrite(uintptr_t address, T value)
-{
-  DWORD oldProtect = 0;
-  VirtualProtect((LPVOID)address, sizeof(T), PAGE_READWRITE, &oldProtect);
-  *reinterpret_cast<T*>(address) = value;
-  VirtualProtect((LPVOID)address, sizeof(T), oldProtect, &oldProtect);
-}
-
-template <typename T>
-void SafeWriteModule(uintptr_t offset, T value)
-{
-  SafeWrite<T>(mBaseAddress + offset, value);
-}
-
-// Same as SafeWrite but doesn't VirtualProtect first, more efficient if you already know the memory is writable!
-template <typename T>
-inline void UnsafeWriteModule(uintptr_t offset, T value)
-{
-  *reinterpret_cast<T*>(mBaseAddress + offset) = value;
-}
-
-void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> VehicleType, FName CameraStyle)
-{
-  auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
-  if (VehicleType == EJackVehicle::EJackVehicle__Herukattya)
-    firstPersonEyeHeight *= 1.5f;
-  else if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo)
-    firstPersonEyeHeight *= 2.1;
-
-  Pawn->BaseEyeHeight = (CameraStyle == CamStyle_FirstPerson) ? firstPersonEyeHeight : 0;
-
-  bool HideModel = (CameraStyle == CamStyle_FirstPerson);
-  bool HideCharaModel = HideModel;
-  if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo && VehicleType != EJackVehicle::EJackVehicle__Herukattya)
-    HideModel = false; // don't hide vehicles
-
-  // Hide character/vehicle model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
-  auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, false);
-  if (chara)
-    chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideModel, HideModel);
-
-  // Hide character model
-  if (VehicleType != EJackVehicle::EJackVehicle__None)
-  {
-    chara = StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, true);
-    if (chara)
-      chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideCharaModel, HideCharaModel);
-  }
-}
-
-typedef void (*UJackGamePlayer__UpdatingRidingVehicle_Fn)(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> Vehicle, TEnumAsByte<EJackVehicleModelId> VehicleModel);
-UJackGamePlayer__UpdatingRidingVehicle_Fn UJackGamePlayer__UpdatingRidingVehicle_Orig;
-void UJackGamePlayer__UpdatingRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> VehicleType, TEnumAsByte<EJackVehicleModelId> VehicleModelType)
-{
-  // Orig code
-  thisptr->GamePlayerCondition->RidingVehicleType = VehicleType;
-  thisptr->GamePlayerCondition->RidingVehicleModelType = VehicleModelType;
-
-  // Our code
-#ifdef _DEBUG
-  if (g_Console)
-  {
-    FString debugText;
-    FStringPrintf(&debugText, L">>> VehicleType changed to %d", (int32_t)VehicleType.GetValue());
-    g_Console->OutputText(debugText);
-  }
-#endif
-
-  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
-  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
-  if (pawn && camera)
-    PawnRecalculateBaseEyeHeight(pawn, VehicleType, camera->CameraStyle);
-}
-
-typedef void (*APawn__RecalculateBaseEyeHeight_Fn)(APawn* thisptr);
-APawn__RecalculateBaseEyeHeight_Fn APawn__RecalculateBaseEyeHeight_Orig;
-void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
-{
-  APawn__RecalculateBaseEyeHeight_Orig(thisptr);
-
-  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
-  if (!pawn || thisptr != pawn)
-    return;
-
-  auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(thisptr);
-  if (!gamePlayer)
-    return;
-
-  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
-  if (camera)
-    PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
-}
-
-void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
-{
-  auto newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
-
-  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(actor);
-  if (!camera)
-    return;
-
-  camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
-
-  auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(actor);
-  if (!gamePlayer)
-    return;
-
-  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(actor, EJackPlayerController::EJackPlayerController__Player1);
-  if (!pawn)
-    return;
-
-  PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, newStyle);
-
-  auto playerController = StaticFuncs->STATIC_GetJackPlayerController(actor);
-  if (playerController)
-    playerController->Camera(newStyle);
-}
-
-bool g_shouldRestoreFirstPerson = false;
-
-typedef void (*AJackBattleManager__ClassFn)(AJackBattleManager* thisptr);
-
-AJackBattleManager__ClassFn AJackBattleManager__BattleInitialize_Orig;
-void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
-{
-  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
-  if (camera->CameraStyle == CamStyle_FirstPerson)
-  {
-    SetMovableFirstPersonCam(thisptr, false);
-    g_shouldRestoreFirstPerson = true;
-  }
-
-  AJackBattleManager__BattleInitialize_Orig(thisptr);
-}
-
-AJackBattleManager__ClassFn AJackBattleManager__BattleFinalize_Orig;
-void AJackBattleManager__BattleFinalize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
-{
-  if (g_shouldRestoreFirstPerson)
-  {
-    SetMovableFirstPersonCam(thisptr, true);
-    g_shouldRestoreFirstPerson = false;
-  }
-
-  AJackBattleManager__BattleFinalize_Orig(thisptr);
-}
-
-void FirstPersonCamera(AJackFieldPlayerController* playerController)
-{
-  if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController))
-    return;
-
-  FName newStyle = CamStyle_FirstPersonView;
-  if (Options.FirstPersonMovable)
-  {
-    auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
-    bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
-    IsFirstPerson = !IsFirstPerson; // toggle
-
-    return SetMovableFirstPersonCam(playerController, IsFirstPerson);
-  }
-
-  playerController->Camera(newStyle);
-}
-
-void EnterPartyChat(AJackFieldPlayerController* playerController)
-{
-  if (!IsPlayerMovementEnabled(playerController))
-    return;
-
-  playerController->NakamaKaiwa();
-}
+extern FName CamStyle_FirstPersonView;
+extern FName CamStyle_FirstPerson;
+extern FName CamStyle_Normal;
 
 typedef void (*InitActionMappingsFn)(AActor* thisptr);
 InitActionMappingsFn InitActionMappings_Field_Orig;
@@ -255,7 +43,7 @@ void CacheUFunctions()
   FNameCreate(&CamStyle_FirstPerson, "FirstPerson", 1);
   FNameCreate(&CamStyle_Normal, "Normal", 1);
 
-  StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
+  g_StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
 
   // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
   UObject::AllowFunctionCalls = false;
@@ -387,61 +175,6 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   }
 
   SetsCharacterViewerResolution_Orig(camera, rdx);
-}
-
-// UGameViewportClient::SetupInitialLocalPlayer hook, allows us to set ViewportConsole
-// and with that, the UE4 dev console will be available even in Shipping builds!
-typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
-StaticConstructObject_InternalFn StaticConstructObject_Internal = nullptr;
-
-typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
-UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
-
-void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thisptr, void* OutError)
-{
-  auto ret = UGameViewportClient__SetupInitialLocalPlayer_Orig(thisptr, OutError);
-
-  if (!thisptr->ViewportConsole) {
-    auto engines = UObject::FindObjects<UEngine>();
-    for (auto engine : engines)
-    {
-      // First UEngine is usually a dud
-      if (!engine->ConsoleClass)
-        continue;
-
-      thisptr->ViewportConsole = g_Console = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
-      if(thisptr->ViewportConsole)
-        break;
-    }
-  }
-
-  return ret;
-}
-
-typedef void* (*FPakPlatformFile__FindFileInPakFilesFn)(void* Paks, const TCHAR* Filename, void** OutPakFile);
-typedef bool (*FPakPlatformFile__IsNonPakFilenameAllowedFn)(void* thisptr, const FString& InFilename);
-
-const wchar_t* gameDataStart = L"../../../"; // seems to be at the start of every game path
-
-// FPakPlatformFile::FindFileInPakFiles hook: this will check for any loose file with the same filename
-// If a loose file is found will return null (ie: saying that the .pak doesn't contain it)
-// 90% of UE4 games will then try loading loose files, luckily DQXI is part of that 90% :D
-FPakPlatformFile__FindFileInPakFilesFn FPakPlatformFile__FindFileInPakFiles_Orig;
-void* FPakPlatformFile__FindFileInPakFiles_Hook(void* Paks, const TCHAR* Filename, void** OutPakFile)
-{
-  if (OutPakFile)
-    *OutPakFile = nullptr;
-
-  if (Filename && wcsstr(Filename, gameDataStart) && FileExists(Filename))
-      return 0; // file exists, tell game it's not in pak
-
-  return FPakPlatformFile__FindFileInPakFiles_Orig(Paks, Filename, OutPakFile);
-}
-
-FPakPlatformFile__IsNonPakFilenameAllowedFn FPakPlatformFile__IsNonPakFilenameAllowed_Orig;
-bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString& InFilename)
-{
-  return 1;
 }
 
 // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
@@ -630,7 +363,6 @@ void InitPlugin()
 
   BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + 0x6AA7A0);
   FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + 0xD697D0);
-  StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + 0xF16220);
   FStringPrintf = reinterpret_cast<FStringPrintf_Fn>(mBaseAddress + 0xCAAC00);
 
   MH_Initialize();
@@ -640,15 +372,6 @@ void InitPlugin()
 
   if (Options.CustomActions)
     MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
-
-  if (Options.EnableDevConsole)
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
-
-  if (Options.LoadUnpackedFiles)
-  {
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F653E0), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
-  }
 
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)
@@ -671,23 +394,16 @@ void InitPlugin()
     MH_CreateHook((LPVOID)(mBaseAddress + 0xD4F480), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
   }
 
-  if (!Options.FirstPersonMovable)
+  if (Options.FirstPersonMovable)
+    Init_FirstPerson();
+  else
   {
-    // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FPS camera
+    // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
     MH_CreateHook((LPVOID)(mBaseAddress + 0x652850), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
     MH_CreateHook((LPVOID)(mBaseAddress + 0x651C60), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
   }
-  else
-  {
-    // Hook UpdatingRidingVehicle to know current vehicle being used
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
-    // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1C49F30), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
 
-    // Hook BattleManager so we know when battle begins/ends
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6FE0), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6A50), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
-  }
+  Init_DQXIHook();
 
   MH_EnableHook(MH_ALL_HOOKS);
 }
