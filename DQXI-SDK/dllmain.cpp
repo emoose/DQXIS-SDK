@@ -91,6 +91,50 @@ inline void UnsafeWriteModule(uintptr_t offset, T value)
   *reinterpret_cast<T*>(mBaseAddress + offset) = value;
 }
 
+
+void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> VehicleType, FName CameraStyle)
+{
+  auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
+  if (VehicleType != EJackVehicle::EJackVehicle__None)
+    firstPersonEyeHeight *= 2;
+
+  Pawn->BaseEyeHeight = (CameraStyle == CamStyle_FirstPerson) ? firstPersonEyeHeight : 0;
+}
+
+typedef void (*UJackGamePlayer__UpdatingRidingVehicle_Fn)(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> Vehicle, TEnumAsByte<EJackVehicleModelId> VehicleModel);
+UJackGamePlayer__UpdatingRidingVehicle_Fn UJackGamePlayer__UpdatingRidingVehicle_Orig;
+void UJackGamePlayer__UpdatingRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> VehicleType, TEnumAsByte<EJackVehicleModelId> VehicleModelType)
+{
+  // Orig code
+  thisptr->GamePlayerCondition->RidingVehicleType = VehicleType;
+  thisptr->GamePlayerCondition->RidingVehicleModelType = VehicleModelType;
+
+  // Our code
+  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
+  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
+  if (pawn && camera)
+    PawnRecalculateBaseEyeHeight(pawn, VehicleType, camera->CameraStyle);
+}
+
+typedef void (*APawn__RecalculateBaseEyeHeight_Fn)(APawn* thisptr);
+APawn__RecalculateBaseEyeHeight_Fn APawn__RecalculateBaseEyeHeight_Orig;
+void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
+{
+  APawn__RecalculateBaseEyeHeight_Orig(thisptr);
+
+  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
+  if (!pawn || thisptr != pawn)
+    return;
+
+  auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(thisptr);
+  if (gamePlayer)
+  {
+    auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
+    if (camera)
+      PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
+  }
+}
+
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
   if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController))
@@ -104,21 +148,17 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
     {
       bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
       IsFirstPerson = !IsFirstPerson; // toggle
-
       newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
+
       camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
 
-      auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
-
-      // Increase eye height if player is in a vehicle (horse etc)
       auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(playerController);
-      if (gamePlayer && gamePlayer->GamePlayerCondition->RidingVehicleType != EJackVehicle::EJackVehicle__None)
-        firstPersonEyeHeight *= 2;
-
-      // Fix camera height, 64 is pretty close to chara's eye position
-      auto pawn = StaticFuncs->STATIC_GetPlayerPawn(playerController, EJackPlayerController::EJackPlayerController__Player1);
-      if (pawn)
-        pawn->BaseEyeHeight = IsFirstPerson ? firstPersonEyeHeight : 0;
+      if (gamePlayer)
+      {
+        auto pawn = StaticFuncs->STATIC_GetPlayerPawn(playerController, EJackPlayerController::EJackPlayerController__Player1);
+        if (pawn)
+          PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, newStyle);
+      }
 
       // Hide character model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
       auto chara = StaticFuncs->STATIC_GetJackPlayerCharacter(playerController, 1);
@@ -551,6 +591,13 @@ void InitPlugin()
     // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FPS camera
     MH_CreateHook((LPVOID)(mBaseAddress + 0x652850), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
     MH_CreateHook((LPVOID)(mBaseAddress + 0x651C60), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
+  }
+  else
+  {
+    // Hook UpdatingRidingVehicle to know current vehicle being used
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
+    // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x1C49F30), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
   }
 
   MH_EnableHook(MH_ALL_HOOKS);
