@@ -1,5 +1,5 @@
 
-#include "../SDK.h"
+#include "../pch.h"
 
 // Name: DQXIS, Version: 1.0.0
 

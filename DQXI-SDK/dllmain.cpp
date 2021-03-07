@@ -1,9 +1,7 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
-#include "framework.h"
-#include "SDK.h"
+#include "pch.h"
 #include <fstream>
 #include "MinHook.h"
-#include "ConsoleVariable.h"
 #include <sstream>
 
 using namespace SDK;
