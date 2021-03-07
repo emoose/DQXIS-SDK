@@ -96,6 +96,8 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func
 
+  OnLoad_FirstPerson();
+
   // A render resolution variable used by game in a few spots, always set to 1920x1080
   // Doesn't seem to ever get changed, maybe something was broken during UE4 engine update
   // CharacterCaptureCamera calc uses (720 / this) as a render scale, was maybe meant to be (this / 720)?

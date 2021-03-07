@@ -42,6 +42,7 @@ void Init_DQXIHook();
 // FirstPerson.cpp
 bool IsPlayerMovementEnabled(AActor* actor);
 void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson);
+void OnLoad_FirstPerson();
 void Init_FirstPerson();
 
 // Utility.cpp

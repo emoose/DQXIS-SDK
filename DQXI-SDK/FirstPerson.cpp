@@ -95,6 +95,8 @@ void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
     PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
 }
 
+bool ShouldZeroInterpSpeed = false;
+
 void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
 {
   auto newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
@@ -118,9 +120,13 @@ void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
   auto playerController = g_StaticFuncs->STATIC_GetJackPlayerController(actor);
   if (playerController)
     playerController->Camera(newStyle);
+
+  // set flag to make CameraInterpolate hook zero out the interp speed, making it instant
+  // (only if switching to third-person, and only for a single CameraInterpolate call)
+  ShouldZeroInterpSpeed = !IsFirstPerson;
 }
 
-bool g_shouldRestoreFirstPerson = false;
+bool ShouldRestoreFirstPerson = false;
 
 typedef void (*AJackBattleManager__ClassFn)(AJackBattleManager* thisptr);
 
@@ -131,7 +137,7 @@ void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // T
   if (camera->CameraStyle == CamStyle_FirstPerson)
   {
     SetMovableFirstPersonCam(thisptr, false);
-    g_shouldRestoreFirstPerson = true;
+    ShouldRestoreFirstPerson = true;
   }
 
   AJackBattleManager__BattleInitialize_Orig(thisptr);
@@ -140,10 +146,10 @@ void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // T
 AJackBattleManager__ClassFn AJackBattleManager__BattleFinalize_Orig;
 void AJackBattleManager__BattleFinalize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
 {
-  if (g_shouldRestoreFirstPerson)
+  if (ShouldRestoreFirstPerson)
   {
     SetMovableFirstPersonCam(thisptr, true);
-    g_shouldRestoreFirstPerson = false;
+    ShouldRestoreFirstPerson = false;
   }
 
   AJackBattleManager__BattleFinalize_Orig(thisptr);
@@ -182,6 +188,38 @@ void AJackPlayerController__PopCameraMode_Hook(AJackPlayerController* thisptr, T
   }
 }
 
+// Cached CameraData class pointers
+std::vector<UJackPlayerCameraData*> CameraDatas;
+std::vector<UJackPlayerCameraData> OriginalCameraDatas;
+
+typedef void* (*CameraInterpolate_Fn)(UObject* a1, void* a2, void* a3);
+CameraInterpolate_Fn CameraInterpolate_Orig;
+
+// TODO: find what class this belongs to
+// func seems to use data from UJackPlayerCameraData somehow
+void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
+{
+  for (int i = 0; i < CameraDatas.size(); i++)
+  {
+    CameraDatas[i]->InterpTargetLocation_Speed = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_Speed;
+    CameraDatas[i]->InterpTargetLocation_SpeedXY = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXY;
+  }
+
+  // Only zero it for this call
+  ShouldZeroInterpSpeed = false;
+
+  return CameraInterpolate_Orig(a1, a2, a3);
+}
+
+void OnLoad_FirstPerson()
+{
+  // Cache the CameraData pointers, and store a copy of their original values
+  CameraDatas = UObject::FindObjects<UJackPlayerCameraData>();
+  OriginalCameraDatas.clear();
+  for (auto data : CameraDatas)
+    OriginalCameraDatas.push_back(*data);
+}
+
 void Init_FirstPerson()
 {
   // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
@@ -190,6 +228,8 @@ void Init_FirstPerson()
 
   if (!Options.FirstPersonMovable)
     return;
+
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x62E5F0), CameraInterpolate_Hook, (LPVOID*)&CameraInterpolate_Orig);
 
   // Hook UpdatingRidingVehicle to know current vehicle being used
   MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
