@@ -158,12 +158,66 @@ void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
     return;
 
   auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(thisptr);
-  if (gamePlayer)
+  if (!gamePlayer)
+    return;
+
+  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
+  if (camera)
+    PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
+}
+
+void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
+{
+  auto newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
+
+  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(actor);
+  if (!camera)
+    return;
+
+  camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
+
+  auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(actor);
+  if (!gamePlayer)
+    return;
+
+  auto pawn = StaticFuncs->STATIC_GetPlayerPawn(actor, EJackPlayerController::EJackPlayerController__Player1);
+  if (!pawn)
+    return;
+
+  PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, newStyle);
+
+  auto playerController = StaticFuncs->STATIC_GetJackPlayerController(actor);
+  if (playerController)
+    playerController->Camera(newStyle);
+}
+
+bool g_shouldRestoreFirstPerson = false;
+
+typedef void (*AJackBattleManager__ClassFn)(AJackBattleManager* thisptr);
+
+AJackBattleManager__ClassFn AJackBattleManager__BattleInitialize_Orig;
+void AJackBattleManager__BattleInitialize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
+{
+  auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
+  if (camera->CameraStyle == CamStyle_FirstPerson)
   {
-    auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
-    if (camera)
-      PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
+    SetMovableFirstPersonCam(thisptr, false);
+    g_shouldRestoreFirstPerson = true;
   }
+
+  AJackBattleManager__BattleInitialize_Orig(thisptr);
+}
+
+AJackBattleManager__ClassFn AJackBattleManager__BattleFinalize_Orig;
+void AJackBattleManager__BattleFinalize_Hook(AJackBattleManager* thisptr) // TODO: unsure if this is actually AJackBattleManager
+{
+  if (g_shouldRestoreFirstPerson)
+  {
+    SetMovableFirstPersonCam(thisptr, true);
+    g_shouldRestoreFirstPerson = false;
+  }
+
+  AJackBattleManager__BattleFinalize_Orig(thisptr);
 }
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
@@ -175,22 +229,10 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
   if (Options.FirstPersonMovable)
   {
     auto camera = StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
-    if (camera)
-    {
-      bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
-      IsFirstPerson = !IsFirstPerson; // toggle
-      newStyle = IsFirstPerson ? CamStyle_FirstPerson : CamStyle_Normal;
+    bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
+    IsFirstPerson = !IsFirstPerson; // toggle
 
-      camera->SetHiddenControlBeginOverlapEnabled(!IsFirstPerson); // stop NPCs from fading/dithering out when too close
-
-      auto gamePlayer = StaticFuncs->STATIC_GetJackGamePlayer(playerController);
-      if (gamePlayer)
-      {
-        auto pawn = StaticFuncs->STATIC_GetPlayerPawn(playerController, EJackPlayerController::EJackPlayerController__Player1);
-        if (pawn)
-          PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, newStyle);
-      }
-    }
+    return SetMovableFirstPersonCam(playerController, IsFirstPerson);
   }
 
   playerController->Camera(newStyle);
@@ -206,6 +248,43 @@ void EnterPartyChat(AJackFieldPlayerController* playerController)
 
 typedef void (*InitActionMappingsFn)(AActor* thisptr);
 InitActionMappingsFn InitActionMappings_Field_Orig;
+
+void CacheUFunctions()
+{
+  FNameCreate(&CamStyle_FirstPersonView, "FirstPersonView", 1);
+  FNameCreate(&CamStyle_FirstPerson, "FirstPerson", 1);
+  FNameCreate(&CamStyle_Normal, "Normal", 1);
+
+  StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
+
+  // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
+  UObject::AllowFunctionCalls = false;
+
+  AJackCharacter character;
+  character.SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__LVD, false, false);
+
+  AJackFieldPlayerController playerController;
+  playerController.Camera(nullptr);
+  playerController.NakamaKaiwa();
+
+  AJackPlayerCameraManager cameraManager;
+  cameraManager.SetHiddenControlBeginOverlapEnabled(true);
+
+  UJackGameplayStatics statics;
+  statics.STATIC_GetJackGamePlayer(nullptr);
+  statics.STATIC_GetJackPlayerCameraManager(nullptr);
+  statics.STATIC_GetJackPlayerCharacter(nullptr, 1);
+  statics.STATIC_GetJackPlayerController(nullptr);
+  statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::EJackPlayerController__Player1);
+
+  UCapsuleComponent capsule;
+  capsule.SetCapsuleHalfHeight(0, false);
+
+  UJackGamePlayerCondition condition;
+  condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
+
+  UObject::AllowFunctionCalls = true;
+}
 
 void InitActionMappings_Field_Hook(AActor* thisptr)
 {
@@ -227,40 +306,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
   BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
 
   // Cache our UFunctions & FNames
-  {
-    FNameCreate(&CamStyle_FirstPersonView, "FirstPersonView", 1);
-    FNameCreate(&CamStyle_FirstPerson, "FirstPerson", 1);
-    FNameCreate(&CamStyle_Normal, "Normal", 1);
-
-    StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
-
-    // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
-    UObject::AllowFunctionCalls = false;
-
-    AJackCharacter character;
-    character.SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__LVD, false, false);
-
-    AJackFieldPlayerController playerController;
-    playerController.Camera(nullptr);
-    playerController.NakamaKaiwa();
-
-    AJackPlayerCameraManager cameraManager;
-    cameraManager.SetHiddenControlBeginOverlapEnabled(true);
-
-    UJackGameplayStatics statics;
-    statics.STATIC_GetJackGamePlayer(nullptr);
-    statics.STATIC_GetJackPlayerCameraManager(nullptr);
-    statics.STATIC_GetJackPlayerCharacter(nullptr, 1);
-    statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::EJackPlayerController__Player1);
-
-    UCapsuleComponent capsule;
-    capsule.SetCapsuleHalfHeight(0, false);
-
-    UJackGamePlayerCondition condition;
-    condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
-
-    UObject::AllowFunctionCalls = true;
-  }
+  CacheUFunctions(); // moved to reduce stack usage of this func
 
   // A render resolution variable used by game in a few spots, always set to 1920x1080
   // Doesn't seem to ever get changed, maybe something was broken during UE4 engine update
@@ -625,6 +671,10 @@ void InitPlugin()
     MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
     // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
     MH_CreateHook((LPVOID)(mBaseAddress + 0x1C49F30), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
+
+    // Hook BattleManager so we know when battle begins/ends
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6FE0), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6A50), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
   }
 
   MH_EnableHook(MH_ALL_HOOKS);
