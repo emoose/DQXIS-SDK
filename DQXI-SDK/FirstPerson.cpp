@@ -95,7 +95,8 @@ void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
     PawnRecalculateBaseEyeHeight(pawn, gamePlayer->GamePlayerCondition->RidingVehicleType, camera->CameraStyle);
 }
 
-bool ShouldZeroInterpSpeed = false;
+// HACKHACK: this should just be a bool, but PopCameraMode & CameraInterpolate seem to be called at random times in the frame, can't rely on one always being called after the other?
+int NumFramesToZeroInterpSpeed = 0;
 
 void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
 {
@@ -123,7 +124,8 @@ void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
 
   // set flag to make CameraInterpolate hook zero out the interp speed, making it instant
   // (only if switching to third-person, and only for a single CameraInterpolate call)
-  ShouldZeroInterpSpeed = !IsFirstPerson;
+  if (IsFirstPerson)
+    NumFramesToZeroInterpSpeed = 15;
 }
 
 bool ShouldRestoreFirstPerson = false;
@@ -159,6 +161,9 @@ typedef void(*AJackPlayerController__PushCameraMode_Fn)(AJackPlayerController* t
 AJackPlayerController__PushCameraMode_Fn AJackPlayerController__PushCameraMode_Orig;
 void AJackPlayerController__PushCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds, bool bKeepOldCameraView)
 {
+  if (NumFramesToZeroInterpSpeed)
+    InterpSeconds = 0;
+
   AJackPlayerController__PushCameraMode_Orig(thisptr, InMode, InterpSeconds, bKeepOldCameraView);
 
   auto currentCam = thisptr->CurrentCameraMode();
@@ -174,6 +179,9 @@ AJackPlayerController__PopCameraMode_Fn AJackPlayerController__PopCameraMode_Ori
 void AJackPlayerController__PopCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds)
 {
   auto prevCam = thisptr->CurrentCameraMode();
+
+  if (NumFramesToZeroInterpSpeed)
+    InterpSeconds = 0;
 
   AJackPlayerController__PopCameraMode_Orig(thisptr, InMode, InterpSeconds);
 
@@ -197,22 +205,37 @@ CameraInterpolate_Fn CameraInterpolate_Orig;
 
 // TODO: find what class this belongs to
 // func seems to use data from UJackPlayerCameraData somehow
+bool ResetZeroInterpNextFrame = false;
 void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
 {
+  if (!NumFramesToZeroInterpSpeed)
+    return CameraInterpolate_Orig(a1, a2, a3);
+
   for (int i = 0; i < CameraDatas.size(); i++)
   {
-    CameraDatas[i]->InterpTargetLocation_Speed = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_Speed;
-    CameraDatas[i]->InterpTargetLocation_SpeedXY = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXY;
-    CameraDatas[i]->InterpTargetLocation_SpeedInZoom = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoom;
-    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoom = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoom;
-    CameraDatas[i]->InterpTargetLocation_SpeedInZoomMoveStop = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoomMoveStop;
-    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoomMoveStop = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoomMoveStop;
+    CameraDatas[i]->InterpTargetLocation_Speed = 0;
+    CameraDatas[i]->InterpTargetLocation_SpeedXY = 0;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoom = 0;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoom = 0;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoomMoveStop = 0;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoomMoveStop = 0;
   }
 
-  // Only zero it for this call
-  ShouldZeroInterpSpeed = false;
+  auto ret = CameraInterpolate_Orig(a1, a2, a3);
 
-  return CameraInterpolate_Orig(a1, a2, a3);
+  for (int i = 0; i < CameraDatas.size(); i++)
+  {
+    CameraDatas[i]->InterpTargetLocation_Speed = OriginalCameraDatas[i].InterpTargetLocation_Speed;
+    CameraDatas[i]->InterpTargetLocation_SpeedXY = OriginalCameraDatas[i].InterpTargetLocation_SpeedXY;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoom = OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoom;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoom = OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoom;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoomMoveStop = OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoomMoveStop;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoomMoveStop = OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoomMoveStop;
+  }
+
+  NumFramesToZeroInterpSpeed--;
+
+  return ret;
 }
 
 void OnLoad_FirstPerson()

@@ -46,7 +46,7 @@ public:
 		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + 0xEF12A0);
 		//auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
 
-		if(AllowFunctionCalls)
+		if (AllowFunctionCalls)
 			fn(this, function, parms);
 	}
 

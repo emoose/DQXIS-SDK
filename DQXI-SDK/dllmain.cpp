@@ -107,7 +107,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
 
   // Fixes for some common misconfigurations
   // TODO: move these to an AfterConfigIniRead hook, so they only get applied once per session
-  if(Options.FixCommonMisconfigs)
+  if (Options.FixCommonMisconfigs)
   {
     // set r.JackLoadReduction.DisableMovementModeOptimization to 0, fixes floating NPCs
     auto* disableMovementModeOptimization = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDB8);
