@@ -203,6 +203,10 @@ void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
   {
     CameraDatas[i]->InterpTargetLocation_Speed = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_Speed;
     CameraDatas[i]->InterpTargetLocation_SpeedXY = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXY;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoom = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoom;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoom = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoom;
+    CameraDatas[i]->InterpTargetLocation_SpeedInZoomMoveStop = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedInZoomMoveStop;
+    CameraDatas[i]->InterpTargetLocation_SpeedXYInZoomMoveStop = ShouldZeroInterpSpeed ? 0 : OriginalCameraDatas[i].InterpTargetLocation_SpeedXYInZoomMoveStop;
   }
 
   // Only zero it for this call
