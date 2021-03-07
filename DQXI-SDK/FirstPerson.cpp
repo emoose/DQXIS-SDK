@@ -38,17 +38,17 @@ void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> Vehicle
   if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo && VehicleType != EJackVehicle::EJackVehicle__Herukattya)
     HideModel = false; // don't hide vehicles
 
-  // Hide character/vehicle model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
-  auto chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, false);
-  if (chara)
-    chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideModel, HideModel);
-
   // Hide character model
+  auto chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, true);
+  if (chara)
+    chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideCharaModel, HideCharaModel);
+
+  // Hide character/vehicle model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
   if (VehicleType != EJackVehicle::EJackVehicle__None)
   {
-    chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, true);
+    chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, false);
     if (chara)
-      chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideCharaModel, HideCharaModel);
+      chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideModel, HideModel);
   }
 }
 
