@@ -322,17 +322,29 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
     // set r.JackLoadReduction.DisableMovementModeOptimization to 0, fixes floating NPCs
     auto* disableMovementModeOptimization = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDB8);
     if (disableMovementModeOptimization && disableMovementModeOptimization->GetInt() != 0)
-        disableMovementModeOptimization->Set(L"0");
+    {
+      disableMovementModeOptimization->Set(L"0");
+      if (g_Console)
+        g_Console->OutputText(L">>> DQXIS-SDK: detected misconfigured r.JackLoadReduction.DisableMovementModeOptimization cvar, has been set to 0 to fix floating NPCs");
+    }
 
     // set r.JackLoadReduction.DisableDitherHidden to 0, allows NPCs to fade in/out instead of popping
     auto* disableDitherHidden = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDE8);
     if (disableDitherHidden && disableDitherHidden->GetInt() != 0)
+    {
       disableDitherHidden->Set(L"0");
+      if (g_Console)
+        g_Console->OutputText(L">>> DQXIS-SDK: detected misconfigured r.JackLoadReduction.DisableDitherHidden cvar, has been set to 0 to fix NPC fading");
+    }
 
     // set r.Shadow.FilterMethod to 0 as 1 seems to break shadows (but still gets recommended by some ancient UE4 mod guides...)
     auto* shadowFilterMethod = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5E18AD0);
     if (shadowFilterMethod && shadowFilterMethod->GetInt() != 0)
+    {
       shadowFilterMethod->Set(L"0");
+      if (g_Console)
+        g_Console->OutputText(L">>> DQXIS-SDK: detected misconfigured r.Shadow.FilterMethod cvar, has been set to 0 to fix shadows");
+    }
   }
 }
 
