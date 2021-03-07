@@ -149,8 +149,48 @@ void AJackBattleManager__BattleFinalize_Hook(AJackBattleManager* thisptr) // TOD
   AJackBattleManager__BattleFinalize_Orig(thisptr);
 }
 
+typedef void(*AJackPlayerController__PushCameraMode_Fn)(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds, bool bKeepOldCameraView);
+AJackPlayerController__PushCameraMode_Fn AJackPlayerController__PushCameraMode_Orig;
+void AJackPlayerController__PushCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds, bool bKeepOldCameraView)
+{
+  AJackPlayerController__PushCameraMode_Orig(thisptr, InMode, InterpSeconds, bKeepOldCameraView);
+
+  auto currentCam = thisptr->CurrentCameraMode();
+  if (currentCam == EJackCameraMode::EJackCameraMode__FirstPersonView)
+  {
+    // Entering first-person mode, stop NPCs from fading/dithering when up close
+    ((AJackPlayerCameraManager*)thisptr->PlayerCameraManager)->SetHiddenControlBeginOverlapEnabled(false);
+  }
+}
+
+typedef void(*AJackPlayerController__PopCameraMode_Fn)(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds);
+AJackPlayerController__PopCameraMode_Fn AJackPlayerController__PopCameraMode_Orig;
+void AJackPlayerController__PopCameraMode_Hook(AJackPlayerController* thisptr, TEnumAsByte<EJackCameraMode> InMode, float InterpSeconds)
+{
+  auto prevCam = thisptr->CurrentCameraMode();
+
+  AJackPlayerController__PopCameraMode_Orig(thisptr, InMode, InterpSeconds);
+
+  if (prevCam != EJackCameraMode::EJackCameraMode__FirstPersonView)
+    return;
+
+  auto currentCam = thisptr->CurrentCameraMode();
+  if (prevCam != currentCam)
+  {
+    // Leaving first-person mode, allow NPCs to fade/dither away
+    ((AJackPlayerCameraManager*)thisptr->PlayerCameraManager)->SetHiddenControlBeginOverlapEnabled(true);
+  }
+}
+
 void Init_FirstPerson()
 {
+  // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x652850), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + 0x651C60), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
+
+  if (!Options.FirstPersonMovable)
+    return;
+
   // Hook UpdatingRidingVehicle to know current vehicle being used
   MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
   // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
