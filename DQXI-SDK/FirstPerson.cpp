@@ -52,9 +52,9 @@ void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> Vehicle
   }
 }
 
-typedef void (*UJackGamePlayer__UpdatingRidingVehicle_Fn)(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> Vehicle, TEnumAsByte<EJackVehicleModelId> VehicleModel);
-UJackGamePlayer__UpdatingRidingVehicle_Fn UJackGamePlayer__UpdatingRidingVehicle_Orig;
-void UJackGamePlayer__UpdatingRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> VehicleType, TEnumAsByte<EJackVehicleModelId> VehicleModelType)
+typedef void (*UJackGamePlayer__UpdateRidingVehicle_Fn)(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> Vehicle, TEnumAsByte<EJackVehicleModelId> VehicleModel);
+UJackGamePlayer__UpdateRidingVehicle_Fn UJackGamePlayer__UpdateRidingVehicle_Orig;
+void UJackGamePlayer__UpdateRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAsByte<EJackVehicle> VehicleType, TEnumAsByte<EJackVehicleModelId> VehicleModelType)
 {
   // Orig code
   thisptr->GamePlayerCondition->RidingVehicleType = VehicleType;
@@ -250,20 +250,20 @@ void OnLoad_FirstPerson()
 void Init_FirstPerson()
 {
   // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x652850), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x651C60), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackPlayerController__PushCameraMode), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackPlayerController__PopCameraMode), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
 
   if (!Options.FirstPersonMovable)
     return;
 
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x62E5F0), CameraInterpolate_Hook, (LPVOID*)&CameraInterpolate_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->CameraInterpolate), CameraInterpolate_Hook, (LPVOID*)&CameraInterpolate_Orig);
 
-  // Hook UpdatingRidingVehicle to know current vehicle being used
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x745450), UJackGamePlayer__UpdatingRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdatingRidingVehicle_Orig);
+  // Hook UpdateRidingVehicle to know current vehicle being used
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->UJackGamePlayer__UpdateRidingVehicle), UJackGamePlayer__UpdateRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdateRidingVehicle_Orig);
   // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x1C49F30), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->APawn__RecalculateBaseEyeHeight), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
 
   // Hook BattleManager so we know when battle begins/ends
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6FE0), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + 0x4D6A50), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackBattleManager__BattleInitialize), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackBattleManager__BattleFinalize), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
 }

@@ -6,11 +6,6 @@
 
 #include "MinHook/MinHook.h"
 
-#include "SDK.h"
-using namespace SDK;
-
-#include "ConsoleVariable.h"
-
 struct IniSettings {
   bool RenderFix = true;
   bool CustomActions = true;
@@ -23,6 +18,67 @@ struct IniSettings {
   bool FixCommonMisconfigs = true;
   bool BindFromInputIniOnly = false;
 };
+
+struct GameAddresses
+{
+  // Check data
+  uintptr_t CheckDataAddr;
+  unsigned int CheckData;
+
+  // Variables
+  uintptr_t GUObjectArray; // aka GObjects
+  uintptr_t Names; // aka GNames, "TNameEntryArray* Names"
+
+  uintptr_t Cvar_ScreenPercentage;
+  uintptr_t Cvar_DisableMovementModeOptimization;
+  uintptr_t Cvar_DisableDitherHidden;
+  uintptr_t Cvar_ShadowFilterMethod;
+
+  uintptr_t ExcludedDebugPackage_1;
+  uintptr_t ExcludedDebugPackage_2;
+
+  // Functions
+  uintptr_t UObject__ProcessEvent;
+  uintptr_t BindAction;
+  uintptr_t FNameCreate;
+  uintptr_t FStringPrintf;
+  uintptr_t StaticConstructObject_Internal;
+  
+  // Hooked functions
+  uintptr_t SetsCharacterViewerResolution;
+  uintptr_t InitActionMappings_Field;
+  uintptr_t GetSourceIniFilename;
+  uintptr_t FPaths__GeneratedConfigDir;
+
+  // Stubbed functions
+  uintptr_t GenerateActionMappings_1;
+  uintptr_t GenerateActionMappings_2;
+
+  // DQXIHook hooked funcs
+  uintptr_t UGameViewportClient__SetupInitialLocalPlayer;
+  uintptr_t FPakPlatformFile__FindFileInPakFiles;
+  uintptr_t FPakPlatformFile__IsNonPakFilenameAllowed;
+
+  // FirstPerson hooked funcs
+  uintptr_t AJackPlayerController__PushCameraMode;
+  uintptr_t AJackPlayerController__PopCameraMode;
+  uintptr_t CameraInterpolate;
+  uintptr_t UJackGamePlayer__UpdateRidingVehicle;
+  uintptr_t APawn__RecalculateBaseEyeHeight;
+  uintptr_t AJackBattleManager__BattleInitialize;
+  uintptr_t AJackBattleManager__BattleFinalize;
+
+  bool CheckDataValid();
+};
+
+// GameAddresses.cpp
+extern GameAddresses* GameAddrs;
+bool UpdateGameAddrs();
+
+#include "SDK.h"
+using namespace SDK;
+
+#include "ConsoleVariable.h"
 
 // dllmain.cpp
 typedef void(*FStringPrintf_Fn)(FString* fstring, const TCHAR* format, ...);

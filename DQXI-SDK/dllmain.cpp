@@ -110,7 +110,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
   if (Options.FixCommonMisconfigs)
   {
     // set r.JackLoadReduction.DisableMovementModeOptimization to 0, fixes floating NPCs
-    auto* disableMovementModeOptimization = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDB8);
+    auto* disableMovementModeOptimization = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + GameAddrs->Cvar_DisableMovementModeOptimization);
     if (disableMovementModeOptimization && disableMovementModeOptimization->GetInt() != 0)
     {
       disableMovementModeOptimization->Set(L"0");
@@ -119,7 +119,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
     }
 
     // set r.JackLoadReduction.DisableDitherHidden to 0, allows NPCs to fade in/out instead of popping
-    auto* disableDitherHidden = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5BFBDE8);
+    auto* disableDitherHidden = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + GameAddrs->Cvar_DisableDitherHidden);
     if (disableDitherHidden && disableDitherHidden->GetInt() != 0)
     {
       disableDitherHidden->Set(L"0");
@@ -128,7 +128,7 @@ void InitActionMappings_Field_Hook(AActor* thisptr)
     }
 
     // set r.Shadow.FilterMethod to 0 as 1 seems to break shadows (but still gets recommended by some ancient UE4 mod guides...)
-    auto* shadowFilterMethod = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5E18AD0);
+    auto* shadowFilterMethod = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + GameAddrs->Cvar_ShadowFilterMethod);
     if (shadowFilterMethod && shadowFilterMethod->GetInt() != 0)
     {
       shadowFilterMethod->Set(L"0");
@@ -161,7 +161,7 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
   if (userResolutionX && userResolutionY)
   {
     // Multiply resolution by screen percentage cvar
-    auto* screenPercentageCVar = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + 0x5C48810); // r.ScreenPercentage address
+    auto* screenPercentageCVar = *reinterpret_cast<IConsoleVariable**>(mBaseAddress + GameAddrs->Cvar_ScreenPercentage); // r.ScreenPercentage address
 
     // Scale display width/height by percentage
     float screenPercentageMult = max(screenPercentageCVar->GetFloat(), 1) / 100.f;
@@ -287,6 +287,12 @@ void InitPlugin()
 
   mBaseAddress = reinterpret_cast<uintptr_t>(GameHModule);
 
+  if (!UpdateGameAddrs())
+  {
+    MessageBoxW(NULL, L"DQXIS-SDK doesn't support current game version, maybe check for an update?", L"DQXIS-SDK", MB_ICONEXCLAMATION);
+    return;
+  }
+
   // Get folder path of currently running EXE
   GetModuleFileName(GameHModule, IniPath, 4096);
   int len = wcslen(IniPath);
@@ -327,40 +333,45 @@ void InitPlugin()
     }
   }
 
-  UObject::GObjects = reinterpret_cast<FUObjectArray*>(mBaseAddress + 0x5D83BF8);
-  FName::GNames = reinterpret_cast<TNameEntryArray*>(mBaseAddress + 0x5D7AE20);
+  UObject::GObjects = reinterpret_cast<FUObjectArray*>(mBaseAddress + GameAddrs->GUObjectArray);
+  FName::GNames = reinterpret_cast<TNameEntryArray*>(mBaseAddress + GameAddrs->Names);
 
-  BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + 0x6AA7A0);
-  FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + 0xD697D0);
-  FStringPrintf = reinterpret_cast<FStringPrintf_Fn>(mBaseAddress + 0xCAAC00);
+  BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + GameAddrs->BindAction);
+  FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + GameAddrs->FNameCreate);
+  FStringPrintf = reinterpret_cast<FStringPrintf_Fn>(mBaseAddress + GameAddrs->FStringPrintf);
 
   MH_Initialize();
 
   if (Options.RenderFix)
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x914E60), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->SetsCharacterViewerResolution), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
 
   if (Options.CustomActions)
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x629560), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->InitActionMappings_Field), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
 
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)
   {
-    SafeWriteModule<uint8_t>(0x367FA48, 0x44);
-    SafeWriteModule<uint8_t>(0x3680100, 0x44);
+    if (GameAddrs->ExcludedDebugPackage_1)
+      SafeWriteModule<uint8_t>(GameAddrs->ExcludedDebugPackage_1, 0x44);
+    if (GameAddrs->ExcludedDebugPackage_2)
+      SafeWriteModule<uint8_t>(GameAddrs->ExcludedDebugPackage_2, 0x44);
   }
 
   // Only allows bindings from Input.ini, prevents game EXE from creating any that could collide with any custom binds
   if (Options.BindFromInputIniOnly)
   {
-    SafeWriteModule<uint8_t>(0x75A200, 0xC3);
-    SafeWriteModule<uint8_t>(0x7D0DF0, 0xC3);
+    // Stub game functions that generate ActionMappings, as we only want mappings from Input.ini
+    if (GameAddrs->GenerateActionMappings_1)
+      SafeWriteModule<uint8_t>(GameAddrs->GenerateActionMappings_1, 0xC3);
+    if (GameAddrs->GenerateActionMappings_2)
+      SafeWriteModule<uint8_t>(GameAddrs->GenerateActionMappings_2, 0xC3);
 
     // Hook GetSourceIniFilename so we can make game ignore DefaultInput.ini
     // (We only want Input.ini to be the source of bindings)
-    MH_CreateHook((LPVOID)(mBaseAddress + 0xD2E700), GetSourceIniFilename_Hook, (LPVOID*)&GetSourceIniFilename_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->GetSourceIniFilename), GetSourceIniFilename_Hook, (LPVOID*)&GetSourceIniFilename_Orig);
 
     // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
-    MH_CreateHook((LPVOID)(mBaseAddress + 0xD4F480), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPaths__GeneratedConfigDir), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
   }
   
   Init_FirstPerson();

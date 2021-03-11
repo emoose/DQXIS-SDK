@@ -60,14 +60,14 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
 
 void Init_DQXIHook()
 {
-  StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + 0xF16220);
+  StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + GameAddrs->StaticConstructObject_Internal);
 
   if (Options.EnableDevConsole)
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1AA5050), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->UGameViewportClient__SetupInitialLocalPlayer), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
 
   if (Options.LoadUnpackedFiles)
   {
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F653E0), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
-    MH_CreateHook((LPVOID)(mBaseAddress + 0x1F68680), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__FindFileInPakFiles), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__IsNonPakFilenameAllowed), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
   }
 }

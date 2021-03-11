@@ -6,6 +6,8 @@
 	#pragma pack(push, 0x8)
 #endif
 
+#include "../pch.h"
+
 extern uintptr_t mBaseAddress;
 
 namespace SDK
@@ -43,7 +45,7 @@ public:
 
 	inline void ProcessEvent(class UFunction* function, void* parms) {
 
-		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + 0xEF12A0);
+		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + GameAddrs->UObject__ProcessEvent);
 		//auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
 
 		if (AllowFunctionCalls)
