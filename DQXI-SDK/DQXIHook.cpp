@@ -11,23 +11,29 @@ StaticConstructObject_InternalFn StaticConstructObject_Internal = nullptr;
 typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
 UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
 
+void SetupViewportConsole(UGameViewportClient* viewport)
+{
+  if (viewport->ViewportConsole)
+    return; // already has console;
+
+  auto engines = UObject::FindObjects<UEngine>();
+  for (auto engine : engines)
+  {
+    // First UEngine is usually a dud
+    if (!engine->ConsoleClass)
+      continue;
+
+    viewport->ViewportConsole = g_Console = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, viewport, 0, 0, 0, 0, 0, 0, 0);
+    if (viewport->ViewportConsole)
+      break;
+  }
+}
+
 void* UGameViewportClient__SetupInitialLocalPlayer_Hook(UGameViewportClient* thisptr, void* OutError)
 {
   auto ret = UGameViewportClient__SetupInitialLocalPlayer_Orig(thisptr, OutError);
 
-  if (!thisptr->ViewportConsole) {
-    auto engines = UObject::FindObjects<UEngine>();
-    for (auto engine : engines)
-    {
-      // First UEngine is usually a dud
-      if (!engine->ConsoleClass)
-        continue;
-
-      thisptr->ViewportConsole = g_Console = (UConsole*)StaticConstructObject_Internal(engine->ConsoleClass, thisptr, 0, 0, 0, 0, 0, 0, 0);
-      if (thisptr->ViewportConsole)
-        break;
-    }
-  }
+  SetupViewportConsole(thisptr);
 
   return ret;
 }
@@ -69,5 +75,19 @@ void Init_DQXIHook()
   {
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__FindFileInPakFiles), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__IsNonPakFilenameAllowed), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
+  }
+
+  if (UObject::GObjects->ObjObjects.Num())
+  {
+    // Objects is already filled, likely DLL has been injected instead of being ran at startup
+    // Search for UGameViewportClient and apply the dev-console enabler
+    auto viewports = UObject::FindObjects<UGameViewportClient>();
+    for (auto viewport : viewports)
+    {
+      if (!viewport->World || !viewport->GameInstance)
+        continue; // dud object
+
+      SetupViewportConsole(viewport);
+    }
   }
 }
