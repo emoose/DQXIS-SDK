@@ -6432,10 +6432,10 @@ public:
 	unsigned char                                      UnknownData03[0x3];                                       // 0x0105(0x0003) MISSED OFFSET
 	TEnumAsByte<EPixelFormat>                          OverrideFormat;                                           // 0x0108(0x0001) (ZeroConstructor, IsPlainOldData)
 	unsigned char                                      UnknownData04[0x7];                                       // 0x0109(0x007) MISSED OFFSET
-	int JackTargetSizeX; // ??
-	int JackTargetSizeY;
-	int Unk118;
-	int Unk11C;
+	int JackTargetSizeX; // 0x110
+	int JackTargetSizeY; // 0x114
+	int Unk118; // 0x118
+	int Unk11C; // 0x11C
 
 	static UClass* StaticClass()
 	{

@@ -174,6 +174,9 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
     auto* texture = camera->CaptureComponent2D->TextureTarget;
     texture->JackTargetSizeX = userResolutionX;
     texture->JackTargetSizeY = userResolutionY;
+
+    // Prevent render texture from being affected by r.TextureRenderTarget2DScale cvar
+    texture->bAutoScaling = false;
   }
 
   SetsCharacterViewerResolution_Orig(camera, rdx);
