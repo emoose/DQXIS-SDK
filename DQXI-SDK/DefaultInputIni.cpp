@@ -10,6 +10,7 @@ ConsoleKeys=Tilde\n\
 ; Custom action bindings:\n\
 ActionMappings=(ActionName=\"FirstPersonCamera\", Key=N)\n\
 ActionMappings=(ActionName=\"EnterPartyChat\", Key=M)\n\
+ActionMappings=(ActionName=\"QuitGame\", Key=Escape)\n\
 \n\
 ; MiddleMouseButton is usually bound to ToggleAutoRun\n\
 ; Feel free to comment this & uncomment/restore that binding below\n\
