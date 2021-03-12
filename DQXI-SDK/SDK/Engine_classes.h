@@ -8980,12 +8980,20 @@ public:
 
 };
 
+struct BindActionFnPtr
+{
+	void* FnPtr;
+	uint64_t unused;
+};
 
 // Class Engine.InputComponent
 // 0x0078 (0x01A0 - 0x0128)
 class UInputComponent : public UActorComponent
 {
 public:
+	typedef void (*BindAction_Fn)(UInputComponent* thisptr, const FName ActionName, const EInputEvent KeyEvent, void* Object, BindActionFnPtr* FnPtr);
+	static BindAction_Fn BindAction_Ptr;
+
 	unsigned char                                      UnknownData00[0x78];                                      // 0x0128(0x0078) MISSED OFFSET
 
 	static UClass* StaticClass()
@@ -9004,6 +9012,13 @@ public:
 	float GetControllerKeyTimeDown(const struct FKey& Key);
 	void GetControllerAnalogStickState(TEnumAsByte<EControllerAnalogStick> WhichStick, float* StickX, float* StickY);
 	float GetControllerAnalogKeyState(const struct FKey& Key);
+
+	template <class T>
+	void BindAction(const FName ActionName, const EInputEvent KeyEvent, T* Object, void(*FnPtr)(T*))
+	{
+		BindActionFnPtr struc = { FnPtr };
+		BindAction_Ptr(this, ActionName, KeyEvent, Object, &struc);
+	}
 };
 
 

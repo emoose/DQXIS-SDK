@@ -39,9 +39,9 @@ struct GameAddresses
 
   // Functions
   uintptr_t UObject__ProcessEvent;
-  uintptr_t BindAction;
-  uintptr_t FNameCreate;
-  uintptr_t FStringPrintf;
+  uintptr_t UInputComponent__BindAction;
+  uintptr_t FName__Ctor;
+  uintptr_t FString__Printf__VA;
   uintptr_t StaticConstructObject_Internal;
   
   // Hooked functions

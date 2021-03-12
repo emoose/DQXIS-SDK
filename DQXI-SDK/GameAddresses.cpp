@@ -17,9 +17,9 @@ GameAddresses GameAddrs_Steam =
   .ExcludedDebugPackage_2 = 0x3680100,
 
   .UObject__ProcessEvent = 0xEF12A0,
-  .BindAction = 0x6AA7A0,
-  .FNameCreate = 0xD697D0,
-  .FStringPrintf = 0xCAAC00,
+  .UInputComponent__BindAction = 0x6AA7A0,
+  .FName__Ctor = 0xD697D0,
+  .FString__Printf__VA = 0xCAAC00,
   .StaticConstructObject_Internal = 0xF16220,
 
   .SetsCharacterViewerResolution = 0x914E60,
@@ -61,9 +61,9 @@ GameAddresses GameAddrs_UWP =
   .ExcludedDebugPackage_2 = 0x36F1318,
 
   .UObject__ProcessEvent = 0xD9D2A0, // needs verifying
-  .BindAction = 0x679E40,
-  .FNameCreate = 0xE9A180,
-  .FStringPrintf = 0xDE0770,
+  .UInputComponent__BindAction = 0x679E40,
+  .FName__Ctor = 0xE9A180,
+  .FString__Printf__VA = 0xDE0770,
   .StaticConstructObject_Internal = 0xDC24B0,
 
   .SetsCharacterViewerResolution = 0x8A8520,

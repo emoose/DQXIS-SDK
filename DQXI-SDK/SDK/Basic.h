@@ -221,6 +221,9 @@ using TNameEntryArray = TStaticIndirectArrayThreadSafeRead<FNameEntry, 4 * 1024 
 
 struct FName
 {
+	typedef FName* (*Ctor_Fn)(FName* thisptr, const char* Name, int FindType);
+	static Ctor_Fn Ctor_Ptr;
+
 	union
 	{
 		struct
@@ -243,6 +246,11 @@ struct FName
 		  Number(0)
 	{
 	};
+
+	FName(const char* Name, int FindType)
+	{
+		Ctor_Ptr(this, Name, FindType);
+	}
 
 	FName(const char* nameToFind)
 		: ComparisonIndex(0),
@@ -295,6 +303,9 @@ struct FName
 
 struct FString : private TArray<wchar_t>
 {
+	typedef FString* (*Printf__VA_Fn)(FString* result, const TCHAR* fmt, ...);
+	static Printf__VA_Fn Printf;
+
 	inline FString()
 	{
 	};

@@ -65,7 +65,7 @@ void UJackGamePlayer__UpdateRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAs
   if (g_Console)
   {
     FString debugText;
-    FStringPrintf(&debugText, L">>> VehicleType changed to %d", (int32_t)VehicleType.GetValue());
+    FString::Printf(&debugText, L">>> VehicleType changed to %d", (int32_t)VehicleType.GetValue());
     g_Console->OutputText(debugText);
   }
 #endif

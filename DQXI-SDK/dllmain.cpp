@@ -13,23 +13,7 @@ uintptr_t mBaseAddress;
 UConsole* g_Console = nullptr;
 UJackGameplayStatics* g_StaticFuncs = nullptr;
 
-FStringPrintf_Fn FStringPrintf = nullptr;
-
 IniSettings Options;
-
-struct BindActionFnPtr
-{
-  void* FnPtr;
-  uint64_t unused;
-};
-
-typedef void (*BindActionFn)(UInputComponent* thisptr, const FName ActionName, const EInputEvent KeyEvent, void* Object, BindActionFnPtr* FnPtr);
-BindActionFn BindAction = nullptr;
-
-// FName::FName() constructor
-// TODO: make our FName ctor call this?
-typedef FName* (*FNameCreateFn)(FName* thisptr, const char* Name, int FindType);
-FNameCreateFn FNameCreate = nullptr;
 
 // Cached things so we don't need any lookups during runtime
 extern FName CamStyle_FirstPersonView;
@@ -41,9 +25,9 @@ InitActionMappingsFn InitActionMappings_Field_Orig;
 
 void CacheUFunctions()
 {
-  FNameCreate(&CamStyle_FirstPersonView, "FirstPersonView", 1);
-  FNameCreate(&CamStyle_FirstPerson, "FirstPerson", 1);
-  FNameCreate(&CamStyle_Normal, "Normal", 1);
+  CamStyle_FirstPersonView = FName("FirstPersonView", 1);
+  CamStyle_FirstPerson = FName("FirstPerson", 1);
+  CamStyle_Normal = FName("Normal", 1);
 
   g_StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
 
@@ -67,33 +51,25 @@ void CacheUFunctions()
   statics.STATIC_GetJackPlayerController(nullptr);
   statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::EJackPlayerController__Player1);
 
-  UCapsuleComponent capsule;
-  capsule.SetCapsuleHalfHeight(0, false);
-
   UJackGamePlayerCondition condition;
   condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
 
   UObject::AllowFunctionCalls = true;
 }
 
-void InitActionMappings_Field_Hook(AActor* thisptr)
+void InitActionMappings_Field_Hook(AJackFieldPlayerController* thisptr)
 {
   InitActionMappings_Field_Orig(thisptr);
 
-  FName name;
+  FName name("FirstPersonCamera", 1);
+  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, FirstPersonCamera);
 
-  FNameCreate(&name, "FirstPersonCamera", 1);
-  BindActionFnPtr fnptr = { FirstPersonCamera };
-  BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
-
-  FNameCreate(&name, "EnterPartyChat", 1);
-  fnptr = { EnterPartyChat };
-  BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
+  name = FName("EnterPartyChat", 1);
+  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
 
   // EnterNakamaKaiwa is apparently original name, based on INI files
-  FNameCreate(&name, "EnterNakamaKaiwa", 1);
-  fnptr = { EnterPartyChat };
-  BindAction(thisptr->InputComponent, name, EInputEvent::IE_Pressed, thisptr, &fnptr);
+  name = FName("EnterNakamaKaiwa", 1);
+  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
 
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func
@@ -380,9 +356,9 @@ void InitPlugin()
   UObject::GObjects = reinterpret_cast<FUObjectArray*>(mBaseAddress + GameAddrs->GUObjectArray);
   FName::GNames = reinterpret_cast<TNameEntryArray*>(mBaseAddress + GameAddrs->Names);
 
-  BindAction = reinterpret_cast<BindActionFn>(mBaseAddress + GameAddrs->BindAction);
-  FNameCreate = reinterpret_cast<FNameCreateFn>(mBaseAddress + GameAddrs->FNameCreate);
-  FStringPrintf = reinterpret_cast<FStringPrintf_Fn>(mBaseAddress + GameAddrs->FStringPrintf);
+  UInputComponent::BindAction_Ptr = reinterpret_cast<UInputComponent::BindAction_Fn>(mBaseAddress + GameAddrs->UInputComponent__BindAction);
+  FName::Ctor_Ptr = reinterpret_cast<FName::Ctor_Fn>(mBaseAddress + GameAddrs->FName__Ctor);
+  FString::Printf = reinterpret_cast<FString::Printf__VA_Fn>(mBaseAddress + GameAddrs->FString__Printf__VA);
 
   MH_Initialize();
 

@@ -15,6 +15,10 @@ TNameEntryArray* FName::GNames = nullptr;
 FUObjectArray* UObject::GObjects = nullptr;
 bool UObject::AllowFunctionCalls = false;
 
+UInputComponent::BindAction_Fn UInputComponent::BindAction_Ptr = nullptr;
+FName::Ctor_Fn FName::Ctor_Ptr = nullptr;
+FString::Printf__VA_Fn FString::Printf = nullptr;
+
 //---------------------------------------------------------------------------
 bool FWeakObjectPtr::IsValid() const
 {
