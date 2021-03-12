@@ -8,29 +8,29 @@ FName CamStyle_Normal;
 void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> VehicleType, FName CameraStyle)
 {
   auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
-  if (VehicleType == EJackVehicle::EJackVehicle__Herukattya)
+  if (VehicleType == EJackVehicle::Herukattya)
     firstPersonEyeHeight *= 1.5f;
-  else if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo)
+  else if (VehicleType != EJackVehicle::None && VehicleType != EJackVehicle::Eggurobo)
     firstPersonEyeHeight *= 2.1f;
 
   Pawn->BaseEyeHeight = (CameraStyle == CamStyle_FirstPerson) ? firstPersonEyeHeight : 0;
 
   bool HideModel = (CameraStyle == CamStyle_FirstPerson);
   bool HideCharaModel = HideModel;
-  if (VehicleType != EJackVehicle::EJackVehicle__None && VehicleType != EJackVehicle::EJackVehicle__Eggurobo && VehicleType != EJackVehicle::EJackVehicle__Herukattya)
+  if (VehicleType != EJackVehicle::None && VehicleType != EJackVehicle::Eggurobo && VehicleType != EJackVehicle::Herukattya)
     HideModel = false; // don't hide vehicles
 
   // Hide character model
   auto chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, true);
   if (chara)
-    chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideCharaModel, HideCharaModel);
+    chara->SetHiddenControl(EJackCharacterHiddenPurpose::FPSCamera, HideCharaModel, HideCharaModel);
 
   // Hide character/vehicle model (would happen automatically if we didn't disable HiddenControlBeginOverlapEnabled)
-  if (VehicleType != EJackVehicle::EJackVehicle__None)
+  if (VehicleType != EJackVehicle::None)
   {
     chara = g_StaticFuncs->STATIC_GetJackPlayerCharacter(Pawn, false);
     if (chara)
-      chara->SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__FPSCamera, HideModel, HideModel);
+      chara->SetHiddenControl(EJackCharacterHiddenPurpose::FPSCamera, HideModel, HideModel);
   }
 }
 
@@ -52,7 +52,7 @@ void UJackGamePlayer__UpdateRidingVehicle_Hook(UJackGamePlayer* thisptr, TEnumAs
   }
 #endif
 
-  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
+  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::Player1);
   auto camera = g_StaticFuncs->STATIC_GetJackPlayerCameraManager(thisptr);
   if (pawn && camera)
     PawnRecalculateBaseEyeHeight(pawn, VehicleType, camera->CameraStyle);
@@ -64,7 +64,7 @@ void APawn__RecalculateBaseEyeHeight_Hook(APawn* thisptr)
 {
   APawn__RecalculateBaseEyeHeight_Orig(thisptr);
 
-  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::EJackPlayerController__Player1);
+  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(thisptr, EJackPlayerController::Player1);
   if (!pawn || thisptr != pawn)
     return;
 
@@ -94,7 +94,7 @@ void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson)
   if (!gamePlayer)
     return;
 
-  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(actor, EJackPlayerController::EJackPlayerController__Player1);
+  auto pawn = g_StaticFuncs->STATIC_GetPlayerPawn(actor, EJackPlayerController::Player1);
   if (!pawn)
     return;
 
@@ -149,7 +149,7 @@ void AJackPlayerController__PushCameraMode_Hook(AJackPlayerController* thisptr, 
   AJackPlayerController__PushCameraMode_Orig(thisptr, InMode, InterpSeconds, bKeepOldCameraView);
 
   auto currentCam = thisptr->CurrentCameraMode();
-  if (currentCam == EJackCameraMode::EJackCameraMode__FirstPersonView)
+  if (currentCam == EJackCameraMode::FirstPersonView)
   {
     // Entering first-person mode, stop NPCs from fading/dithering when up close
     ((AJackPlayerCameraManager*)thisptr->PlayerCameraManager)->SetHiddenControlBeginOverlapEnabled(false);
@@ -167,7 +167,7 @@ void AJackPlayerController__PopCameraMode_Hook(AJackPlayerController* thisptr, T
 
   AJackPlayerController__PopCameraMode_Orig(thisptr, InMode, InterpSeconds);
 
-  if (prevCam != EJackCameraMode::EJackCameraMode__FirstPersonView)
+  if (prevCam != EJackCameraMode::FirstPersonView)
     return;
 
   auto currentCam = thisptr->CurrentCameraMode();

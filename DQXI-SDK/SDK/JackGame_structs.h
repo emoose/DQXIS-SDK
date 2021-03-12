@@ -141,37 +141,37 @@ enum class EJackCharacterCoordinateParts : uint8_t
 // Enum JackGame.EJackCharacterHiddenPurpose
 enum class EJackCharacterHiddenPurpose : uint8_t
 {
-	EJackCharacterHiddenPurpose__LVD = 0,
-	EJackCharacterHiddenPurpose__CutScene = 1,
-	EJackCharacterHiddenPurpose__Battle = 2,
-	EJackCharacterHiddenPurpose__AnimNotify = 3,
-	EJackCharacterHiddenPurpose__DestructibleActor = 4,
-	EJackCharacterHiddenPurpose__BPRenkei = 5,
-	EJackCharacterHiddenPurpose__Engine = 6,
-	EJackCharacterHiddenPurpose__NPCSystem = 7,
-	EJackCharacterHiddenPurpose__CharacterStatus = 8,
-	EJackCharacterHiddenPurpose__ActionSystem = 9,
-	EJackCharacterHiddenPurpose__BattleSystem = 10,
-	EJackCharacterHiddenPurpose__BattleMonsterAppearance = 11,
-	EJackCharacterHiddenPurpose__BattleRenkei = 12,
-	EJackCharacterHiddenPurpose__BattleCamera = 13,
-	EJackCharacterHiddenPurpose__BattleActionCamera = 14,
-	EJackCharacterHiddenPurpose__BattlePause = 15,
-	EJackCharacterHiddenPurpose__BattleAISM = 16,
-	EJackCharacterHiddenPurpose__OutBattleField = 17,
-	EJackCharacterHiddenPurpose__MonsterGenerator = 18,
-	EJackCharacterHiddenPurpose__AnimSM = 19,
-	EJackCharacterHiddenPurpose__Camera = 20,
-	EJackCharacterHiddenPurpose__FPSCamera = 21,
-	EJackCharacterHiddenPurpose__VehicleRide = 22,
-	EJackCharacterHiddenPurpose__GuestNpc = 23,
-	EJackCharacterHiddenPurpose__SnowMan = 24,
-	EJackCharacterHiddenPurpose__DeactivateWeaponEffects = 25,
-	EJackCharacterHiddenPurpose__CategoryHidden = 26,
-	EJackCharacterHiddenPurpose__LoadReduction = 27,
-	EJackCharacterHiddenPurpose__PhotoMode = 28,
-	EJackCharacterHiddenPurpose__Rura = 29,
-	EJackCharacterHiddenPurpose__MAX = 30
+	LVD = 0,
+	CutScene = 1,
+	Battle = 2,
+	AnimNotify = 3,
+	DestructibleActor = 4,
+	BPRenkei = 5,
+	Engine = 6,
+	NPCSystem = 7,
+	CharacterStatus = 8,
+	ActionSystem = 9,
+	BattleSystem = 10,
+	BattleMonsterAppearance = 11,
+	BattleRenkei = 12,
+	BattleCamera = 13,
+	BattleActionCamera = 14,
+	BattlePause = 15,
+	BattleAISM = 16,
+	OutBattleField = 17,
+	MonsterGenerator = 18,
+	AnimSM = 19,
+	Camera = 20,
+	FPSCamera = 21,
+	VehicleRide = 22,
+	GuestNpc = 23,
+	SnowMan = 24,
+	DeactivateWeaponEffects = 25,
+	CategoryHidden = 26,
+	LoadReduction = 27,
+	PhotoMode = 28,
+	Rura = 29,
+	MAX = 30
 };
 
 
@@ -746,33 +746,33 @@ enum class EJackInteractor : uint8_t
 // Enum JackGame.EJackGamePlayerCondition
 enum class EJackGamePlayerCondition : uint8_t
 {
-	EJackGamePlayerCondition__InputDisable = 0,
-	EJackGamePlayerCondition__MoveInputDisable = 1,
-	EJackGamePlayerCondition__LookInputDisabled = 2,
-	EJackGamePlayerCondition__JumpDisabled = 3,
-	EJackGamePlayerCondition__AutoRunDisabled = 4,
-	EJackGamePlayerCondition__DisplayMainMenuDisabled = 5,
-	EJackGamePlayerCondition__DisplayMiniMapDisabled = 6,
-	EJackGamePlayerCondition__DisplayWorldMapDisabled = 7,
-	EJackGamePlayerCondition__DisplayFukidasiDisabled = 8,
-	EJackGamePlayerCondition__DisplaySyouLocationTitleDisabled = 9,
-	EJackGamePlayerCondition__MovementDisabled = 10,
-	EJackGamePlayerCondition__FieldActionDisabled = 11,
-	EJackGamePlayerCondition__MoveActionDisabled = 12,
-	EJackGamePlayerCondition__BenriButtonActionDisabled = 13,
-	EJackGamePlayerCondition__DisplayActionGuideDisabled = 14,
-	EJackGamePlayerCondition__RuraDisabled = 15,
-	EJackGamePlayerCondition__RiremitoDisabled = 16,
-	EJackGamePlayerCondition__SymbolEncountDisabled = 17,
-	EJackGamePlayerCondition__MountAndUnmountVehicleDisabled = 18,
-	EJackGamePlayerCondition__DisplayNorimonoGaugeDisabled = 19,
-	EJackGamePlayerCondition__LazyMessageDisabled = 20,
-	EJackGamePlayerCondition__RunningDisabledWhileLoading = 21,
-	EJackGamePlayerCondition__RunningDisabled = 22,
-	EJackGamePlayerCondition__VehicleRunningDisabled = 23,
-	EJackGamePlayerCondition__HideControlGuideUI = 24,
-	EJackGamePlayerCondition__PhotoModeDisable = 25,
-	EJackGamePlayerCondition__MAX  = 26
+	InputDisable = 0,
+	MoveInputDisable = 1,
+	LookInputDisabled = 2,
+	JumpDisabled = 3,
+	AutoRunDisabled = 4,
+	DisplayMainMenuDisabled = 5,
+	DisplayMiniMapDisabled = 6,
+	DisplayWorldMapDisabled = 7,
+	DisplayFukidasiDisabled = 8,
+	DisplaySyouLocationTitleDisabled = 9,
+	MovementDisabled = 10,
+	FieldActionDisabled = 11,
+	MoveActionDisabled = 12,
+	BenriButtonActionDisabled = 13,
+	DisplayActionGuideDisabled = 14,
+	RuraDisabled = 15,
+	RiremitoDisabled = 16,
+	SymbolEncountDisabled = 17,
+	MountAndUnmountVehicleDisabled = 18,
+	DisplayNorimonoGaugeDisabled = 19,
+	LazyMessageDisabled = 20,
+	RunningDisabledWhileLoading = 21,
+	RunningDisabled = 22,
+	VehicleRunningDisabled = 23,
+	HideControlGuideUI = 24,
+	PhotoModeDisable = 25,
+	MAX  = 26
 };
 
 
@@ -938,25 +938,25 @@ enum class EJackVehicleModelId : uint8_t
 // Enum JackGame.EJackVehicle
 enum class EJackVehicle : uint8_t
 {
-	EJackVehicle__None             = 0,
-	EJackVehicle__Uma              = 1, // Horse
-	EJackVehicle__Eggurobo         = 2, // Eggsoskeleton
-	EJackVehicle__Sukaruraida      = 3, // Skullrider's Steed
-	EJackVehicle__Doragonraida     = 4, // Dragon Rider
-	EJackVehicle__Biraida          = 5, // Horknight Hornet
-	EJackVehicle__Dexyurahanraido  = 6, // Headless Horseman Horse?
-	EJackVehicle__Herukattya       = 7, // Face Invader
-	EJackVehicle__UrufuDoragon     = 8,
-	EJackVehicle__MeidenDooru      = 9,
-	EJackVehicle__KiRaaPansar      = 10,
-	EJackVehicle__SuraimuNaito     = 11, // Slime Knight
-	EJackVehicle__Gorem            = 12,
-	EJackVehicle__Gondora          = 13,
-	EJackVehicle__Ship             = 14,
-	EJackVehicle__Whale            = 15,
-	EJackVehicle__Sakana           = 16,
-	EJackVehicle__Player           = 17,
-	EJackVehicle__MAX              = 18
+	None             = 0,
+	Uma              = 1, // Horse
+	Eggurobo         = 2, // Eggsoskeleton
+	Sukaruraida      = 3, // Skullrider's Steed
+	Doragonraida     = 4, // Dragon Rider
+	Biraida          = 5, // Horknight Hornet
+	Dexyurahanraido  = 6, // Headless Horseman Horse?
+	Herukattya       = 7, // Face Invader
+	UrufuDoragon     = 8,
+	MeidenDooru      = 9,
+	KiRaaPansar      = 10,
+	SuraimuNaito     = 11, // Slime Knight
+	Gorem            = 12,
+	Gondora          = 13,
+	Ship             = 14,
+	Whale            = 15,
+	Sakana           = 16,
+	Player           = 17,
+	MAX              = 18
 };
 
 
@@ -10651,10 +10651,10 @@ enum class EJackFriendCharacterQueryFilter : uint8_t
 // Enum JackGame.EJackPlayerController
 enum class EJackPlayerController : uint8_t
 {
-	EJackPlayerController__Player1 = 0,
-	EJackPlayerController__Player2 = 1,
-	EJackPlayerController__Battle  = 2,
-	EJackPlayerController__MAX     = 3
+	Player1 = 0,
+	Player2 = 1,
+	Battle  = 2,
+	MAX     = 3
 };
 
 
@@ -11217,30 +11217,30 @@ enum class EJackUmaRaceRank : uint8_t
 // Enum JackGame.EJackCameraMode
 enum class EJackCameraMode : uint8_t
 {
-	EJackCameraMode__None          = 0,
-	EJackCameraMode__PlayerView    = 1,
-	EJackCameraMode__BattleView    = 2,
-	EJackCameraMode__BattleSimpleView = 3,
-	EJackCameraMode__BattlePreparationView = 4,
-	EJackCameraMode__Rail          = 5,
-	EJackCameraMode__Debug         = 6,
-	EJackCameraMode__IndoorView    = 7,
-	EJackCameraMode__BattleActionView = 8,
-	EJackCameraMode__BattleResultView = 9,
-	EJackCameraMode__TalkView      = 10,
-	EJackCameraMode__IndoorTalkView = 11,
-	EJackCameraMode__BattleMonsterAppearance = 12,
-	EJackCameraMode__FirstPersonView = 13,
-	EJackCameraMode__SplinePath    = 14,
-	EJackCameraMode__FixCameraView = 15,
-	EJackCameraMode__FriendTalkView = 16,
-	EJackCameraMode__JumpPlayerView = 17,
-	EJackCameraMode__BackPlayerView = 18,
-	EJackCameraMode__UmaRaceView   = 19,
-	EJackCameraMode__ChangeTimeView = 20,
-	EJackCameraMode__UmaRaceResultView = 21,
-	EJackCameraMode__PhotoModeView = 22,
-	EJackCameraMode__MAX           = 23
+	None          = 0,
+	PlayerView    = 1,
+	BattleView    = 2,
+	BattleSimpleView = 3,
+	BattlePreparationView = 4,
+	Rail          = 5,
+	Debug         = 6,
+	IndoorView    = 7,
+	BattleActionView = 8,
+	BattleResultView = 9,
+	TalkView      = 10,
+	IndoorTalkView = 11,
+	BattleMonsterAppearance = 12,
+	FirstPersonView = 13,
+	SplinePath    = 14,
+	FixCameraView = 15,
+	FriendTalkView = 16,
+	JumpPlayerView = 17,
+	BackPlayerView = 18,
+	UmaRaceView   = 19,
+	ChangeTimeView = 20,
+	UmaRaceResultView = 21,
+	PhotoModeView = 22,
+	MAX           = 23
 };
 
 

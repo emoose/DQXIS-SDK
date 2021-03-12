@@ -28,7 +28,7 @@ void CacheUFunctions()
   UObject::AllowFunctionCalls = false;
 
   AJackCharacter character;
-  character.SetHiddenControl(EJackCharacterHiddenPurpose::EJackCharacterHiddenPurpose__LVD, false, false);
+  character.SetHiddenControl(EJackCharacterHiddenPurpose::LVD, false, false);
 
   AJackFieldPlayerController playerController;
   playerController.Camera(nullptr);
@@ -42,10 +42,10 @@ void CacheUFunctions()
   statics.STATIC_GetJackPlayerCameraManager(nullptr);
   statics.STATIC_GetJackPlayerCharacter(nullptr, 1);
   statics.STATIC_GetJackPlayerController(nullptr);
-  statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::EJackPlayerController__Player1);
+  statics.STATIC_GetPlayerPawn(nullptr, EJackPlayerController::Player1);
 
   UJackGamePlayerCondition condition;
-  condition.IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable);
+  condition.IsCondition(EJackGamePlayerCondition::MoveInputDisable);
 
   UObject::AllowFunctionCalls = true;
 }

@@ -304,9 +304,9 @@ enum class EMoveComponentAction : uint8_t
 // Enum Engine.EQuitPreference
 enum class EQuitPreference : uint8_t
 {
-	EQuitPreference__Quit          = 0,
-	EQuitPreference__Background    = 1,
-	EQuitPreference__EQuitPreference_MAX = 2
+	Quit          = 0,
+	Background    = 1,
+	MAX = 2
 };
 
 

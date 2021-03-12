@@ -14,8 +14,8 @@ bool IsPlayerMovementEnabled(AActor* actor)
   if (!condition)
     return false;
 
-  if (condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable)
-    || condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled))
+  if (condition->IsCondition(EJackGamePlayerCondition::MoveInputDisable)
+    || condition->IsCondition(EJackGamePlayerCondition::MovementDisabled))
     return false;
 
   return true;
@@ -54,12 +54,13 @@ void QuitGame(AJackFieldPlayerController* playerController)
 
   std::wstring warning = L"Any unsaved progress will be lost. Are you sure you want to exit the game?\r\n";
   if (MessageBoxW(NULL, warning.c_str(), L"DRAGON QUEST XI S", MB_YESNO ) == IDYES)
-      g_StaticKismet->STATIC_QuitGame(nullptr, playerController, EQuitPreference::EQuitPreference__Quit);
+      g_StaticKismet->STATIC_QuitGame(nullptr, playerController, EQuitPreference::Quit);
 }
 
 void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
 {
-  g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
+  if(!g_StaticKismet)
+    g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
 
   auto input = playerController->InputComponent;
   input->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, playerController, FirstPersonCamera);

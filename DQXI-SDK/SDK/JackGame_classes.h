@@ -5906,7 +5906,7 @@ public:
 	{
 		if (CameraModes.Num())
 			return CameraModes[CameraModes.Num() - 1].Mode;
-		return EJackCameraMode::EJackCameraMode__None;
+		return EJackCameraMode::None;
 	}
 
 	static UClass* StaticClass()
