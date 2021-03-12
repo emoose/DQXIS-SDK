@@ -1,7 +1,7 @@
 #include "pch.h"
-#include <sstream>
 
 // Code for enabling/handling custom input actions, can be bound to keyboard/controller via Input.h
+UKismetSystemLibrary* g_StaticKismet = nullptr;
 
 bool IsPlayerMovementEnabled(AActor* actor)
 {
@@ -49,21 +49,18 @@ void EnterPartyChat(AJackFieldPlayerController* playerController)
 
 void QuitGame(AJackFieldPlayerController* playerController)
 {
-    UKismetSystemLibrary* g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
-    TEnumAsByte<EQuitPreference> justQuit = (EQuitPreference) 0;
-
-    std::wstringstream warning;
-    warning.clear();
-    warning << L"Any unsaved progress will be lost. Are you sure you want to exit the game?\r\n";
-    if (MessageBoxW(NULL, warning.str().c_str(), L"DRAGON QUEST XI S", MB_YESNO ) == IDYES)
-    {
-        g_StaticKismet->STATIC_QuitGame(nullptr, playerController, justQuit);
-    }
+  if (!g_StaticKismet)
     return;
+
+  std::wstring warning = L"Any unsaved progress will be lost. Are you sure you want to exit the game?\r\n";
+  if (MessageBoxW(NULL, warning.c_str(), L"DRAGON QUEST XI S", MB_YESNO ) == IDYES)
+      g_StaticKismet->STATIC_QuitGame(nullptr, playerController, EQuitPreference::EQuitPreference__Quit);
 }
 
-void Init_CustomActions(AJackFieldPlayerController* playerController)
+void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
 {
+  g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
+
   auto input = playerController->InputComponent;
   input->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, playerController, FirstPersonCamera);
 

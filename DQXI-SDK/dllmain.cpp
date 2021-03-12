@@ -58,7 +58,7 @@ void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerControl
   AJackFieldPlayerController__InitActionMappings_Orig(thisptr);
 
   if (Options.CustomActions)
-    Init_CustomActions(thisptr);
+    Init_CustomActions_Field(thisptr);
 
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func

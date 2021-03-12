@@ -96,7 +96,7 @@ extern UJackGameplayStatics* g_StaticFuncs;
 bool IsPlayerMovementEnabled(AActor* actor);
 void FirstPersonCamera(AJackFieldPlayerController* playerController);
 void EnterPartyChat(AJackFieldPlayerController* playerController);
-void Init_CustomActions(AJackFieldPlayerController* playerController);
+void Init_CustomActions_Field(AJackFieldPlayerController* playerController);
 
 // DQXIHook.cpp
 void Init_DQXIHook();

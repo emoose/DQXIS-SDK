@@ -3,7 +3,7 @@
 GameAddresses GameAddrs_Steam =
 {
   .CheckDataAddr = 0xD8,   // NtHeader.FileHeader.TimeDateStamp
-  .CheckData = 1607981102, // 12/14/2020 21:25:02
+  .CheckData = 1607981102, // 2020/12/14 21:25:02
 
   .GUObjectArray = 0x5D83BF8,
   .Names = 0x5D7AE20,
@@ -50,7 +50,7 @@ GameAddresses GameAddrs_Steam =
 GameAddresses GameAddrs_UWP =
 {
   .CheckDataAddr = 0x1F0, // NtHeader.FileHeader.TimeDateStamp
-  .CheckData = 1603439301, // 10/23/2020 07:48:21
+  .CheckData = 1603439301, // 2020/10/23 07:48:21
 
   .GUObjectArray = 0x5CE48B8,
   .Names = 0x5E21158,
