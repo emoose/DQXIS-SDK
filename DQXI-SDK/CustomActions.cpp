@@ -2,9 +2,23 @@
 
 // Code for enabling/handling custom input actions, can be bound to keyboard/controller via Input.h
 
-extern FName CamStyle_FirstPersonView;
-extern FName CamStyle_FirstPerson;
-extern FName CamStyle_Normal;
+bool IsPlayerMovementEnabled(AActor* actor)
+{
+  auto player = g_StaticFuncs->STATIC_GetJackGamePlayer(actor);
+
+  if (!player)
+    return false;
+
+  auto condition = player->GamePlayerCondition;
+  if (!condition)
+    return false;
+
+  if (condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable)
+    || condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled))
+    return false;
+
+  return true;
+}
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
@@ -30,4 +44,15 @@ void EnterPartyChat(AJackFieldPlayerController* playerController)
     return;
 
   playerController->NakamaKaiwa();
+}
+
+void Init_CustomActions(AJackFieldPlayerController* playerController)
+{
+  auto input = playerController->InputComponent;
+  input->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, playerController, FirstPersonCamera);
+
+  input->BindAction("EnterPartyChat", EInputEvent::IE_Pressed, playerController, EnterPartyChat);
+
+  // EnterNakamaKaiwa is apparently original name, based on INI files
+  input->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, playerController, EnterPartyChat);
 }

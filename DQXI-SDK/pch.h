@@ -89,14 +89,19 @@ extern UConsole* g_Console;
 extern UJackGameplayStatics* g_StaticFuncs;
 
 // CustomActions.cpp
+bool IsPlayerMovementEnabled(AActor* actor);
 void FirstPersonCamera(AJackFieldPlayerController* playerController);
 void EnterPartyChat(AJackFieldPlayerController* playerController);
+void Init_CustomActions(AJackFieldPlayerController* playerController);
 
 // DQXIHook.cpp
 void Init_DQXIHook();
 
 // FirstPerson.cpp
-bool IsPlayerMovementEnabled(AActor* actor);
+extern FName CamStyle_FirstPersonView;
+extern FName CamStyle_FirstPerson;
+extern FName CamStyle_Normal;
+
 void SetMovableFirstPersonCam(AActor* actor, bool IsFirstPerson);
 void OnLoad_FirstPerson();
 void Init_FirstPerson();

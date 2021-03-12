@@ -16,13 +16,6 @@ UJackGameplayStatics* g_StaticFuncs = nullptr;
 IniSettings Options;
 
 // Cached things so we don't need any lookups during runtime
-extern FName CamStyle_FirstPersonView;
-extern FName CamStyle_FirstPerson;
-extern FName CamStyle_Normal;
-
-typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
-AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
-
 void CacheUFunctions()
 {
   CamStyle_FirstPersonView = "FirstPersonView";
@@ -56,6 +49,9 @@ void CacheUFunctions()
 
   UObject::AllowFunctionCalls = true;
 }
+
+typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
+AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
 
 void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerController* thisptr)
 {

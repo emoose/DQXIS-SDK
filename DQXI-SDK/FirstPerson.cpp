@@ -5,24 +5,6 @@ FName CamStyle_FirstPersonView;
 FName CamStyle_FirstPerson;
 FName CamStyle_Normal;
 
-bool IsPlayerMovementEnabled(AActor* actor)
-{
-  auto player = g_StaticFuncs->STATIC_GetJackGamePlayer(actor);
-
-  if (!player)
-    return false;
-
-  auto condition = player->GamePlayerCondition;
-  if (!condition)
-    return false;
-
-  if (condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MoveInputDisable)
-    || condition->IsCondition(EJackGamePlayerCondition::EJackGamePlayerCondition__MovementDisabled))
-    return false;
-
-  return true;
-}
-
 void PawnRecalculateBaseEyeHeight(APawn* Pawn, TEnumAsByte<EJackVehicle> VehicleType, FName CameraStyle)
 {
   auto firstPersonEyeHeight = Options.FirstPersonMovableHeight;
