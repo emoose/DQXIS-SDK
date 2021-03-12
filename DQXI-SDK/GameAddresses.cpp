@@ -16,6 +16,9 @@ GameAddresses GameAddrs_Steam =
   .ExcludedDebugPackage_1 = 0x367FA48,
   .ExcludedDebugPackage_2 = 0x3680100,
 
+  .RenderScaleDefault_Width = 0x5896CC0,
+  .RenderScaleDefault_Height = 0x5896CC4,
+
   .UObject__ProcessEvent = 0xEF12A0,
   .UInputComponent__BindAction = 0x6AA7A0,
   .FName__Ctor = 0xD697D0,
@@ -59,6 +62,9 @@ GameAddresses GameAddrs_UWP =
 
   .ExcludedDebugPackage_1 = 0x36F1088,
   .ExcludedDebugPackage_2 = 0x36F1318,
+
+  .RenderScaleDefault_Width = 0x5930C40,
+  .RenderScaleDefault_Height = 0x5930C44,
 
   .UObject__ProcessEvent = 0xD9D2A0, // needs verifying
   .UInputComponent__BindAction = 0x679E40,

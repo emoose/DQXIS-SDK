@@ -57,24 +57,27 @@ void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerControl
 {
   AJackFieldPlayerController__InitActionMappings_Orig(thisptr);
 
-  thisptr->InputComponent->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, thisptr, FirstPersonCamera);
-
-  thisptr->InputComponent->BindAction("EnterPartyChat", EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
-
-  // EnterNakamaKaiwa is apparently original name, based on INI files
-  thisptr->InputComponent->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
+  if (Options.CustomActions)
+    Init_CustomActions(thisptr);
 
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func
 
+  // Do other once-per-session things:
+
   OnLoad_FirstPerson();
 
-  // A render resolution variable used by game in a few spots, always set to 1920x1080
-  // Doesn't seem to ever get changed, maybe something was broken during UE4 engine update
-  // CharacterCaptureCamera calc uses (720 / this) as a render scale, was maybe meant to be (this / 720)?
-  // Setting it to 1280x720 should allow things to render at 1x scale
-  UnsafeWriteModule<int32_t>(0x5896CC0, 1280);
-  UnsafeWriteModule<int32_t>(0x5896CC4, 720);
+  if (Options.RenderFix)
+  {
+    // A render resolution variable used by game in a few spots, always set to 1920x1080
+    // Doesn't seem to ever get changed, maybe something was broken during UE4 engine update
+    // CharacterCaptureCamera calc uses (720 / this) as a render scale, was maybe meant to be (this / 720)?
+    // Setting it to 1280x720 should allow things to render at 1x scale
+    if (GameAddrs->RenderScaleDefault_Height)
+      UnsafeWriteModule<int32_t>(GameAddrs->RenderScaleDefault_Height, 1280);
+    if (GameAddrs->RenderScaleDefault_Width)
+      UnsafeWriteModule<int32_t>(GameAddrs->RenderScaleDefault_Width, 720);
+  }
 
   // Fixes for some common misconfigurations
   // TODO: move these to an AfterConfigIniRead hook, so they only get applied once per session
@@ -355,11 +358,11 @@ void InitPlugin()
 
   MH_Initialize();
 
+  // Always hook AJackFieldPlayerController::InitActionMappings as it's called during load, so we can perform things during loading screen
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
+
   if (Options.RenderFix)
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->SetsCharacterViewerResolution), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
-
-  if (Options.CustomActions)
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
 
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)

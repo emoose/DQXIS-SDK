@@ -222,6 +222,9 @@ void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
 
 void OnLoad_FirstPerson()
 {
+  if (!Options.FirstPersonMovable)
+    return;
+
   // Cache the CameraData pointers, and store a copy of their original values
   CameraDatas = UObject::FindObjects<UJackPlayerCameraData>();
   OriginalCameraDatas.clear();

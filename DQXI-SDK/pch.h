@@ -37,6 +37,10 @@ struct GameAddresses
   uintptr_t ExcludedDebugPackage_1;
   uintptr_t ExcludedDebugPackage_2;
 
+  // Following are explained inside AJackFieldPlayerController__InitActionMappings_Hook
+  uintptr_t RenderScaleDefault_Width;
+  uintptr_t RenderScaleDefault_Height;
+
   // Functions
   uintptr_t UObject__ProcessEvent;
   uintptr_t UInputComponent__BindAction;
