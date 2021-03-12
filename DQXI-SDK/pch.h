@@ -46,7 +46,7 @@ struct GameAddresses
   
   // Hooked functions
   uintptr_t SetsCharacterViewerResolution;
-  uintptr_t InitActionMappings_Field;
+  uintptr_t AJackFieldPlayerController__InitActionMappings; // name is a guess, it's probably SetupInputComponent
   uintptr_t GetSourceIniFilename;
   uintptr_t FPaths__GeneratedConfigDir;
 

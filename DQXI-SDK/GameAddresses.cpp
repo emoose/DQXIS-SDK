@@ -23,7 +23,7 @@ GameAddresses GameAddrs_Steam =
   .StaticConstructObject_Internal = 0xF16220,
 
   .SetsCharacterViewerResolution = 0x914E60,
-  .InitActionMappings_Field = 0x629560,
+  .AJackFieldPlayerController__InitActionMappings = 0x629560,
   .GetSourceIniFilename = 0xD2E700,
   .FPaths__GeneratedConfigDir = 0xD4F480,
 
@@ -67,7 +67,7 @@ GameAddresses GameAddrs_UWP =
   .StaticConstructObject_Internal = 0xDC24B0,
 
   .SetsCharacterViewerResolution = 0x8A8520,
-  .InitActionMappings_Field = 0x5BAE80,
+  .AJackFieldPlayerController__InitActionMappings = 0x5BAE80,
   .GetSourceIniFilename = 0xE5FF20,
   .FPaths__GeneratedConfigDir = 0xE805D0,
 

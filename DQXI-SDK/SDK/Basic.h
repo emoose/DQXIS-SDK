@@ -217,11 +217,18 @@ private:
 	int32_t NumChunks;
 };
 
+enum EFindName
+{
+	FNAME_Find = 0x0,
+	FNAME_Add = 0x1,
+	FNAME_Replace_Not_Safe_For_Threading = 0x2,
+};
+
 using TNameEntryArray = TStaticIndirectArrayThreadSafeRead<FNameEntry, 4 * 1024 * 1024, 16384>;
 
 struct FName
 {
-	typedef FName* (*Ctor_Fn)(FName* thisptr, const char* Name, int FindType);
+	typedef FName* (*Ctor_Fn)(FName* thisptr, const char* Name, EFindName FindType);
 	static Ctor_Fn Ctor_Ptr;
 
 	union
@@ -247,42 +254,10 @@ struct FName
 	{
 	};
 
-	FName(const char* Name, int FindType)
+	FName(const char* Name, EFindName FindType = FNAME_Add)
 	{
 		Ctor_Ptr(this, Name, FindType);
 	}
-
-	FName(const char* nameToFind)
-		: ComparisonIndex(0),
-		  Number(0)
-	{
-		static std::set<int> cache;
-
-		for (auto i : cache)
-		{
-			if (!std::strcmp(GetGlobalNames()[i]->GetAnsiName(), nameToFind))
-			{
-				ComparisonIndex = i;
-				
-				return;
-			}
-		}
-
-		for (size_t i = 0; i < GetGlobalNames().Num(); ++i)
-		{
-			if (GetGlobalNames()[i] != nullptr)
-			{
-				if (!std::strcmp(GetGlobalNames()[i]->GetAnsiName(), nameToFind))
-				{
-					cache.insert(i);
-
-					ComparisonIndex = i;
-
-					return;
-				}
-			}
-		}
-	};
 
 	static TNameEntryArray *GNames;
 	static inline TNameEntryArray& GetGlobalNames()

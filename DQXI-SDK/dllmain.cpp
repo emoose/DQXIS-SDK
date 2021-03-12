@@ -20,14 +20,14 @@ extern FName CamStyle_FirstPersonView;
 extern FName CamStyle_FirstPerson;
 extern FName CamStyle_Normal;
 
-typedef void (*InitActionMappingsFn)(AActor* thisptr);
-InitActionMappingsFn InitActionMappings_Field_Orig;
+typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
+AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
 
 void CacheUFunctions()
 {
-  CamStyle_FirstPersonView = FName("FirstPersonView", 1);
-  CamStyle_FirstPerson = FName("FirstPerson", 1);
-  CamStyle_Normal = FName("Normal", 1);
+  CamStyle_FirstPersonView = "FirstPersonView";
+  CamStyle_FirstPerson = "FirstPerson";
+  CamStyle_Normal = "Normal";
 
   g_StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
 
@@ -57,19 +57,16 @@ void CacheUFunctions()
   UObject::AllowFunctionCalls = true;
 }
 
-void InitActionMappings_Field_Hook(AJackFieldPlayerController* thisptr)
+void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerController* thisptr)
 {
-  InitActionMappings_Field_Orig(thisptr);
+  AJackFieldPlayerController__InitActionMappings_Orig(thisptr);
 
-  FName name("FirstPersonCamera", 1);
-  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, FirstPersonCamera);
+  thisptr->InputComponent->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, thisptr, FirstPersonCamera);
 
-  name = FName("EnterPartyChat", 1);
-  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
+  thisptr->InputComponent->BindAction("EnterPartyChat", EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
 
   // EnterNakamaKaiwa is apparently original name, based on INI files
-  name = FName("EnterNakamaKaiwa", 1);
-  thisptr->InputComponent->BindAction(name, EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
+  thisptr->InputComponent->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, thisptr, EnterPartyChat);
 
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func
@@ -366,7 +363,7 @@ void InitPlugin()
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->SetsCharacterViewerResolution), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
 
   if (Options.CustomActions)
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->InitActionMappings_Field), InitActionMappings_Field_Hook, (LPVOID*)&InitActionMappings_Field_Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
 
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)
