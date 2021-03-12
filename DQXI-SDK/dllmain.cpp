@@ -1,7 +1,9 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
+﻿// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include <fstream>
 #include <sstream>
+#include <Shlobj.h>
+#include <filesystem>
 
 using namespace SDK;
 
@@ -190,6 +192,7 @@ FString FPaths__GeneratedConfigDir_Hook()
   static bool UserWarned = false;
 
   auto configDir = FPaths__GeneratedConfigDir_Orig();
+
   if (UserWarned)
     return configDir;
 
@@ -281,6 +284,47 @@ float INI_GetFloat(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key,
   return retVal;
 }
 
+bool TryLoadINIOptions(const WCHAR* IniFilePath)
+{
+  // Read config INI from given folder
+
+  if (!FileExists(IniFilePath))
+    return false;
+
+  // Store ini path in case it's ever needed later
+  wcscpy_s(IniPath, IniFilePath);
+
+  Options.RenderFix = INI_GetBool(IniPath, L"Patches", L"RenderFix", Options.RenderFix);
+  Options.CustomActions = INI_GetBool(IniPath, L"Patches", L"CustomActions", Options.CustomActions);
+  Options.EnableDevConsole = INI_GetBool(IniPath, L"Patches", L"EnableDevConsole", Options.EnableDevConsole);
+  Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", Options.LoadUnpackedFiles);
+  Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
+  Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
+  Options.BindFromInputIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromInputIniOnly", Options.BindFromInputIniOnly);
+
+  Options.FirstPersonWherever = INI_GetBool(IniPath, L"FirstPerson", L"UseWherever", Options.FirstPersonWherever);
+  Options.FirstPersonMovable = INI_GetBool(IniPath, L"FirstPerson", L"UseMovableCamera", Options.FirstPersonMovable);
+  Options.FirstPersonMovableHeight = INI_GetFloat(IniPath, L"FirstPerson", L"MovableCameraHeight", Options.FirstPersonMovableHeight);
+
+  // Check old INI names
+  if (INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", false))
+    Options.BindFromInputIniOnly = true;
+
+  return true;
+}
+
+bool TrySearchINI(const std::wstring_view& FolderPath)
+{
+  for (const auto& entry : std::filesystem::recursive_directory_iterator(FolderPath))
+  {
+    if (entry.path().filename().generic_wstring() == L"DQXIS-SDK.ini")
+      if (TryLoadINIOptions(entry.path().generic_wstring().c_str()))
+        return true;
+  }
+
+  return false;
+}
+
 void InitPlugin()
 {
   GameHModule = GetModuleHandleA("DRAGON QUEST XI S.exe");
@@ -312,27 +356,24 @@ void InitPlugin()
   if (lastPathSep >= 0)
   {
     IniPath[lastPathSep + 1] = 0;
-
-    // Read config INI from EXE's folder
-    swprintf_s(IniPath, L"%sDQXIS-SDK.ini", IniPath);
-
-    if (FileExists(IniPath))
+    swprintf_s(IniPath, L"%s/DQXIS-SDK.ini", IniPath);
+    
+    if (!TryLoadINIOptions(IniPath))
     {
-      Options.RenderFix = INI_GetBool(IniPath, L"Patches", L"RenderFix", Options.RenderFix);
-      Options.CustomActions = INI_GetBool(IniPath, L"Patches", L"CustomActions", Options.CustomActions);
-      Options.EnableDevConsole = INI_GetBool(IniPath, L"Patches", L"EnableDevConsole", Options.EnableDevConsole);
-      Options.LoadUnpackedFiles = INI_GetBool(IniPath, L"Patches", L"LoadUnpackedFiles", Options.LoadUnpackedFiles);
-      Options.AllowDebugPackages = INI_GetBool(IniPath, L"Patches", L"AllowDebugPackages", Options.AllowDebugPackages);
-      Options.FixCommonMisconfigs = INI_GetBool(IniPath, L"Patches", L"FixCommonMisconfigs", Options.FixCommonMisconfigs);
-      Options.BindFromInputIniOnly = INI_GetBool(IniPath, L"Patches", L"BindFromInputIniOnly", Options.BindFromInputIniOnly);
+      // Failed to find INI inside EXE dir, try searching inside documents folders
 
-      Options.FirstPersonWherever = INI_GetBool(IniPath, L"FirstPerson", L"UseWherever", Options.FirstPersonWherever);
-      Options.FirstPersonMovable = INI_GetBool(IniPath, L"FirstPerson", L"UseMovableCamera", Options.FirstPersonMovable);
-      Options.FirstPersonMovableHeight = INI_GetFloat(IniPath, L"FirstPerson", L"MovableCameraHeight", Options.FirstPersonMovableHeight);
+      PWSTR path = NULL;
 
-      // Check old INI names
-      if (INI_GetBool(IniPath, L"Patches", L"BindFromIniOnly", false))
-        Options.BindFromInputIniOnly = true;
+      HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &path);
+
+      if (SUCCEEDED(hr)) {
+        std::wstring documents = path;
+
+        if (!TrySearchINI(documents + L"\\My Games\\DRAGON QUEST XI S"))
+          TrySearchINI(documents + L"\\My Games\\ドラゴンクエスト XI S");
+      }
+
+      CoTaskMemFree(path);
     }
   }
 
@@ -376,7 +417,7 @@ void InitPlugin()
     // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPaths__GeneratedConfigDir), FPaths__GeneratedConfigDir_Hook, (LPVOID*)&FPaths__GeneratedConfigDir_Orig);
   }
-  
+
   Init_FirstPerson();
 
   Init_DQXIHook();
