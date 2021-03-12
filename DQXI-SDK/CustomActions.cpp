@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <sstream>
 
 // Code for enabling/handling custom input actions, can be bound to keyboard/controller via Input.h
 
@@ -46,6 +47,21 @@ void EnterPartyChat(AJackFieldPlayerController* playerController)
   playerController->NakamaKaiwa();
 }
 
+void QuitGame(AJackFieldPlayerController* playerController)
+{
+    UKismetSystemLibrary* g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
+    TEnumAsByte<EQuitPreference> justQuit = (EQuitPreference) 0;
+
+    std::wstringstream warning;
+    warning.clear();
+    warning << L"Any unsaved progress will be lost. Are you sure you want to exit the game?\r\n";
+    if (MessageBoxW(NULL, warning.str().c_str(), L"DRAGON QUEST XI S", MB_YESNO ) == IDYES)
+    {
+        g_StaticKismet->STATIC_QuitGame(nullptr, playerController, justQuit);
+    }
+    return;
+}
+
 void Init_CustomActions(AJackFieldPlayerController* playerController)
 {
   auto input = playerController->InputComponent;
@@ -55,4 +71,6 @@ void Init_CustomActions(AJackFieldPlayerController* playerController)
 
   // EnterNakamaKaiwa is apparently original name, based on INI files
   input->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, playerController, EnterPartyChat);
+  
+  input->BindAction("QuitGame", EInputEvent::IE_Pressed, playerController, QuitGame);
 }
