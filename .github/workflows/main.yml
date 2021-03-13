@@ -1,0 +1,27 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        
+      - name: Build
+        run: |
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\"
+          .\MSBuild.exe $Env:GITHUB_WORKSPACE\DQXI-SDK.sln /p:Configuration=Release-CI
+
+      - name: Prepare artifacts
+        run: |
+          mkdir artifacts
+          cp Release-CI/xinput1_3.dll DQXIS-SDK.ini Input.ini README.md artifacts
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: DQXIS-SDK.Release
+          path: artifacts
