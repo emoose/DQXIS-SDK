@@ -193,7 +193,7 @@ void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
   if (!NumFramesToZeroInterpSpeed)
     return CameraInterpolate_Orig(a1, a2, a3);
 
-  for (int i = 0; i < CameraDatas.size(); i++)
+  for (size_t i = 0; i < CameraDatas.size(); i++)
   {
     CameraDatas[i]->InterpTargetLocation_Speed = 0;
     CameraDatas[i]->InterpTargetLocation_SpeedXY = 0;
@@ -205,7 +205,7 @@ void* CameraInterpolate_Hook(UObject* a1, void* a2, void* a3)
 
   auto ret = CameraInterpolate_Orig(a1, a2, a3);
 
-  for (int i = 0; i < CameraDatas.size(); i++)
+  for (size_t i = 0; i < CameraDatas.size(); i++)
   {
     CameraDatas[i]->InterpTargetLocation_Speed = OriginalCameraDatas[i].InterpTargetLocation_Speed;
     CameraDatas[i]->InterpTargetLocation_SpeedXY = OriginalCameraDatas[i].InterpTargetLocation_SpeedXY;

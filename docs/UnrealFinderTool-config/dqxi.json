@@ -1,0 +1,55 @@
+{
+  "engine version": "4.18",
+  "structs": [
+    {
+      "name": "UObject",
+      "super": "",
+      "vars": [
+        { "VfTable": "FPointer" },
+        { "Flags": "int" },
+        { "InternalIndex": "int" },
+        { "Class": "UClass*" },
+        { "Name": "FName" },
+        { "Outer": "UObject*" },
+        { "pad_0": "16"}
+      ],
+      "note": ""
+    },
+    {
+      "name": "UStruct",
+      "super": "UField",
+      "vars": [
+        { "SuperField": "UStruct*" },
+        { "Children": "UField*" },
+        { "PropertySize": "int" },
+        { "MinAlignment": "int" },
+        { "Script": "TArray" },
+        { "PropertyLink": "UProperty*" },
+        { "RefLink": "UProperty*" },
+        { "DestructorLink": "UProperty*" },
+        { "PostConstructLink": "UProperty*" },
+        { "ScriptObjectReferences": "TArray" }
+      ],
+      "note": ""
+    },
+    {
+      "name": "UFunction",
+      "super": "UStruct",
+      "vars": [
+        { "FunctionFlags": "int32" },
+        { "NumParms": "int8" },
+        { "pad_1": "1" },
+        { "ParmsSize": "int16" },
+        { "ReturnValueOffset": "uint16" },
+        { "RPCId": "uint16" },
+        { "RPCResponseId": "uint16" },
+        { "FirstPropertyToInit": "UProperty*" },
+        { "EventGraphFunction": "UFunction*" },
+        { "EventGraphCallOffset": "int" },
+        { "pad_2": "4" },
+        { "Func": "*" }
+      ],
+      "note": ""
+    }
+  ]
+}
