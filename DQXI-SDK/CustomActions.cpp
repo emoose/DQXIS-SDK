@@ -1,7 +1,6 @@
 #include "pch.h"
 
 // Code for enabling/handling custom input actions, can be bound to keyboard/controller via Input.h
-UKismetSystemLibrary* g_StaticKismet = nullptr;
 
 bool IsPlayerMovementEnabled(AActor* actor)
 {
@@ -23,17 +22,27 @@ bool IsPlayerMovementEnabled(AActor* actor)
 
 void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
-  if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController))
-    return;
+  auto camera = g_StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
+  bool IsFirstPerson = ((camera->CameraStyle == CamStyle_FirstPerson) || (camera->CameraStyle == CamStyle_FirstPersonView));
+  FName newStyle;
 
-  FName newStyle = CamStyle_FirstPersonView;
+  //NOTE: Changed the logic on this so that the bind could be used in regular (non-movable) first person mode to exit first person
+  //(unfortunately something still prevents this bind/method from being called when in regular first-person anyway)
+  if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController) && (!IsFirstPerson || Options.FirstPersonMovable))
+    return; 
+
+  if (Options.HideMinimap && Options.FirstPersonMovable)
+  {
+      g_JackCheatManager->SetMiniMapVisible(IsFirstPerson);
+  }
+  IsFirstPerson = !IsFirstPerson; //toggle first person
   if (Options.FirstPersonMovable)
   {
-    auto camera = g_StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
-    bool IsFirstPerson = camera->CameraStyle == CamStyle_FirstPerson;
-    IsFirstPerson = !IsFirstPerson; // toggle
-
-    return SetMovableFirstPersonCam(playerController, IsFirstPerson);
+      return SetMovableFirstPersonCam(playerController, IsFirstPerson);
+  }
+  else
+  {
+      IsFirstPerson ? newStyle = CamStyle_FirstPersonView : newStyle = CamStyle_Normal;
   }
 
   playerController->Camera(newStyle);
