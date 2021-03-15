@@ -18,6 +18,7 @@ bool UObject::AllowFunctionCalls = false;
 UInputComponent::BindAction_Fn UInputComponent::BindAction_Ptr = nullptr;
 FName::Ctor_Fn FName::Ctor_Ptr = nullptr;
 FString::Printf__VA_Fn FString::Printf = nullptr;
+UGameEngine::Exec_Fn UGameEngine::Exec_Ptr = nullptr;
 
 //---------------------------------------------------------------------------
 bool FWeakObjectPtr::IsValid() const

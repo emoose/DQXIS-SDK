@@ -47,12 +47,15 @@ struct GameAddresses
   uintptr_t FName__Ctor;
   uintptr_t FString__Printf__VA;
   uintptr_t StaticConstructObject_Internal;
+  uintptr_t UGameEngine__Exec;
   
   // Hooked functions
+  uintptr_t FOutputDevice__Log;
   uintptr_t SetsCharacterViewerResolution;
   uintptr_t AJackFieldPlayerController__InitActionMappings; // name is a guess, it's probably SetupInputComponent
   uintptr_t GetSourceIniFilename;
   uintptr_t FPaths__GeneratedConfigDir;
+  uintptr_t AActor__InitActionMappingsUI;
 
   // Stubbed functions
   uintptr_t GenerateActionMappings_1;
@@ -97,6 +100,7 @@ bool IsPlayerMovementEnabled(AActor* actor);
 void FirstPersonCamera(AJackFieldPlayerController* playerController);
 void EnterPartyChat(AJackFieldPlayerController* playerController);
 void Init_CustomActions_Field(AJackFieldPlayerController* playerController);
+void Init_CustomActions_UI(AActor* actor);
 
 // DQXIHook.cpp
 void Init_DQXIHook();

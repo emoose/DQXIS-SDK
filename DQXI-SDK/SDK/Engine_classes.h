@@ -2751,12 +2751,16 @@ public:
 
 };
 
+class UWorld;
 
 // Class Engine.GameEngine
 // 0x0050 (0x0CE0 - 0x0C90)
 class UGameEngine : public UEngine
 {
 public:
+	typedef void(*Exec_Fn)(UGameEngine* thisptr, UWorld* InWorld, const wchar_t* Cmd, void* Ar);
+	static Exec_Fn Exec_Ptr;
+
 	float                                              MaxDeltaTime;                                             // 0x0C90(0x0004) (ZeroConstructor, Config, IsPlainOldData)
 	float                                              ServerFlushLogInterval;                                   // 0x0C94(0x0004) (ZeroConstructor, Config, IsPlainOldData)
 	class UGameInstance*                               GameInstance;                                             // 0x0C98(0x0008) (ZeroConstructor, Transient, IsPlainOldData)
@@ -2766,6 +2770,11 @@ public:
 	{
 		static auto ptr = UObject::FindClass("Class Engine.GameEngine");
 		return ptr;
+	}
+
+	void Exec(UWorld* InWorld, const wchar_t* Cmd, void* Ar)
+	{
+		Exec_Ptr(this, InWorld, Cmd, Ar);
 	}
 
 };
