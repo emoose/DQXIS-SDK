@@ -12,6 +12,7 @@ uintptr_t mBaseAddress;
 
 UConsole* g_Console = nullptr;
 UJackGameplayStatics* g_StaticFuncs = nullptr;
+UJackCheatManager* g_JackCheatManager = nullptr;
 
 IniSettings Options;
 
@@ -23,6 +24,7 @@ void CacheUFunctions()
   CamStyle_Normal = "Normal";
 
   g_StaticFuncs = UObject::FindObject<UJackGameplayStatics>();
+  g_JackCheatManager = UObject::FindObject<UJackCheatManager>();
 
   // Prevent UFunctions from actually being called, we just want wrapper to cache the addr of them
   UObject::AllowFunctionCalls = false;
