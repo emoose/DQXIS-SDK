@@ -250,19 +250,6 @@ static FString GetSourceIniFilename_Hook(const TCHAR* ConfigDir, const TCHAR* Pr
   return GetSourceIniFilename_Orig(ConfigDir, Prefix, BaseIniName);
 }
 
-// Hook FOutputDevice::Log so we can verify thisptr before running it
-// (as our UGameEngine::Exec call in CustomActions uses nullptr for the pointer)
-typedef void(*FOutputDevice__Log_Fn)(void* thisptr, const wchar_t* Str);
-FOutputDevice__Log_Fn FOutputDevice__Log_Orig;
-
-void FOutputDevice__Log_Hook(void* thisptr, const wchar_t* Str)
-{
-  if (!thisptr)
-    return;
-
-  FOutputDevice__Log_Orig(thisptr, Str);
-}
-
 WCHAR IniPath[4096];
 WCHAR IniData[256];
 bool INI_GetBool(const WCHAR* IniPath, const WCHAR* Section, const WCHAR* Key, bool DefaultValue)
@@ -380,18 +367,14 @@ void InitPlugin()
   UInputComponent::BindAction_Ptr = reinterpret_cast<UInputComponent::BindAction_Fn>(mBaseAddress + GameAddrs->UInputComponent__BindAction);
   FName::Ctor_Ptr = reinterpret_cast<FName::Ctor_Fn>(mBaseAddress + GameAddrs->FName__Ctor);
   FString::Printf = reinterpret_cast<FString::Printf__VA_Fn>(mBaseAddress + GameAddrs->FString__Printf__VA);
-  UGameEngine::Exec_Ptr = reinterpret_cast<UGameEngine::Exec_Fn>(mBaseAddress + GameAddrs->UGameEngine__Exec);
 
   MH_Initialize();
 
   // Always hook AJackFieldPlayerController::InitActionMappings as it's called during load, so we can perform things during loading screen
   MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
 
-  if (Options.CustomActions && GameAddrs->AActor__InitActionMappingsUI)
-  {
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FOutputDevice__Log), FOutputDevice__Log_Hook, (LPVOID*)&FOutputDevice__Log_Orig);
+  if (Options.CustomActions)
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AActor__InitActionMappingsUI), AActor__InitActionMappingsUI_Hook, (LPVOID*)&AActor__InitActionMappingsUI_Orig);
-  }
 
   if (Options.RenderFix)
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->SetsCharacterViewerResolution), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);

@@ -47,10 +47,8 @@ struct GameAddresses
   uintptr_t FName__Ctor;
   uintptr_t FString__Printf__VA;
   uintptr_t StaticConstructObject_Internal;
-  uintptr_t UGameEngine__Exec;
   
   // Hooked functions
-  uintptr_t FOutputDevice__Log;
   uintptr_t SetsCharacterViewerResolution;
   uintptr_t AJackFieldPlayerController__InitActionMappings; // name is a guess, it's probably SetupInputComponent
   uintptr_t GetSourceIniFilename;
@@ -116,6 +114,7 @@ void Init_FirstPerson();
 
 // Utility.cpp
 bool FileExists(const WCHAR* Filename);
+HWND FindMainWindow(DWORD process_id);
 
 template <typename T>
 void SafeWrite(uintptr_t address, T value)
