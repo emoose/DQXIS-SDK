@@ -156,6 +156,9 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
     userResolutionX = (int)((float)userResolutionX * screenPercentageMult);
     userResolutionY = (int)((float)userResolutionY * screenPercentageMult);
 
+    // Allow TAA to be applied to this capture (will only be applied if TAA is enabled, eg. with r.DefaultFeature.AntiAliasing 2)
+    camera->CaptureComponent2D->ShowFlags.TemporalAA = true;
+
     // Apply new resolution to the render texture
     auto* texture = camera->CaptureComponent2D->TextureTarget;
     texture->JackTargetSizeX = userResolutionX;

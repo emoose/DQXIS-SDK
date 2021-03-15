@@ -3,8 +3,8 @@
 An XInput/DXGI wrapper DLL bringing several enhancements to DQXIS, via an SDK generated with [UnrealFinderTool](https://github.com/CorrM/Unreal-Finder-Tool).
 
 ## Improvements
-- Fixes render resolution of `USceneCaptureComponent2D`, used in character/monster viewers & fun-sized forge, resolution should now match up with games.
-- Adds `FirstPersonCamera` and `EnterPartyChat` input actions, that can be bound to any key/button via the Input.ini file.
+- Allows TemporalAA & fixes render resolution of `USceneCaptureComponent2D`, used in character/monster viewers & fun-sized forge, resolution should now match up with games.
+- Adds `FirstPersonCamera`, `EnterPartyChat` and `QuitGame` input actions, that can be bound to any key/button via the Input.ini file.
 - Unlocks the UE4 dev-console & allows loose, unpacked files to be loaded by the game.
 - Fixes `Camera FirstPerson` camera height, and made it so NPCs no longer disappear when viewed up close in first-person.
 - (optionally can make `FirstPersonCamera` use the movable `Camera FirstPerson` camera, allowing the game to mostly be played in first-person!)

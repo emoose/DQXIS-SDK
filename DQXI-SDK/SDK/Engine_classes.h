@@ -18909,6 +18909,62 @@ public:
 	void OnInterpToggle(bool bEnable);
 };
 
+struct FEngineShowFlags
+{
+	uint32_t PostProcessing : 1;
+	uint32_t Bloom : 1;
+	uint32_t AntiAliasing : 1;
+	uint32_t TemporalAA : 1;
+	uint32_t AmbientCubemap : 1;
+	uint32_t EyeAdaptation : 1;
+	uint32_t GlobalIllumination : 1;
+	uint32_t AmbientOcclusion : 1;
+	uint32_t Decals : 1;
+	uint32_t OnScreenDebug : 1;
+	uint32_t PointLights : 1;
+	uint32_t SpotLights : 1;
+	uint32_t MotionBlur : 1;
+	uint32_t CameraInterpolation : 1;
+	uint32_t SeparateTranslucency : 1;
+	uint32_t ScreenPercentage : 1;
+	uint32_t ReflectionEnvironment : 1;
+	uint32_t Specular : 1;
+	uint32_t ScreenSpaceReflections : 1;
+	uint32_t ContactShadows : 1;
+	uint32_t VolumetricLightmap : 1;
+	uint32_t IndirectLightingCache : 1;
+	uint32_t TexturedLightProfiles : 1;
+	uint32_t LightFunctions : 1;
+	uint32_t InstancedStaticMeshes : 1;
+	uint32_t InstancedFoliage : 1;
+	uint32_t InstancedGrass : 1;
+	uint32_t DynamicShadows : 1;
+	uint32_t Particles : 1;
+	uint32_t SkeletalMeshes : 1;
+	uint32_t Translucency : 1;
+	uint32_t LOD : 1;
+	uint32_t Lighting : 1;
+	uint32_t DeferredLighting : 1;
+	uint32_t StaticMeshes : 1;
+	uint32_t Landscape : 1;
+	uint32_t Fog : 1;
+	uint32_t Game : 1;
+	uint32_t BSP : 1;
+	uint32_t LightShafts : 1;
+	uint32_t AtmosphericFog : 1;
+	uint32_t TextRender : 1;
+	uint32_t Rendering : 1;
+	uint32_t HMDDistortion : 1;
+	uint32_t StereoRendering : 1;
+	uint32_t DistanceCulledPrimitives : 1;
+	uint32_t SkyLighting : 1;
+	uint32_t Paper2DSprites : 1;
+	uint32_t ScreenSpaceAO : 1;
+	uint32_t DistanceFieldAO : 1;
+	uint32_t VolumetricFog : 1;
+	uint32_t WidgetComponents : 1;
+	uint32_t MediaPlanes : 1;
+};
 
 // Class Engine.SceneCaptureComponent
 // 0x00A0 (0x0380 - 0x02E0)
@@ -18930,7 +18986,8 @@ public:
 	float                                              MaxViewDistanceOverride;                                  // 0x0340(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
 	int                                                CaptureSortPriority;                                      // 0x0344(0x0004) (Edit, BlueprintVisi, BlueprintReadOnly, ZeroConstructor, IsPlainOldData)
 	TArray<struct FEngineShowFlagsSetting>             ShowFlagSettings;                                         // 0x0348(0x0010) (Edit, BlueprintVisi, ZeroConstructor)
-	unsigned char                                      UnknownData02[0x28];                                      // 0x0358(0x0028) MISSED OFFSET
+	FEngineShowFlags                                   ShowFlags;                                                // 0x0358(0x0008) MISSED OFFSET
+	unsigned char                                      UnknownData02[0x20];                                      // 0x0360(0x0020) MISSED OFFSET
 
 	static UClass* StaticClass()
 	{
