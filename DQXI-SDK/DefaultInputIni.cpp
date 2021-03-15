@@ -39,7 +39,7 @@ ActionMappings=(ActionName=\"Jump\",Key=LeftShift)\n\
 ActionMappings=(ActionName=\"JumpExtend\",Key=Gamepad_FaceButton_Right)\n\
 ActionMappings=(ActionName=\"JumpExtend\",Key=SpaceBar)\n\
 ActionMappings=(ActionName=\"OpenMainMenuWindow\",Key=Gamepad_FaceButton_Top)\n\
-ActionMappings=(ActionName=\"OpenMainMenuWindow\",Key=Escape)\n\
+ActionMappings=(ActionName=\"OpenMainMenuWindow\",Key=Z)\n\
 ActionMappings=(ActionName=\"OpenShortcutMenu\",Key=Gamepad_Special_Right)\n\
 ActionMappings=(ActionName=\"OpenShortcutMenu\",Key=I)\n\
 ActionMappings=(ActionName=\"OpenWorldMap\",Key=Gamepad_FaceButton_Left)\n\
@@ -82,7 +82,7 @@ ActionMappings=(ActionName=\"DPad_Right\",Key=Gamepad_DPad_Right)\n\
 ActionMappings=(ActionName=\"DPad_Right\",Key=Right)\n\
 ActionMappings=(ActionName=\"DPad_Up\",Key=Gamepad_DPad_Up)\n\
 ActionMappings=(ActionName=\"DPad_Up\",Key=Up)\n\
-ActionMappings=(ActionName=\"UIButtonTop\",Key=Escape)\n\
+ActionMappings=(ActionName=\"UIButtonTop\",Key=Z)\n\
 ActionMappings=(ActionName=\"UIButtonTop\",Key=Gamepad_FaceButton_Top)\n\
 ActionMappings=(ActionName=\"UIButtonLeft\",Key=Gamepad_FaceButton_Left)\n\
 ActionMappings=(ActionName=\"UIButtonLeft\",Key=X)\n\
