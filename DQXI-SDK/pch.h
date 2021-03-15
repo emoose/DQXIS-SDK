@@ -11,6 +11,7 @@ struct IniSettings {
   bool CustomActions = true;
   bool FirstPersonWherever = false;
   bool FirstPersonMovable = false;
+  bool HideMinimap = true;
   float FirstPersonMovableHeight = 64.f;
   bool EnableDevConsole = true;
   bool LoadUnpackedFiles = true;
@@ -92,6 +93,7 @@ extern FStringPrintf_Fn FStringPrintf;
 extern IniSettings Options;
 extern UConsole* g_Console;
 extern UJackGameplayStatics* g_StaticFuncs;
+extern UJackCheatManager* g_JackCheatManager;
 
 // CustomActions.cpp
 bool IsPlayerMovementEnabled(AActor* actor);
