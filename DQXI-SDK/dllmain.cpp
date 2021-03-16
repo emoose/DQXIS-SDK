@@ -293,6 +293,7 @@ bool TryLoadINIOptions(const WCHAR* IniFilePath)
 
   Options.FirstPersonWherever = INI_GetBool(IniPath, L"FirstPerson", L"UseWherever", Options.FirstPersonWherever);
   Options.FirstPersonMovable = INI_GetBool(IniPath, L"FirstPerson", L"UseMovableCamera", Options.FirstPersonMovable);
+  Options.HideMinimap = INI_GetBool(IniPath, L"FirstPerson", L"HideMinimap", Options.HideMinimap); 
   Options.FirstPersonMovableHeight = INI_GetFloat(IniPath, L"FirstPerson", L"MovableCameraHeight", Options.FirstPersonMovableHeight);
 
   // Check old INI names
