@@ -158,8 +158,10 @@ void SetsCharacterViewerResolution_Hook(AJackCharacterCaptureCamera* camera, voi
     userResolutionX = (int)((float)userResolutionX * screenPercentageMult);
     userResolutionY = (int)((float)userResolutionY * screenPercentageMult);
 
-    // Allow TAA to be applied to this capture (will only be applied if TAA is enabled, eg. with r.DefaultFeature.AntiAliasing 2)
-    camera->CaptureComponent2D->ShowFlags.TemporalAA = true;
+    // Allow TAA & motion-blur to be applied to this capture (will only be applied if TAA is enabled, eg. with r.DefaultFeature.AntiAliasing 2)
+    // (InitPlugin has a patch that should keep this enabled, but we'll also set them here just in case)
+    camera->CaptureComponent2D->ShowFlags.TemporalAA =
+      camera->CaptureComponent2D->ShowFlags.MotionBlur = true;
 
     // Apply new resolution to the render texture
     auto* texture = camera->CaptureComponent2D->TextureTarget;
@@ -383,7 +385,12 @@ void InitPlugin()
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AActor__InitActionMappingsUI), AActor__InitActionMappingsUI_Hook, (LPVOID*)&AActor__InitActionMappingsUI_Orig);
 
   if (Options.RenderFix)
+  {
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->SetsCharacterViewerResolution), SetsCharacterViewerResolution_Hook, (LPVOID*)&SetsCharacterViewerResolution_Orig);
+
+    // Prevent USceneCaptureComponent2D ctor from setting ShowFlags.TemporalAA & ShowFlags.MotionBlur to false
+    SafeWriteModule<uint8_t>(GameAddrs->USceneCaptureComponent2D__Ctor_ShowFlags_AND, 0x90, 10);
+  }
 
   // Disable ExcludedDebugPackage* variables by renaming them
   if (Options.AllowDebugPackages)

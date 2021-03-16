@@ -56,9 +56,10 @@ struct GameAddresses
   uintptr_t FPaths__GeneratedConfigDir;
   uintptr_t AActor__InitActionMappingsUI;
 
-  // Stubbed functions
+  // Patched/stubbed functions
   uintptr_t GenerateActionMappings_1;
   uintptr_t GenerateActionMappings_2;
+  uintptr_t USceneCaptureComponent2D__Ctor_ShowFlags_AND;
 
   // DQXIHook hooked funcs
   uintptr_t UGameViewportClient__SetupInitialLocalPlayer;
@@ -128,9 +129,25 @@ void SafeWrite(uintptr_t address, T value)
 }
 
 template <typename T>
+void SafeWrite(uintptr_t address, T value, int count)
+{
+  DWORD oldProtect = 0;
+  VirtualProtect((LPVOID)address, sizeof(T) * count, PAGE_READWRITE, &oldProtect);
+  for(int i = 0; i < count; i++)
+    *reinterpret_cast<T*>(address + (sizeof(T) * i)) = value;
+  VirtualProtect((LPVOID)address, sizeof(T) * count, oldProtect, &oldProtect);
+}
+
+template <typename T>
 void SafeWriteModule(uintptr_t offset, T value)
 {
   SafeWrite<T>(mBaseAddress + offset, value);
+}
+
+template <typename T>
+void SafeWriteModule(uintptr_t offset, T value, int count)
+{
+  SafeWrite<T>(mBaseAddress + offset, value, count);
 }
 
 // Same as SafeWrite but doesn't VirtualProtect first, more efficient if you already know the memory is writable!
