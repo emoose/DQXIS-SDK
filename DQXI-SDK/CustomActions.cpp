@@ -24,28 +24,22 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
 {
   auto camera = g_StaticFuncs->STATIC_GetJackPlayerCameraManager(playerController);
   bool IsFirstPerson = ((camera->CameraStyle == CamStyle_FirstPerson) || (camera->CameraStyle == CamStyle_FirstPersonView));
-  FName newStyle;
 
   //NOTE: Changed the logic on this so that the bind could be used in regular (non-movable) first person mode to exit first person
   //(unfortunately something still prevents this bind/method from being called when in regular first-person anyway)
   if (!Options.FirstPersonWherever && !IsPlayerMovementEnabled(playerController) && (!IsFirstPerson || Options.FirstPersonMovable))
     return; 
 
-  if (Options.HideMinimap && Options.FirstPersonMovable)
-  {
-      g_JackCheatManager->SetMiniMapVisible(IsFirstPerson);
-  }
   IsFirstPerson = !IsFirstPerson; //toggle first person
   if (Options.FirstPersonMovable)
   {
-      return SetMovableFirstPersonCam(playerController, IsFirstPerson);
-  }
-  else
-  {
-      IsFirstPerson ? newStyle = CamStyle_FirstPersonView : newStyle = CamStyle_Normal;
+    if (Options.HideMinimap)
+      g_JackCheatManager->SetMiniMapVisible(!IsFirstPerson);
+
+    return SetMovableFirstPersonCam(playerController, IsFirstPerson);
   }
 
-  playerController->Camera(newStyle);
+  playerController->Camera(IsFirstPerson ? CamStyle_FirstPersonView : CamStyle_Normal);
 }
 
 void EnterPartyChat(AJackFieldPlayerController* playerController)
@@ -78,9 +72,6 @@ void QuitGame(AActor* actor)
 
 void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
 {
-  if(!g_StaticKismet)
-    g_StaticKismet = UObject::FindObject<UKismetSystemLibrary>();
-
   auto input = playerController->InputComponent;
   input->BindAction("FirstPersonCamera", EInputEvent::IE_Pressed, playerController, FirstPersonCamera);
 
