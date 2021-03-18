@@ -97,11 +97,9 @@ extern UConsole* g_Console;
 extern UJackGameplayStatics* g_StaticFuncs;
 extern UJackCheatManager* g_JackCheatManager;
 
+void OnLoadScreen();
+
 // CustomActions.cpp
-bool IsPlayerMovementEnabled(AActor* actor);
-void FirstPersonCamera(AJackFieldPlayerController* playerController);
-void EnterPartyChat(AJackFieldPlayerController* playerController);
-void Init_CustomActions_Field(AJackFieldPlayerController* playerController);
 void Init_CustomActions();
 
 // DQXIHook.cpp

@@ -52,16 +52,8 @@ void CacheUFunctions()
   UObject::AllowFunctionCalls = true;
 }
 
-typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
-AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
-
-void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerController* thisptr)
+void OnLoadScreen()
 {
-  AJackFieldPlayerController__InitActionMappings_Orig(thisptr);
-
-  if (Options.CustomActions)
-    Init_CustomActions_Field(thisptr);
-
   // Cache our UFunctions & FNames
   CacheUFunctions(); // moved to reduce stack usage of this func
 
@@ -366,11 +358,7 @@ void InitPlugin()
 
   MH_Initialize();
 
-  // Always hook AJackFieldPlayerController::InitActionMappings as it's called during load, so we can perform things during loading screen
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
-
-  if (Options.CustomActions)
-    Init_CustomActions();
+  Init_CustomActions();    
 
   if (Options.RenderFix)
   {

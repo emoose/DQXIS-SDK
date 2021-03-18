@@ -92,8 +92,8 @@ void Init_CustomActions_UI(AActor* Actor, UInputComponent* PlayerInputComponent)
 
 // Doubt this is actually AActor, probably a class that inherits it
 typedef void (*AActor__InitActionMappingsUI_Fn)(AActor* thisptr, void* a2, void* a3);
-AActor__InitActionMappingsUI_Fn AActor__InitActionMappingsUI_Orig;
 
+AActor__InitActionMappingsUI_Fn AActor__InitActionMappingsUI_Orig;
 void AActor__InitActionMappingsUI_Hook(AActor* thisptr, void* a2, void* a3)
 {
   AActor__InitActionMappingsUI_Orig(thisptr, a2, a3);
@@ -120,8 +120,26 @@ void AJackTripleManager__SetupPlayerInputComponent_Hook(AJackTripleManager* this
   Init_CustomActions_UI(thisptr, PlayerInputComponent);
 }
 
+
+typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
+
+AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
+void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerController* thisptr)
+{
+  AJackFieldPlayerController__InitActionMappings_Orig(thisptr);
+
+  if (Options.CustomActions)
+    Init_CustomActions_Field(thisptr);
+
+  // Let us do stuff during the load screen
+  OnLoadScreen();
+}
+
 void Init_CustomActions()
 {
+  // Always hook AJackFieldPlayerController::InitActionMappings as it's called during load, so we can perform things during loading screen
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
+
   if (!Options.CustomActions)
     return;
 
