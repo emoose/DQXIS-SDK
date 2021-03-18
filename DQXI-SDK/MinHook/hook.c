@@ -846,7 +846,7 @@ MH_STATUS WINAPI MH_CreateHookApiEx(
     if (pTarget == NULL)
         return MH_ERROR_FUNCTION_NOT_FOUND;
 
-    if(ppTarget != NULL)
+    if (ppTarget != NULL)
         *ppTarget = pTarget;
 
     return MH_CreateHook(pTarget, pDetour, ppOriginal);

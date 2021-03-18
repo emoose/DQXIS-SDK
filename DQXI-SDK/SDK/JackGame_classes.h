@@ -21405,7 +21405,8 @@ public:
 	class UJackMeosiSlotSimulationComponent*           MeosiSlotSimulationComponent;                             // 0x0450(0x0008) (ExportObject, ZeroConstructor, InstancedReference, IsPlainOldData)
 	unsigned char                                      UnknownData01[0x8];                                       // 0x0458(0x0008) MISSED OFFSET
 	struct FScriptMulticastDelegate                    PlayMovieRequestDelegate;                                 // 0x0460(0x0010) (ZeroConstructor, InstancedReference, BlueprintAssignable)
-	unsigned char                                      UnknownData02[0x10];                                      // 0x0470(0x0010) MISSED OFFSET
+	unsigned char                                      UnknownData02[0x8];                                       // 0x0470(0x0008) MISSED OFFSET
+	UInputComponent*                                   InputComponent;                                           // 0x0478(0x0008) MISSED OFFSET
 
 	static UClass* StaticClass()
 	{

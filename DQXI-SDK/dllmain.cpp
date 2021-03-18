@@ -52,18 +52,6 @@ void CacheUFunctions()
   UObject::AllowFunctionCalls = true;
 }
 
-// Doubt this is actually AActor, probably a class that inherits it
-typedef void (*AActor__InitActionMappingsUI_Fn)(AActor* thisptr, void* a2, void* a3);
-AActor__InitActionMappingsUI_Fn AActor__InitActionMappingsUI_Orig;
-
-void AActor__InitActionMappingsUI_Hook(AActor* thisptr, void* a2, void* a3)
-{
-  AActor__InitActionMappingsUI_Orig(thisptr, a2, a3);
-
-  if (Options.CustomActions && thisptr->InputComponent)
-    Init_CustomActions_UI(thisptr);
-}
-
 typedef void (*AJackFieldPlayerController__InitActionMappings_Fn)(AJackFieldPlayerController* thisptr);
 AJackFieldPlayerController__InitActionMappings_Fn AJackFieldPlayerController__InitActionMappings_Orig;
 
@@ -382,7 +370,7 @@ void InitPlugin()
   MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
 
   if (Options.CustomActions)
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AActor__InitActionMappingsUI), AActor__InitActionMappingsUI_Hook, (LPVOID*)&AActor__InitActionMappingsUI_Orig);
+    Init_CustomActions();
 
   if (Options.RenderFix)
   {

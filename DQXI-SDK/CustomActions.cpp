@@ -1,6 +1,8 @@
 #include "pch.h"
 
 // Code for enabling/handling custom input actions, can be bound to keyboard/controller via Input.h
+// For adding to this file, see list of hookable SetupInputComponent funcs at https://gist.github.com/emoose/61be532af247f486902103096da5d38f
+// (indented funcs call into the non-indented func above it, so only that needs hooking to affect all its indented children)
 
 bool IsPlayerMovementEnabled(AActor* actor)
 {
@@ -66,7 +68,7 @@ void QuitGame(AActor* actor)
 
   // Make DQXIS show "Are you sure you want to quit" messagebox prompt
   HWND mainWindow = FindMainWindow(GetCurrentProcessId());
-  if(mainWindow)
+  if (mainWindow)
     PostMessageA(mainWindow, WM_SYSCOMMAND, SC_CLOSE, 0);
 }
 
@@ -83,12 +85,46 @@ void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
   input->BindAction("QuitGame", EInputEvent::IE_Pressed, (AActor*)playerController, QuitGame);
 }
 
-void Init_CustomActions_UI(AActor* actor)
+void Init_CustomActions_UI(AActor* Actor, UInputComponent* PlayerInputComponent)
 {
+  PlayerInputComponent->BindAction("QuitGame", EInputEvent::IE_Pressed, Actor, QuitGame);
+}
+
+// Doubt this is actually AActor, probably a class that inherits it
+typedef void (*AActor__InitActionMappingsUI_Fn)(AActor* thisptr, void* a2, void* a3);
+AActor__InitActionMappingsUI_Fn AActor__InitActionMappingsUI_Orig;
+
+void AActor__InitActionMappingsUI_Hook(AActor* thisptr, void* a2, void* a3)
+{
+  AActor__InitActionMappingsUI_Orig(thisptr, a2, a3);
+
+  if (!Options.CustomActions || !thisptr->InputComponent)
+    return;
+
   // This is called by multiple UI classes at varying times
   // Actions bound here will likely also get called by all the UI classes that registered it!
+  Init_CustomActions_UI(thisptr, thisptr->InputComponent);
+}
 
-  auto input = actor->InputComponent;
+// SetupPlayerInputComponent is defined by APawn, AJackTripleManager inherits and overrides it
+typedef void (*APawn__SetupPlayerInputComponent)(APawn* thisptr, UInputComponent* PlayerInputComponent);
 
-  input->BindAction("QuitGame", EInputEvent::IE_Pressed, actor, QuitGame);
+APawn__SetupPlayerInputComponent AJackTripleManager__SetupPlayerInputComponent_Orig;
+void AJackTripleManager__SetupPlayerInputComponent_Hook(AJackTripleManager* thisptr, UInputComponent* PlayerInputComponent)
+{
+  AJackTripleManager__SetupPlayerInputComponent_Orig(thisptr, PlayerInputComponent);
+
+  if (!Options.CustomActions || !PlayerInputComponent)
+    return;
+
+  Init_CustomActions_UI(thisptr, PlayerInputComponent);
+}
+
+void Init_CustomActions()
+{
+  if (!Options.CustomActions)
+    return;
+
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AActor__InitActionMappingsUI), AActor__InitActionMappingsUI_Hook, (LPVOID*)&AActor__InitActionMappingsUI_Orig);
+  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackTripleManager__SetupPlayerInputComponent), AJackTripleManager__SetupPlayerInputComponent_Hook, (LPVOID*)&AJackTripleManager__SetupPlayerInputComponent_Orig);
 }

@@ -55,6 +55,7 @@ struct GameAddresses
   uintptr_t GetSourceIniFilename;
   uintptr_t FPaths__GeneratedConfigDir;
   uintptr_t AActor__InitActionMappingsUI;
+  uintptr_t AJackTripleManager__SetupPlayerInputComponent;
 
   // Patched/stubbed functions
   uintptr_t GenerateActionMappings_1;
@@ -101,7 +102,7 @@ bool IsPlayerMovementEnabled(AActor* actor);
 void FirstPersonCamera(AJackFieldPlayerController* playerController);
 void EnterPartyChat(AJackFieldPlayerController* playerController);
 void Init_CustomActions_Field(AJackFieldPlayerController* playerController);
-void Init_CustomActions_UI(AActor* actor);
+void Init_CustomActions();
 
 // DQXIHook.cpp
 void Init_DQXIHook();
