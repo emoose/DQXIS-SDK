@@ -22,15 +22,18 @@ class UObject
 {
 public:
 	static bool AllowFunctionCalls;
+	static FUObjectArray* GObjects;
 
-	static FUObjectArray*                              GObjects;                                                 // 0x0000(0x0000)
 	uint64_t*                                          Vtable;                                                   // 0x0000(0x0008) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            ObjectFlags;                                              // 0x0008(0x0004) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            InternalIndex;                                            // 0x000C(0x0004) NOT AUTO-GENERATED PROPERTY
 	class UClass*                                      Class;                                                    // 0x0010(0x0008) NOT AUTO-GENERATED PROPERTY
 	FName                                              Name;                                                     // 0x0018(0x0008) NOT AUTO-GENERATED PROPERTY
 	class UObject*                                     Outer;                                                    // 0x0020(0x0008) NOT AUTO-GENERATED PROPERTY
-	unsigned char                                      UnknownData00[0x10];                                      // 0x0028(0x0010)
+	uint32_t                                           UnknownData28;                                            // 0x0028(0x0004)
+	uint32_t                                           UnknownData2C;                                            // 0x002C(0x0004)
+	bool                                               UnknownData30;                                            // 0x0030(0x0001) (set to 1 in every UObject I checked?)
+	unsigned char                                      UnknownData31[0x7];                                       // 0x0031(0x0007) (padding?)
 
 	static inline TUObjectArray& GetGlobalObjects()
 	{
@@ -258,13 +261,68 @@ public:
 
 };
 
+enum EClassFlags
+{
+	CLASS_None = 0x0,
+	CLASS_Abstract = 0x1,
+	CLASS_DefaultConfig = 0x2,
+	CLASS_Config = 0x4,
+	CLASS_Transient = 0x8,
+	CLASS_Parsed = 0x10,
+	CLASS_AdvancedDisplay = 0x40,
+	CLASS_Native = 0x80,
+	CLASS_NoExport = 0x100,
+	CLASS_NotPlaceable = 0x200,
+	CLASS_PerObjectConfig = 0x400,
+	CLASS_EditInlineNew = 0x1000,
+	CLASS_CollapseCategories = 0x2000,
+	CLASS_Interface = 0x4000,
+	CLASS_CustomConstructor = 0x8000,
+	CLASS_Const = 0x10000,
+	CLASS_CompiledFromBlueprint = 0x40000,
+	CLASS_MinimalAPI = 0x80000,
+	CLASS_RequiredAPI = 0x100000,
+	CLASS_DefaultToInstanced = 0x200000,
+	CLASS_TokenStreamAssembled = 0x400000,
+	CLASS_HasInstancedReference = 0x800000,
+	CLASS_Hidden = 0x1000000,
+	CLASS_Deprecated = 0x2000000,
+	CLASS_HideDropDown = 0x4000000,
+	CLASS_GlobalUserConfig = 0x8000000,
+	CLASS_Intrinsic = 0x10000000,
+	CLASS_Constructed = 0x20000000,
+	CLASS_ConfigDoNotCheckDefaults = 0x40000000,
+	CLASS_NewerVersionExists = 0x80000000,
+};
+
+typedef unsigned __int64 EClassCastFlags;
 
 // Class CoreUObject.Class
 // 0x0198 (0x0230 - 0x0098)
 class UClass : public UStruct
 {
 public:
-	unsigned char                                      UnknownData00[0x198];                                     // 0x0098(0x0198) MISSED OFFSET
+	unsigned char                                      UnknownData98[0x10];                                     // 0x0098(0x0010) MISSED OFFSET
+
+	typedef void (*ClassConstructorType)(void*);
+	typedef UObject*(*ClassVTableHelperCtorCallerType)(void* Helper);
+	typedef void (*ClassAddReferencedObjectsType)(UObject*, class FReferenceCollector&);
+	typedef UClass* (*StaticClassFunctionType)();
+
+	ClassConstructorType                               ClassConstructor;                                        // 0x00A8(0x0008) MISSED OFFSET
+	ClassVTableHelperCtorCallerType                    ClassVTableHelperCtorCaller;                             // 0x00B0(0x0008) MISSED OFFSET
+	ClassAddReferencedObjectsType                      ClassAddReferencedObjects;                               // 0x00B8(0x0008) MISSED OFFSET
+
+	uint32_t                                           ClassUnique : 31;                                        // 0x00C0(0x0004) MISSED OFFSET
+	uint32_t                                           bCooked : 1;                                             // 0x00C0(0x0004) MISSED OFFSET
+	EClassFlags                                        ClassFlags;                                              // 0x00C4(0x0004) MISSED OFFSET
+	EClassCastFlags                                    ClassCastFlags;                                          // 0x00C8(0x0008) MISSED OFFSET
+	UClass*                                            ClassWithin;                                             // 0x00D0(0x0008) MISSED OFFSET
+	UObject*                                           ClassGeneratedBy;                                        // 0x00D8(0x0008) MISSED OFFSET
+
+	FName                                              ClassConfigName;                                         // 0x00E0(0x0008) MISSED OFFSET
+
+	unsigned char                                      UnknownDataE8[0x148];                                    // 0x00E8(0x0148) MISSED OFFSET
 
 	template<typename T>
 	inline T* CreateDefaultObject()

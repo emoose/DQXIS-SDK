@@ -21401,11 +21401,20 @@ class AJackTripleManager : public APawn
 {
 public:
 	TMap<struct FName, class UClass*>                  MiniGameMap;                                              // 0x03F8(0x0050) (Edit, BlueprintVisi, ZeroConstructor)
-	unsigned char                                      UnknownData00[0x8];                                       // 0x0448(0x0008) MISSED OFFSET
+	TWeakObjectPtr<class UObject>                      UnknownData448;                                           // 0x0448(0x0008) MISSED OFFSET
 	class UJackMeosiSlotSimulationComponent*           MeosiSlotSimulationComponent;                             // 0x0450(0x0008) (ExportObject, ZeroConstructor, InstancedReference, IsPlainOldData)
-	unsigned char                                      UnknownData01[0x8];                                       // 0x0458(0x0008) MISSED OFFSET
+	unsigned char                                      UnknownData458;                                           // 0x0458(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData459;                                           // 0x0459(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData45A;                                           // 0x045A(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData45B;                                           // 0x045B(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData45C;                                           // 0x045C(0x0001) MISSED OFFSET
+	unsigned char                                      IsPaused;                                                 // 0x045D(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData45E;                                           // 0x045E(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData45F;                                           // 0x045F(0x0001) MISSED OFFSET
 	struct FScriptMulticastDelegate                    PlayMovieRequestDelegate;                                 // 0x0460(0x0010) (ZeroConstructor, InstancedReference, BlueprintAssignable)
-	unsigned char                                      UnknownData02[0x8];                                       // 0x0470(0x0008) MISSED OFFSET
+	bool                                               IsRunning;                                                // 0x0470(0x0001) MISSED OFFSET (set to 1 by StartTriple / 0 by EndTriple)
+	bool                                               IsForceDisableTriple60fps;                                // 0x0471(0x0001) MISSED OFFSET (set by ForceDisableTriple60fps)
+	unsigned char                                      UnknownData472[0x6];                                      // 0x0472(0x0006) MISSED OFFSET (padding?)
 	UInputComponent*                                   InputComponent;                                           // 0x0478(0x0008) MISSED OFFSET
 
 	static UClass* StaticClass()
