@@ -79,6 +79,31 @@ UTripleCheatManager* FTripleModule__GetCheatManager_Hook(FTripleModule* thisptr)
   return FTripleModule__GetCheatManager_Orig(thisptr);
 }
 
+typedef void*(*Triple_CharWalk_Fn)(uint8_t*);
+Triple_CharWalk_Fn Triple_CharWalk_Orig;
+void* Triple_CharWalk_Hook(uint8_t* a1)
+{
+  float* runSpeed = reinterpret_cast<float*>(a1 + 0x20);
+  float curRunSpeed = *runSpeed;
+
+  // cheat command variable
+  bool tripleRunRate_IsSet = *reinterpret_cast<bool*>(mBaseAddress + GameAddrs->TripleRunRate_IsSet);
+  if (tripleRunRate_IsSet)
+  {
+    float tripleRunRate = *reinterpret_cast<float*>(mBaseAddress + GameAddrs->TripleRunRate_Value);
+
+    // Multiply the run speed variable used in CharWalk
+    *runSpeed = *runSpeed * tripleRunRate;
+  }
+
+  auto res = Triple_CharWalk_Orig(a1);
+
+  // Set var back to what it was
+  *runSpeed = curRunSpeed;
+
+  return res;
+}
+
 void Init_DQXIHook()
 {
   StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + GameAddrs->StaticConstructObject_Internal);
@@ -89,6 +114,9 @@ void Init_DQXIHook()
     
     // Unlock Triple (2D mode) cheats while we're at it
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FTripleModule__GetCheatManager), FTripleModule__GetCheatManager_Hook, (LPVOID*)&FTripleModule__GetCheatManager_Orig);
+
+    // Enable TripleRunRate
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->Triple_CharWalk), Triple_CharWalk_Hook, (LPVOID*)&Triple_CharWalk_Orig);
 
     // Fix bug in AJackTriplePlayerController::ProcessConsoleExec that makes it think command was never found
     // (patches "result = old & new" to "result = old | new")

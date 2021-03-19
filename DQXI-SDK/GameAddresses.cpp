@@ -19,6 +19,9 @@ GameAddresses GameAddrs_Steam =
   .RenderScaleDefault_Width = 0x5896CC0,
   .RenderScaleDefault_Height = 0x5896CC4,
 
+  .TripleRunRate_Value = 0x59D9140,
+  .TripleRunRate_IsSet = 0x5EFE99A,
+
   .UObject__ProcessEvent = 0xEF12A0,
   .UInputComponent__BindAction = 0x6AA7A0,
   .FName__Ctor = 0xD697D0,
@@ -33,6 +36,7 @@ GameAddresses GameAddrs_Steam =
   .AActor__InitActionMappingsUI = 0x91B100,
   .AJackTripleManager__SetupPlayerInputComponent = 0x9156C0,
   .FTripleModule__GetCheatManager = 0x215FB10,
+  .Triple_CharWalk = 0x2124FC0,
 
   .GenerateActionMappings_1 = 0x75A200,
   .GenerateActionMappings_2 = 0x7D0DF0,
@@ -73,6 +77,9 @@ GameAddresses GameAddrs_UWP =
   .RenderScaleDefault_Width = 0x5930C40,
   .RenderScaleDefault_Height = 0x5930C44,
 
+  .TripleRunRate_Value = 0x5A731A0,
+  .TripleRunRate_IsSet = 0x5F9C53A,
+
   .UObject__ProcessEvent = 0xD9D2A0, // needs verifying
   .UInputComponent__BindAction = 0x679E40,
   .FName__Ctor = 0xE9A180,
@@ -87,6 +94,7 @@ GameAddresses GameAddrs_UWP =
   .AActor__InitActionMappingsUI = 0x8AEF90,
   .AJackTripleManager__SetupPlayerInputComponent = 0x8A8D80,
   .FTripleModule__GetCheatManager = 0x20F8B60,
+  .Triple_CharWalk = 0x20BDF70,
 
   .GenerateActionMappings_1 = 0x6EC5D0,
   .GenerateActionMappings_2 = 0x7634B0,

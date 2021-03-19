@@ -37,10 +37,12 @@ struct GameAddresses
 
   uintptr_t ExcludedDebugPackage_1;
   uintptr_t ExcludedDebugPackage_2;
-
-  // Following are explained inside AJackFieldPlayerController__InitActionMappings_Hook
-  uintptr_t RenderScaleDefault_Width;
+  
+  uintptr_t RenderScaleDefault_Width; // these are explained inside AJackFieldPlayerController__InitActionMappings_Hook
   uintptr_t RenderScaleDefault_Height;
+
+  uintptr_t TripleRunRate_Value;
+  uintptr_t TripleRunRate_IsSet;
 
   // Functions
   uintptr_t UObject__ProcessEvent;
@@ -58,6 +60,7 @@ struct GameAddresses
   uintptr_t AActor__InitActionMappingsUI;
   uintptr_t AJackTripleManager__SetupPlayerInputComponent;
   uintptr_t FTripleModule__GetCheatManager;
+  uintptr_t Triple_CharWalk;
 
   // Patched/stubbed functions
   uintptr_t GenerateActionMappings_1;

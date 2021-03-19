@@ -24,7 +24,7 @@ namespace SDK
 	class ITripleModule : public IModuleInterface
 	{
 	public:
-		///* 0x00 */ void* Vftable; // func at 0x1D8 checks CheatManager ptr and retrieves raw pointer to it, which is used in AJackTriplePlayerController::ProcessConsoleExec
+		// func at Vftable+0x1D8 checks CheatManager ptr and retrieves raw pointer to it, which is used in AJackTriplePlayerController::ProcessConsoleExec
 		/* 0x08 */ bool Unk8; // some kind if IsInited var?
 		/* 0x09 */ unsigned char Unk9[0x3];
 		/* 0x0C */ TWeakObjectPtr<class UObject> UnkPtrC;
