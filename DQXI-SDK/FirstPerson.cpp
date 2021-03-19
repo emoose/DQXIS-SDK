@@ -235,20 +235,20 @@ void OnLoad_FirstPerson()
 void Init_FirstPerson()
 {
   // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
-  MH_Hook(GameAddrs->AJackPlayerController__PushCameraMode, AJackPlayerController__PushCameraMode_Hook, &AJackPlayerController__PushCameraMode_Orig);
-  MH_Hook(GameAddrs->AJackPlayerController__PopCameraMode, AJackPlayerController__PopCameraMode_Hook, &AJackPlayerController__PopCameraMode_Orig);
+  MH_GameHook(AJackPlayerController__PushCameraMode);
+  MH_GameHook(AJackPlayerController__PopCameraMode);
 
   if (!Options.FirstPersonMovable)
     return;
 
-  MH_Hook(GameAddrs->CameraInterpolate, CameraInterpolate_Hook, &CameraInterpolate_Orig);
+  MH_GameHook(CameraInterpolate);
 
   // Hook UpdateRidingVehicle to know current vehicle being used
-  MH_Hook(GameAddrs->UJackGamePlayer__UpdateRidingVehicle, UJackGamePlayer__UpdateRidingVehicle_Hook, &UJackGamePlayer__UpdateRidingVehicle_Orig);
+  MH_GameHook(UJackGamePlayer__UpdateRidingVehicle);
   // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
-  MH_Hook(GameAddrs->APawn__RecalculateBaseEyeHeight, APawn__RecalculateBaseEyeHeight_Hook, &APawn__RecalculateBaseEyeHeight_Orig);
+  MH_GameHook(APawn__RecalculateBaseEyeHeight);
 
   // Hook BattleManager so we know when battle begins/ends
-  MH_Hook(GameAddrs->AJackBattleManager__BattleInitialize, AJackBattleManager__BattleInitialize_Hook, &AJackBattleManager__BattleInitialize_Orig);
-  MH_Hook(GameAddrs->AJackBattleManager__BattleFinalize, AJackBattleManager__BattleFinalize_Hook, &AJackBattleManager__BattleFinalize_Orig);
+  MH_GameHook(AJackBattleManager__BattleInitialize);
+  MH_GameHook(AJackBattleManager__BattleFinalize);
 }

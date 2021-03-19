@@ -22,6 +22,9 @@ struct IniSettings {
 
 #define MH_Hook(addr, hook, orig) MH_CreateHook((LPVOID)(mBaseAddress + addr), hook, (LPVOID*)orig)
 
+// Creates a hook for function defined in GameAddresses, requires _Hook function & _Orig variable
+#define MH_GameHook(func) MH_Hook(GameAddrs->##func, func##_Hook, &func##_Orig)
+
 struct GameAddresses
 {
   // Check data

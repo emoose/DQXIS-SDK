@@ -364,7 +364,7 @@ void InitPlugin()
 
   if (Options.RenderFix)
   {
-    MH_Hook(GameAddrs->SetsCharacterViewerResolution, SetsCharacterViewerResolution_Hook, &SetsCharacterViewerResolution_Orig);
+    MH_GameHook(SetsCharacterViewerResolution);
 
     // Prevent USceneCaptureComponent2D ctor from setting ShowFlags.TemporalAA & ShowFlags.MotionBlur to false
     SafeWriteModule<uint8_t>(GameAddrs->USceneCaptureComponent2D__Ctor_ShowFlags_AND, 0x90, 10);
@@ -390,10 +390,10 @@ void InitPlugin()
 
     // Hook GetSourceIniFilename so we can make game ignore DefaultInput.ini
     // (We only want Input.ini to be the source of bindings)
-    MH_Hook(GameAddrs->GetSourceIniFilename, GetSourceIniFilename_Hook, &GetSourceIniFilename_Orig);
+    MH_GameHook(GetSourceIniFilename);
 
     // Hook FPaths::GeneratedConfigDir so we can check for Input.ini existence before game opens it
-    MH_Hook(GameAddrs->FPaths__GeneratedConfigDir, FPaths__GeneratedConfigDir_Hook, &FPaths__GeneratedConfigDir_Orig);
+    MH_GameHook(FPaths__GeneratedConfigDir);
   }
 
   Init_FirstPerson();
