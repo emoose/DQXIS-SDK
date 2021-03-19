@@ -387,6 +387,14 @@ public:
 		return static_cast<T*>(CreateDefaultObject());
 	}
 
+	template<typename T>
+	inline T* GetDefault()
+	{
+		if (!ClassDefaultObject)
+			return CreateDefaultObject<T>();
+		return static_cast<T*>(ClassDefaultObject);
+	}
+
 	static UClass* StaticClass()
 	{
 		static auto ptr = UObject::FindClass("Class CoreUObject.Class");
