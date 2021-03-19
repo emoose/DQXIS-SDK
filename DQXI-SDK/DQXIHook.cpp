@@ -62,13 +62,13 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
   return 1;
 }
 
-typedef void(*FTripleModule__StartupModule_Fn)(FTripleModule*);
-FTripleModule__StartupModule_Fn FTripleModule__StartupModule__Orig;
-
-typedef UObject*(*UClass__CreateDefaultObject_Fn)(UClass*);
-void FTripleModule__StartupModule__Hook(FTripleModule* thisptr)
+typedef UTripleCheatManager*(*FTripleModule__GetCheatManager_Fn)(FTripleModule*);
+FTripleModule__GetCheatManager_Fn FTripleModule__GetCheatManager_Orig;
+UTripleCheatManager* FTripleModule__GetCheatManager_Hook(FTripleModule* thisptr)
 {
-  FTripleModule__StartupModule__Orig(thisptr);
+  auto res = FTripleModule__GetCheatManager_Orig(thisptr);
+  if (res)
+    return res;
 
   // CheatManager field needs to be filled with a UTripleCheatManager object
   auto cheatClass = UTripleCheatManager::StaticClass();
@@ -76,6 +76,7 @@ void FTripleModule__StartupModule__Hook(FTripleModule* thisptr)
     cheatClass->CreateDefaultObject();
 
   thisptr->CheatManager = cheatClass->ClassDefaultObject;
+  return FTripleModule__GetCheatManager_Orig(thisptr);
 }
 
 void Init_DQXIHook()
@@ -87,7 +88,7 @@ void Init_DQXIHook()
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->UGameViewportClient__SetupInitialLocalPlayer), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
     
     // Unlock Triple (2D mode) cheats while we're at it
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FTripleModule__StartupModule), FTripleModule__StartupModule__Hook, (LPVOID*)&FTripleModule__StartupModule__Orig);
+    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FTripleModule__GetCheatManager), FTripleModule__GetCheatManager_Hook, (LPVOID*)&FTripleModule__GetCheatManager_Orig);
 
     // Fix bug in AJackTriplePlayerController::ProcessConsoleExec that makes it think command was never found
     // (patches "result = old & new" to "result = old | new")

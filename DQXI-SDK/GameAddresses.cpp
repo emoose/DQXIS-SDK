@@ -32,7 +32,7 @@ GameAddresses GameAddrs_Steam =
   .FPaths__GeneratedConfigDir = 0xD4F480,
   .AActor__InitActionMappingsUI = 0x91B100,
   .AJackTripleManager__SetupPlayerInputComponent = 0x9156C0,
-  .FTripleModule__StartupModule = 0x215F5C0,
+  .FTripleModule__GetCheatManager = 0x215FB10,
 
   .GenerateActionMappings_1 = 0x75A200,
   .GenerateActionMappings_2 = 0x7D0DF0,
@@ -86,7 +86,7 @@ GameAddresses GameAddrs_UWP =
   .FPaths__GeneratedConfigDir = 0xE805D0,
   .AActor__InitActionMappingsUI = 0x8AEF90,
   .AJackTripleManager__SetupPlayerInputComponent = 0x8A8D80,
-  .FTripleModule__StartupModule = 0x20F8610,
+  .FTripleModule__GetCheatManager = 0x20F8B60,
 
   .GenerateActionMappings_1 = 0x6EC5D0,
   .GenerateActionMappings_2 = 0x7634B0,

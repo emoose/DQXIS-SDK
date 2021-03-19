@@ -57,7 +57,7 @@ struct GameAddresses
   uintptr_t FPaths__GeneratedConfigDir;
   uintptr_t AActor__InitActionMappingsUI;
   uintptr_t AJackTripleManager__SetupPlayerInputComponent;
-  uintptr_t FTripleModule__StartupModule;
+  uintptr_t FTripleModule__GetCheatManager;
 
   // Patched/stubbed functions
   uintptr_t GenerateActionMappings_1;
