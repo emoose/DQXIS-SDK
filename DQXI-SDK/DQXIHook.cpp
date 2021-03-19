@@ -110,13 +110,13 @@ void Init_DQXIHook()
 
   if (Options.EnableDevConsole)
   {
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->UGameViewportClient__SetupInitialLocalPlayer), UGameViewportClient__SetupInitialLocalPlayer_Hook, (LPVOID*)&UGameViewportClient__SetupInitialLocalPlayer_Orig);
+    MH_Hook(GameAddrs->UGameViewportClient__SetupInitialLocalPlayer, UGameViewportClient__SetupInitialLocalPlayer_Hook, &UGameViewportClient__SetupInitialLocalPlayer_Orig);
     
     // Unlock Triple (2D mode) cheats while we're at it
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FTripleModule__GetCheatManager), FTripleModule__GetCheatManager_Hook, (LPVOID*)&FTripleModule__GetCheatManager_Orig);
+    MH_Hook(GameAddrs->FTripleModule__GetCheatManager, FTripleModule__GetCheatManager_Hook, &FTripleModule__GetCheatManager_Orig);
 
     // Enable TripleRunRate
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->Triple_CharWalk), Triple_CharWalk_Hook, (LPVOID*)&Triple_CharWalk_Orig);
+    MH_Hook(GameAddrs->Triple_CharWalk, Triple_CharWalk_Hook, &Triple_CharWalk_Orig);
 
     // Fix bug in AJackTriplePlayerController::ProcessConsoleExec that makes it think command was never found
     // (patches "result = old & new" to "result = old | new")
@@ -126,8 +126,8 @@ void Init_DQXIHook()
 
   if (Options.LoadUnpackedFiles)
   {
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__FindFileInPakFiles), FPakPlatformFile__FindFileInPakFiles_Hook, (LPVOID*)&FPakPlatformFile__FindFileInPakFiles_Orig);
-    MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FPakPlatformFile__IsNonPakFilenameAllowed), FPakPlatformFile__IsNonPakFilenameAllowed_Hook, (LPVOID*)&FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
+    MH_Hook(GameAddrs->FPakPlatformFile__FindFileInPakFiles, FPakPlatformFile__FindFileInPakFiles_Hook, &FPakPlatformFile__FindFileInPakFiles_Orig);
+    MH_Hook(GameAddrs->FPakPlatformFile__IsNonPakFilenameAllowed, FPakPlatformFile__IsNonPakFilenameAllowed_Hook, &FPakPlatformFile__IsNonPakFilenameAllowed_Orig);
   }
 
   if (UObject::GObjects->ObjObjects.Num())

@@ -20,6 +20,8 @@ struct IniSettings {
   bool BindFromInputIniOnly = false;
 };
 
+#define MH_Hook(addr, hook, orig) MH_CreateHook((LPVOID)(mBaseAddress + addr), hook, (LPVOID*)orig)
+
 struct GameAddresses
 {
   // Check data

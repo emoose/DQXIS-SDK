@@ -138,11 +138,11 @@ void AJackFieldPlayerController__InitActionMappings_Hook(AJackFieldPlayerControl
 void Init_CustomActions()
 {
   // Always hook AJackFieldPlayerController::InitActionMappings as it's called during load, so we can perform things during loading screen
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackFieldPlayerController__InitActionMappings), AJackFieldPlayerController__InitActionMappings_Hook, (LPVOID*)&AJackFieldPlayerController__InitActionMappings_Orig);
+  MH_Hook(GameAddrs->AJackFieldPlayerController__InitActionMappings, AJackFieldPlayerController__InitActionMappings_Hook, &AJackFieldPlayerController__InitActionMappings_Orig);
 
   if (!Options.CustomActions)
     return;
 
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AActor__InitActionMappingsUI), AActor__InitActionMappingsUI_Hook, (LPVOID*)&AActor__InitActionMappingsUI_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackTripleManager__SetupPlayerInputComponent), AJackTripleManager__SetupPlayerInputComponent_Hook, (LPVOID*)&AJackTripleManager__SetupPlayerInputComponent_Orig);
+  MH_Hook(GameAddrs->AActor__InitActionMappingsUI, AActor__InitActionMappingsUI_Hook, &AActor__InitActionMappingsUI_Orig);
+  MH_Hook(GameAddrs->AJackTripleManager__SetupPlayerInputComponent, AJackTripleManager__SetupPlayerInputComponent_Hook, &AJackTripleManager__SetupPlayerInputComponent_Orig);
 }

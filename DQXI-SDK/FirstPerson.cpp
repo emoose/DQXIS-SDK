@@ -235,20 +235,20 @@ void OnLoad_FirstPerson()
 void Init_FirstPerson()
 {
   // Need to hook AJackPlayerController::PushCameraMode/AJackPlayerController::PopCameraMode so we can track FirstPersonView camera
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackPlayerController__PushCameraMode), AJackPlayerController__PushCameraMode_Hook, (LPVOID*)&AJackPlayerController__PushCameraMode_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackPlayerController__PopCameraMode), AJackPlayerController__PopCameraMode_Hook, (LPVOID*)&AJackPlayerController__PopCameraMode_Orig);
+  MH_Hook(GameAddrs->AJackPlayerController__PushCameraMode, AJackPlayerController__PushCameraMode_Hook, &AJackPlayerController__PushCameraMode_Orig);
+  MH_Hook(GameAddrs->AJackPlayerController__PopCameraMode, AJackPlayerController__PopCameraMode_Hook, &AJackPlayerController__PopCameraMode_Orig);
 
   if (!Options.FirstPersonMovable)
     return;
 
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->CameraInterpolate), CameraInterpolate_Hook, (LPVOID*)&CameraInterpolate_Orig);
+  MH_Hook(GameAddrs->CameraInterpolate, CameraInterpolate_Hook, &CameraInterpolate_Orig);
 
   // Hook UpdateRidingVehicle to know current vehicle being used
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->UJackGamePlayer__UpdateRidingVehicle), UJackGamePlayer__UpdateRidingVehicle_Hook, (LPVOID*)&UJackGamePlayer__UpdateRidingVehicle_Orig);
+  MH_Hook(GameAddrs->UJackGamePlayer__UpdateRidingVehicle, UJackGamePlayer__UpdateRidingVehicle_Hook, &UJackGamePlayer__UpdateRidingVehicle_Orig);
   // RecalculateBaseEyeHeight normally sets BaseEyeHeight back to APawn class default (0), hook it so we can override that
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->APawn__RecalculateBaseEyeHeight), APawn__RecalculateBaseEyeHeight_Hook, (LPVOID*)&APawn__RecalculateBaseEyeHeight_Orig);
+  MH_Hook(GameAddrs->APawn__RecalculateBaseEyeHeight, APawn__RecalculateBaseEyeHeight_Hook, &APawn__RecalculateBaseEyeHeight_Orig);
 
   // Hook BattleManager so we know when battle begins/ends
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackBattleManager__BattleInitialize), AJackBattleManager__BattleInitialize_Hook, (LPVOID*)&AJackBattleManager__BattleInitialize_Orig);
-  MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->AJackBattleManager__BattleFinalize), AJackBattleManager__BattleFinalize_Hook, (LPVOID*)&AJackBattleManager__BattleFinalize_Orig);
+  MH_Hook(GameAddrs->AJackBattleManager__BattleInitialize, AJackBattleManager__BattleInitialize_Hook, &AJackBattleManager__BattleInitialize_Orig);
+  MH_Hook(GameAddrs->AJackBattleManager__BattleFinalize, AJackBattleManager__BattleFinalize_Hook, &AJackBattleManager__BattleFinalize_Orig);
 }
