@@ -88,6 +88,11 @@ void Init_DQXIHook()
     
     // Unlock Triple (2D mode) cheats while we're at it
     MH_CreateHook((LPVOID)(mBaseAddress + GameAddrs->FTripleModule__StartupModule), FTripleModule__StartupModule__Hook, (LPVOID*)&FTripleModule__StartupModule__Orig);
+
+    // Fix bug in AJackTriplePlayerController::ProcessConsoleExec that makes it think command was never found
+    // (patches "result = old & new" to "result = old | new")
+    uint8_t result_OR_patch[] = { 0x40, 0x08, 0xF8 };
+    SafeWriteModule<uint8_t>(GameAddrs->AJackTriplePlayerController__ProcessConsoleExec_result_AND, result_OR_patch, 3);
   }
 
   if (Options.LoadUnpackedFiles)

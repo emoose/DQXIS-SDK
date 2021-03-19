@@ -63,6 +63,7 @@ struct GameAddresses
   uintptr_t GenerateActionMappings_1;
   uintptr_t GenerateActionMappings_2;
   uintptr_t USceneCaptureComponent2D__Ctor_ShowFlags_AND;
+  uintptr_t AJackTriplePlayerController__ProcessConsoleExec_result_AND;
 
   // DQXIHook hooked funcs
   uintptr_t UGameViewportClient__SetupInitialLocalPlayer;
@@ -142,6 +143,16 @@ void SafeWrite(uintptr_t address, T value, int count)
 }
 
 template <typename T>
+void SafeWrite(uintptr_t address, T* value, int count)
+{
+  DWORD oldProtect = 0;
+  VirtualProtect((LPVOID)address, sizeof(T) * count, PAGE_READWRITE, &oldProtect);
+  for (int i = 0; i < count; i++)
+    *reinterpret_cast<T*>(address + (sizeof(T) * i)) = value[i];
+  VirtualProtect((LPVOID)address, sizeof(T) * count, oldProtect, &oldProtect);
+}
+
+template <typename T>
 void SafeWriteModule(uintptr_t offset, T value)
 {
   SafeWrite<T>(mBaseAddress + offset, value);
@@ -149,6 +160,12 @@ void SafeWriteModule(uintptr_t offset, T value)
 
 template <typename T>
 void SafeWriteModule(uintptr_t offset, T value, int count)
+{
+  SafeWrite<T>(mBaseAddress + offset, value, count);
+}
+
+template <typename T>
+void SafeWriteModule(uintptr_t offset, T* value, int count)
 {
   SafeWrite<T>(mBaseAddress + offset, value, count);
 }

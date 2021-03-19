@@ -38,6 +38,7 @@ GameAddresses GameAddrs_Steam =
   .GenerateActionMappings_2 = 0x7D0DF0,
 
   .USceneCaptureComponent2D__Ctor_ShowFlags_AND = 0x19D3785,
+  .AJackTriplePlayerController__ProcessConsoleExec_result_AND = 0x912CB9,
 
   .UGameViewportClient__SetupInitialLocalPlayer = 0x1AA5050,
   .FPakPlatformFile__FindFileInPakFiles = 0x1F653E0,
@@ -91,6 +92,7 @@ GameAddresses GameAddrs_UWP =
   .GenerateActionMappings_2 = 0x7634B0,
 
   .USceneCaptureComponent2D__Ctor_ShowFlags_AND = 0x1968B85,
+  .AJackTriplePlayerController__ProcessConsoleExec_result_AND = 0x8A61F9,
 
   .UGameViewportClient__SetupInitialLocalPlayer = 0x1A3AB80, // needs verifying
   .FPakPlatformFile__FindFileInPakFiles = 0x1EF9A70, // needs verifying
