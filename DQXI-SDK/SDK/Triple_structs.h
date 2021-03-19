@@ -8,14 +8,20 @@
 
 namespace SDK
 {
-	// TODO: hook constructor for Triple module and make it set CheatManager
-	struct TripleModuleInterface
+	// TODO: add virtual funcs to this interface
+	class ITripleModule
 	{
-		void* Vftable; // 0x0, func at 0x1D8 checks CheatManager ptr and retrieves raw pointer to it, which is used in AJackTriplePlayerController::ProcessConsoleExec
-		void* Unk8;    // 0x8;
-		void* Unk10;   // 0x10
-		int Unk18;     // 0x18
-		TWeakObjectPtr<class UTripleCheatManager> CheatManager; // 0x1C, most likely cheat manager
+	public:
+		/* 0x00 */ void* Vftable; // func at 0x1D8 checks CheatManager ptr and retrieves raw pointer to it, which is used in AJackTriplePlayerController::ProcessConsoleExec
+		/* 0x08 */ int Unk8;
+		/* 0x0C */ TWeakObjectPtr<class UObject> UnkPtrC;
+		/* 0x14 */ TWeakObjectPtr<class UObject> UnkPtr14;
+		/* 0x1C */ TWeakObjectPtr<class UTripleCheatManager> CheatManager; // most likely cheat manager
+	};
+
+	class FTripleModule : public ITripleModule
+	{
+
 	};
 }
 

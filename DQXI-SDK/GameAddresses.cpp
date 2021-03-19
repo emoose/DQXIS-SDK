@@ -24,6 +24,7 @@ GameAddresses GameAddrs_Steam =
   .FName__Ctor = 0xD697D0,
   .FString__Printf__VA = 0xCAAC00,
   .StaticConstructObject_Internal = 0xF16220,
+  .FWeakObjectPtr__operatorEquals = 0xF1B650,
 
   .SetsCharacterViewerResolution = 0x914E60,
   .AJackFieldPlayerController__InitActionMappings = 0x629560,
@@ -31,6 +32,7 @@ GameAddresses GameAddrs_Steam =
   .FPaths__GeneratedConfigDir = 0xD4F480,
   .AActor__InitActionMappingsUI = 0x91B100,
   .AJackTripleManager__SetupPlayerInputComponent = 0x9156C0,
+  .FTripleModule__StartupModule = 0x215F5C0,
 
   .GenerateActionMappings_1 = 0x75A200,
   .GenerateActionMappings_2 = 0x7D0DF0,
@@ -75,6 +77,7 @@ GameAddresses GameAddrs_UWP =
   .FName__Ctor = 0xE9A180,
   .FString__Printf__VA = 0xDE0770,
   .StaticConstructObject_Internal = 0xDC24B0,
+  .FWeakObjectPtr__operatorEquals = 0xDC78E0,
 
   .SetsCharacterViewerResolution = 0x8A8520,
   .AJackFieldPlayerController__InitActionMappings = 0x5BAE80,
@@ -82,6 +85,7 @@ GameAddresses GameAddrs_UWP =
   .FPaths__GeneratedConfigDir = 0xE805D0,
   .AActor__InitActionMappingsUI = 0x8AEF90,
   .AJackTripleManager__SetupPlayerInputComponent = 0x8A8D80,
+  .FTripleModule__StartupModule = 0x20F8610,
 
   .GenerateActionMappings_1 = 0x6EC5D0,
   .GenerateActionMappings_2 = 0x7634B0,

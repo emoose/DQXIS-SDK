@@ -48,6 +48,7 @@ struct GameAddresses
   uintptr_t FName__Ctor;
   uintptr_t FString__Printf__VA;
   uintptr_t StaticConstructObject_Internal;
+  uintptr_t FWeakObjectPtr__operatorEquals;
   
   // Hooked functions
   uintptr_t SetsCharacterViewerResolution;
@@ -56,6 +57,7 @@ struct GameAddresses
   uintptr_t FPaths__GeneratedConfigDir;
   uintptr_t AActor__InitActionMappingsUI;
   uintptr_t AJackTripleManager__SetupPlayerInputComponent;
+  uintptr_t FTripleModule__StartupModule;
 
   // Patched/stubbed functions
   uintptr_t GenerateActionMappings_1;

@@ -338,6 +338,15 @@ enum EClassFlags
 
 typedef unsigned __int64 EClassCastFlags;
 
+class UProperty;
+
+struct FRepRecord
+{
+	UProperty* Property;
+	int Index;
+	unsigned char PaddingC[0x4];
+};
+
 // Class CoreUObject.Class
 // 0x0198 (0x0230 - 0x0098)
 class UClass : public UStruct
@@ -362,8 +371,11 @@ public:
 	UObject*                                           ClassGeneratedBy;                                        // 0x00D8(0x0008) MISSED OFFSET
 
 	FName                                              ClassConfigName;                                         // 0x00E0(0x0008) MISSED OFFSET
-
-	unsigned char                                      UnknownDataE8[0x148];                                    // 0x00E8(0x0148) MISSED OFFSET
+	TArray<FRepRecord>                                 ClassReps;                                               // 0x00E8(0x0010) MISSED OFFSET
+	TArray<UField*>                                    NetFields;                                               // 0x00F8(0x0010) MISSED OFFSET
+	UObject*                                           ClassDefaultObject;                                      // 0x0108(0x0008) MISSED OFFSET
+	
+	unsigned char                                      UnknownData110[0x120];                                   // 0x0110(0x0120) MISSED OFFSET
 
 	template<typename T>
 	inline T* CreateDefaultObject()
