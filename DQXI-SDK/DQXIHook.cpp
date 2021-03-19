@@ -71,11 +71,7 @@ UTripleCheatManager* FTripleModule__GetCheatManager_Hook(FTripleModule* thisptr)
     return res;
 
   // CheatManager field needs to be filled with a UTripleCheatManager object
-  auto cheatClass = UTripleCheatManager::StaticClass();
-  if (!cheatClass->ClassDefaultObject)
-    cheatClass->CreateDefaultObject();
-
-  thisptr->CheatManager = cheatClass->ClassDefaultObject;
+  thisptr->CheatManager = UTripleCheatManager::StaticClass()->GetDefault<UTripleCheatManager>();
   return FTripleModule__GetCheatManager_Orig(thisptr);
 }
 
