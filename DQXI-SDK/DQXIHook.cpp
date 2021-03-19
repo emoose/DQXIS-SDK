@@ -5,7 +5,6 @@
 
 // UGameViewportClient::SetupInitialLocalPlayer hook, allows us to set ViewportConsole
 // and with that, the UE4 dev console will be available even in Shipping builds!
-typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
 StaticConstructObject_InternalFn StaticConstructObject_Internal = nullptr;
 
 typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);

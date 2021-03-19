@@ -229,13 +229,54 @@ public:
 
 };
 
+enum EStructFlags
+{
+	STRUCT_NoFlags = 0x0,
+	STRUCT_Native = 0x1,
+	STRUCT_IdenticalNative = 0x2,
+	STRUCT_HasInstancedReference = 0x4,
+	STRUCT_NoExport = 0x8,
+	STRUCT_Atomic = 0x10,
+	STRUCT_Immutable = 0x20,
+	STRUCT_AddStructReferencedObjects = 0x40,
+	STRUCT_RequiredAPI = 0x200,
+	STRUCT_NetSerializeNative = 0x400,
+	STRUCT_SerializeNative = 0x800,
+	STRUCT_CopyNative = 0x1000,
+	STRUCT_IsPlainOldData = 0x2000,
+	STRUCT_NoDestructor = 0x4000,
+	STRUCT_ZeroConstructor = 0x8000,
+	STRUCT_ExportTextItemNative = 0x10000,
+	STRUCT_ImportTextItemNative = 0x20000,
+	STRUCT_PostSerializeNative = 0x40000,
+	STRUCT_SerializeFromMismatchedTag = 0x80000,
+	STRUCT_NetDeltaSerializeNative = 0x100000,
+
+	// following 2 don't exist in UE 4.18, either taken from newer UE or custom
+	STRUCT_200000 = 0x200000, // assumed it exists (STRUCT_PostScriptConstruct in latest UE)
+	STRUCT_400000 = 0x400000, // set on FJackDataTableMonsterFieldMovingBounds (STRUCT_NetSharedSerialization in latest UE)
+
+	STRUCT_Inherit = 0x14,
+	STRUCT_ComputedFlags = 0x1FFC42,
+};
 
 // Class CoreUObject.ScriptStruct
 // 0x0010 (0x00A8 - 0x0098)
 class UScriptStruct : public UStruct
 {
 public:
-	unsigned char                                      UnknownData00[0x10];                                      // 0x0098(0x0010) MISSED OFFSET
+	struct ICppStructOps
+	{
+		// TODO: virtual funcs
+		void*                                            Vftable;
+		const int                                        Size;
+		const int                                        Alignment;
+	};
+
+	EStructFlags                                       StructFlags;                                              // 0x0098(0x0004) MISSED OFFSET
+	bool                                               bPrepareCppStructOpsCompleted;                            // 0x009C(0x0001) MISSED OFFSET
+	unsigned char                                      UnknownData9D[0x3];                                       // 0x009D(0x0003) padding
+	UScriptStruct::ICppStructOps*                      CppStructOps;                                             // 0x00A0(0x0008) MISSED OFFSET
 
 	static UClass* StaticClass()
 	{

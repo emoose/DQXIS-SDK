@@ -103,6 +103,8 @@ void OnLoadScreen();
 void Init_CustomActions();
 
 // DQXIHook.cpp
+typedef void* (*StaticConstructObject_InternalFn)(UClass* Class, UObject* InOuter, FName Name, void* SetFlags, void* InternalSetFlags, UObject* Template, bool bCopyTransientsFromClassDefaults, struct FObjectInstancingGraph* InstanceGraph, bool bAssumeTemplateIsArchetype);
+extern StaticConstructObject_InternalFn StaticConstructObject_Internal;
 void Init_DQXIHook();
 
 // FirstPerson.cpp

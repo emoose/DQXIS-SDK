@@ -6613,23 +6613,24 @@ struct FNamedCurveValue
 {
 	struct FName                                       Name;                                                     // 0x0000(0x0008) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
 	float                                              Value;                                                    // 0x0008(0x0004) (Edit, BlueprintVisi, ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData00[0x4];                                       // 0x000C(0x0004) MISSED OFFSET
+	unsigned char                                      PaddingC[0x4];                                            // 0x000C(0x0004) padding
 };
 
 // ScriptStruct Engine.TableRowBase
 // 0x0008
 struct FTableRowBase
 {
-	unsigned char                                      UnknownData00[0x8];                                       // 0x0000(0x0008) MISSED OFFSET
+	void*                                              Vftable;                                                  // 0x0000(0x0008) MISSED OFFSET
 };
 
 // ScriptStruct Engine.RollbackNetStartupActorInfo
 // 0x0030
 struct FRollbackNetStartupActorInfo
 {
-	unsigned char                                      UnknownData00[0x8];                                       // 0x0000(0x0008) MISSED OFFSET
+	FName                                              Name;                                                     // 0x0000(0x0008) MISSED OFFSET
 	class UObject*                                     Archetype;                                                // 0x0008(0x0008) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData01[0x18];                                      // 0x0010(0x0018) MISSED OFFSET
+	FVector                                            Location;                                                 // 0x0010(0x000C) MISSED OFFSET
+	FRotator                                           Rotation;                                                 // 0x001C(0x000C) MISSED OFFSET
 	class ULevel*                                      Level;                                                    // 0x0028(0x0008) (ZeroConstructor, IsPlainOldData)
 };
 
@@ -6638,16 +6639,18 @@ struct FRollbackNetStartupActorInfo
 struct FTextureLODGroup
 {
 	TEnumAsByte<ETextureGroup>                         Group;                                                    // 0x0000(0x0001) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData00[0xB];                                       // 0x0001(0x000B) MISSED OFFSET
+	unsigned char                                      Padding1[0x3];                                            // 0x0001(0x0003) padding
+	int                                                MinLODMipCount;                                           // 0x0004(0x0004) MISSED OFFSET
+	int                                                MaxLODMipCount;                                           // 0x0008(0x0004) MISSED OFFSET
 	int                                                LODBias;                                                  // 0x000C(0x0004) (ZeroConstructor, IsPlainOldData)
 	bool                                               bIgnoreLODBias;                                           // 0x0010(0x0001) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData01[0x3];                                       // 0x0011(0x0003) MISSED OFFSET
+	unsigned char                                      UnknownData01[0x3];                                       // 0x0011(0x0003) MISSED OFFSET (maybe not padding, might contain Filter field)
 	int                                                NumStreamedMips;                                          // 0x0014(0x0004) (ZeroConstructor, IsPlainOldData)
 	TEnumAsByte<ETextureMipGenSettings>                MipGenSettings;                                           // 0x0018(0x0001) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData02[0x3];                                       // 0x0019(0x0003) MISSED OFFSET
+	unsigned char                                      Padding19[0x3];                                           // 0x0019(0x0003) padding
 	int                                                MinLODSize;                                               // 0x001C(0x0004) (ZeroConstructor, IsPlainOldData)
 	int                                                MaxLODSize;                                               // 0x0020(0x0004) (ZeroConstructor, IsPlainOldData)
-	unsigned char                                      UnknownData03[0x4];                                       // 0x0024(0x0004) MISSED OFFSET
+	unsigned char                                      Padding24[0x4];                                           // 0x0024(0x0004) padding
 	struct FName                                       MinMagFilter;                                             // 0x0028(0x0008) (ZeroConstructor, IsPlainOldData)
 	struct FName                                       MipFilter;                                                // 0x0030(0x0008) (ZeroConstructor, IsPlainOldData)
 };

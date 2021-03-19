@@ -2232,6 +2232,19 @@ public:
 
 };
 
+struct FDebugTraceInfo
+{
+	FVector LineTraceStart;
+	FVector LineTraceEnd;
+	FVector HitNormalStart;
+	FVector HitNormalEnd;
+	FVector HitImpactNormalEnd;
+	FVector HitLocation;
+	float CapsuleHalfHeight;
+	float CapsuleRadius;
+	uint32_t bInsideOfObject : 1;
+	unsigned char Padding51[0x3];
+};
 
 // Class Engine.CheatManager
 // 0x0050 (0x0088 - 0x0038)
@@ -2240,7 +2253,20 @@ class UCheatManager : public UObject
 public:
 	class ADebugCameraController*                      DebugCameraControllerRef;                                 // 0x0038(0x0008) (ZeroConstructor, IsPlainOldData)
 	class UClass*                                      DebugCameraControllerClass;                               // 0x0040(0x0008) (Edit, BlueprintVisi, BlueprintReadOnly, ZeroConstructor, DisableEditOnInstance, IsPlainOldData)
-	unsigned char                                      UnknownData00[0x40];                                      // 0x0048(0x0040) MISSED OFFSET
+	uint32_t                                           bDebugCapsuleSweep : 1;                                   // 0x0048(0x0001) MISSED OFFSET
+	uint32_t                                           bDebugCapsuleTraceComplex : 1;                            // 0x0048(0x0001) MISSED OFFSET
+	uint32_t                                           bToggleAILogging : 1;                                     // 0x0048(0x0001) MISSED OFFSET
+	unsigned char                                      Padding49[0x3];                                           // 0x0049(0x0003) padding
+	float                                              DebugTraceDistance;                                       // 0x004C(0x0004) MISSED OFFSET
+	float                                              DebugCapsuleHalfHeight;                                   // 0x0050(0x0004) MISSED OFFSET
+	float                                              DebugCapsuleRadius;                                       // 0x0054(0x0004) MISSED OFFSET
+	float                                              DebugTraceDrawNormalLength;                               // 0x0058(0x0004) MISSED OFFSET
+	TEnumAsByte<ECollisionChannel>                     DebugTraceChannel;                                        // 0x005C(0x0001) MISSED OFFSET
+	unsigned char                                      Padding5D[0x3];                                           // 0x005D(0x0003) padding
+	TArray<FDebugTraceInfo>                            DebugTraceInfoList;                                       // 0x0060(0x0010) MISSED OFFSET
+	TArray<FDebugTraceInfo>                            DebugTracePawnInfoList;                                   // 0x0070(0x0010) MISSED OFFSET
+	int                                                CurrentTraceIndex;                                        // 0x0080(0x0004) MISSED OFFSET
+	int                                                CurrentTracePawnIndex;                                    // 0x0084(0x0004) MISSED OFFSET
 
 	static UClass* StaticClass()
 	{
