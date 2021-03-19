@@ -48,7 +48,7 @@ struct GameAddresses
   uintptr_t FName__Ctor;
   uintptr_t FString__Printf__VA;
   uintptr_t StaticConstructObject_Internal;
-  uintptr_t FWeakObjectPtr__operatorEquals;
+  uintptr_t FWeakObjectPtr__OperatorEquals;
   
   // Hooked functions
   uintptr_t SetsCharacterViewerResolution;

@@ -7,10 +7,6 @@
 // and with that, the UE4 dev console will be available even in Shipping builds!
 StaticConstructObject_InternalFn StaticConstructObject_Internal = nullptr;
 
-// TODO: move FWeakObjectPtr__operatorEquals into FWeakObjectPtr / TWeakObjectPtr class!
-typedef void(*FWeakObjectPtr__operatorEquals_Fn)(void* thisptr, UObject*);
-FWeakObjectPtr__operatorEquals_Fn FWeakObjectPtr__operatorEquals;
-
 typedef void* (*UGameViewportClient__SetupInitialLocalPlayerFn)(UGameViewportClient* thisptr, void* OutError);
 UGameViewportClient__SetupInitialLocalPlayerFn UGameViewportClient__SetupInitialLocalPlayer_Orig;
 void SetupViewportConsole(UGameViewportClient* viewport)
@@ -66,23 +62,25 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
   return 1;
 }
 
-typedef void(*FTripleModule__StartupModule__Fn)(FTripleModule*);
-FTripleModule__StartupModule__Fn FTripleModule__StartupModule__Orig;
+typedef void(*FTripleModule__StartupModule_Fn)(FTripleModule*);
+FTripleModule__StartupModule_Fn FTripleModule__StartupModule__Orig;
+
+typedef UObject*(*UClass__CreateDefaultObject_Fn)(UClass*);
 void FTripleModule__StartupModule__Hook(FTripleModule* thisptr)
 {
   FTripleModule__StartupModule__Orig(thisptr);
 
   // CheatManager field needs to be filled with a UTripleCheatManager object
-  // TODO: might need to check if ClassDefaultObject == 0, and call vtable if so (see FAssetRegistryModule::StartupModule disasm)
-
   auto cheatClass = UTripleCheatManager::StaticClass();
-  FWeakObjectPtr__operatorEquals(&thisptr->CheatManager, cheatClass->ClassDefaultObject);
+  if (!cheatClass->ClassDefaultObject)
+    cheatClass->CreateDefaultObject();
+
+  thisptr->CheatManager = cheatClass->ClassDefaultObject;
 }
 
 void Init_DQXIHook()
 {
   StaticConstructObject_Internal = reinterpret_cast<StaticConstructObject_InternalFn>(mBaseAddress + GameAddrs->StaticConstructObject_Internal);
-  FWeakObjectPtr__operatorEquals = reinterpret_cast<FWeakObjectPtr__operatorEquals_Fn>(mBaseAddress + GameAddrs->FWeakObjectPtr__operatorEquals);
 
   if (Options.EnableDevConsole)
   {

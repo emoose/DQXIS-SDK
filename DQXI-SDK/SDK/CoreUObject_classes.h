@@ -44,12 +44,11 @@ public:
 
 	std::string GetFullName() const;
 
-	typedef void (*ProcessEventFn)(UObject*, class UFunction*, void*);
 
-	inline void ProcessEvent(class UFunction* function, void* parms) {
-
+	inline void ProcessEvent(class UFunction* function, void* parms)
+	{
+		typedef void (*ProcessEventFn)(UObject*, class UFunction*, void*);
 		ProcessEventFn fn = (ProcessEventFn)(mBaseAddress + GameAddrs->UObject__ProcessEvent);
-		//auto fn2 = GetVFunction<void(*)(UObject*, class UFunction*, void*)>(this, 393);
 
 		if (AllowFunctionCalls)
 			fn(this, function, parms);
@@ -376,6 +375,11 @@ public:
 	UObject*                                           ClassDefaultObject;                                      // 0x0108(0x0008) MISSED OFFSET
 	
 	unsigned char                                      UnknownData110[0x120];                                   // 0x0110(0x0120) MISSED OFFSET
+
+	inline UObject* CreateDefaultObject()
+	{
+		return GetVFunction<UObject*(*)(UClass*)>(this, 0x66)(this);
+	}
 
 	template<typename T>
 	inline T* CreateDefaultObject()

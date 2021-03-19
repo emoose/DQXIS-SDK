@@ -421,9 +421,17 @@ class TMap
 struct FWeakObjectPtr
 {
 public:
+	typedef void(*OperatorEquals_Fn)(void*, const UObject*);
+	static OperatorEquals_Fn OperatorEquals;
+
 	inline bool SerialNumbersMatch(FUObjectItem* ObjectItem) const
 	{
 		return ObjectItem->SerialNumber == ObjectSerialNumber;
+	}
+
+	inline void operator=(const UObject* Object)
+	{
+		OperatorEquals(this, Object);
 	}
 
 	bool IsValid() const;
@@ -437,6 +445,7 @@ public:
 template<class T, class TWeakObjectPtrBase = FWeakObjectPtr>
 struct TWeakObjectPtr : private TWeakObjectPtrBase
 {
+
 public:
 	inline T* Get() const
 	{
@@ -451,6 +460,12 @@ public:
 	inline T* operator->() const
 	{
 		return Get();
+	}
+
+	template<class U>
+	inline void operator=(const U* Object)
+	{
+		TWeakObjectPtrBase::operator=(Object);
 	}
 
 	inline bool IsValid() const

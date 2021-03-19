@@ -356,6 +356,8 @@ void InitPlugin()
   FName::Ctor_Ptr = reinterpret_cast<FName::Ctor_Fn>(mBaseAddress + GameAddrs->FName__Ctor);
   FString::Printf = reinterpret_cast<FString::Printf__VA_Fn>(mBaseAddress + GameAddrs->FString__Printf__VA);
 
+  FWeakObjectPtr::OperatorEquals = reinterpret_cast<FWeakObjectPtr::OperatorEquals_Fn>(mBaseAddress + GameAddrs->FWeakObjectPtr__OperatorEquals);
+
   MH_Initialize();
 
   Init_CustomActions();    
