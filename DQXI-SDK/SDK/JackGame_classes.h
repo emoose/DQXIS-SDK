@@ -8475,7 +8475,15 @@ public:
 class AJackDebugMenu : public AActor
 {
 public:
-	unsigned char                                      UnknownData00[0x48];                                      // 0x0398(0x0048) MISSED OFFSET
+	void*                                              Unknown398;                                               // 0x0398(0x0008) MISSED OFFSET
+	TWeakObjectPtr<class UObject>                      Unknown3A0;                                               // 0x03A0(0x0008) MISSED OFFSET
+	void*                                              Unknown3A8;                                               // 0x03A8(0x0008) MISSED OFFSET
+	void*                                              Unknown3B0;                                               // 0x03B0(0x0008) MISSED OFFSET
+	void*                                              Unknown3B8;                                               // 0x03B8(0x0008) MISSED OFFSET
+	void*                                              Unknown3C0;                                               // 0x03C0(0x0008) MISSED OFFSET
+	TArray<void*>                                      DebugMenuCategories;                                      // 0x03C8(0x0010) MISSED OFFSET (could be FName array, initialized with 0x29 entries, EJackDebugMenuCategory ends at 0x29...)
+	unsigned char                                      Unknown3D8;                                               // 0x03D8(0x0001) MISSED OFFSET
+	unsigned char                                      Padding3D9[0x7];                                          // 0x03D9(0x0007) padding
 
 	static UClass* StaticClass()
 	{
