@@ -30,8 +30,8 @@ public:
 	class UClass*                                      Class;                                                    // 0x0010(0x0008) NOT AUTO-GENERATED PROPERTY
 	FName                                              Name;                                                     // 0x0018(0x0008) NOT AUTO-GENERATED PROPERTY
 	class UObject*                                     Outer;                                                    // 0x0020(0x0008) NOT AUTO-GENERATED PROPERTY
-	TWeakObjectPtr<class UObject>                      MaybeDefaultObject;                                       // 0x0028(0x0008) sometimes points to Class.ClassDefaultObject, but not always?
-	bool                                               UnknownData30;                                            // 0x0030(0x0001) (set to 1 in every UObject I checked?)
+	TWeakObjectPtr<class UObject>                      ObjectArchetype;                                          // 0x0028(0x0008) gets set by custom UObject::GetArchetypeFromRequiredInfo (0x140ECB9BF is FWeakObjectPtr::operator= call that sets it) - maybe custom for UE4 switch version?
+	bool                                               ObjectArchetype_IsSet;                                    // 0x0030(0x0001) if set to 1 the cached ObjectArchetype above is used, else full UObject::GetArchetypeFromRequiredInfo needs to be ran
 	unsigned char                                      UnknownData31[0x7];                                       // 0x0031(0x0007) (padding?)
 
 	static inline TUObjectArray& GetGlobalObjects()
