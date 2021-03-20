@@ -23,35 +23,40 @@ inline Fn GetVFunction(const void* instance, std::size_t index)
 
 class UObject;
 
+enum class EInternalObjectFlags : int32_t
+{
+	None = 0,
+
+	ReachableInCluster = 1 << 23, //   0x800000
+	ClusterRoot = 1 << 24,        //  0x1000000
+	Native = 1 << 25,             //  0x2000000
+	Async = 1 << 26,              //  0x4000000
+	AsyncLoading = 1 << 27,       //  0x8000000
+	Unreachable = 1 << 28,        // 0x10000000
+	PendingKill = 1 << 29,        // 0x20000000
+	RootSet = 1 << 30,            // 0x40000000
+
+	GarbageCollectionKeepFlags = Native | Async | AsyncLoading,
+	AllFlags = ReachableInCluster | ClusterRoot | Native | Async | AsyncLoading | Unreachable | PendingKill | RootSet
+};
+EInternalObjectFlags operator&(EInternalObjectFlags lhs, EInternalObjectFlags rhs);
+
 class FUObjectItem
 {
 public:
 	UObject* Object;
-	int Flags;
+	EInternalObjectFlags Flags;
 	int ClusterIndex;
 	int SerialNumber;
 	unsigned char Unknown_00[4];
 
-
-	enum class ObjectFlags : int32_t
+	inline bool IsUnreachable() const 
 	{
-		None = 0,
-		Native = 1 << 25,
-		Async = 1 << 26,
-		AsyncLoading = 1 << 27,
-		Unreachable = 1 << 28,
-		PendingKill = 1 << 29,
-		RootSet = 1 << 30,
-		NoStrongReference = 1 << 31
-	};
-
-	inline bool IsUnreachable() const
-	{
-		return !!(Flags & static_cast<std::underlying_type_t<ObjectFlags>>(ObjectFlags::Unreachable));
+		return (Flags & EInternalObjectFlags::Unreachable) == EInternalObjectFlags::Unreachable;
 	}
 	inline bool IsPendingKill() const
 	{
-		return !!(Flags & static_cast<std::underlying_type_t<ObjectFlags>>(ObjectFlags::PendingKill));
+		return (Flags & EInternalObjectFlags::PendingKill) == EInternalObjectFlags::PendingKill;
 	}
 };
 class TUObjectArray

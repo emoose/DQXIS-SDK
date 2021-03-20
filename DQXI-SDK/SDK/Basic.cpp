@@ -21,6 +21,16 @@ FString::Printf__VA_Fn FString::Printf = nullptr;
 
 FWeakObjectPtr::OperatorEquals_Fn FWeakObjectPtr::OperatorEquals = nullptr;
 
+// TODO: operator|, operator|=, operator^...
+// or we can just use https://github.com/grisumbras/enum-flags maybe
+EInternalObjectFlags operator&(EInternalObjectFlags lhs, EInternalObjectFlags rhs)
+{
+	return static_cast<EInternalObjectFlags> (
+		static_cast<std::underlying_type<EInternalObjectFlags>::type>(lhs) &
+		static_cast<std::underlying_type<EInternalObjectFlags>::type>(rhs)
+		);
+}
+
 //---------------------------------------------------------------------------
 bool FWeakObjectPtr::IsValid() const
 {

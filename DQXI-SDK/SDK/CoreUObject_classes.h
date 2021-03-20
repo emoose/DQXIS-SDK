@@ -16,6 +16,40 @@ namespace SDK
 // Classes
 //---------------------------------------------------------------------------
 
+enum EObjectFlags
+{
+	RF_NoFlags = 0x0,
+	RF_Public = 0x1,
+	RF_Standalone = 0x2,
+	RF_MarkAsNative = 0x4,
+	RF_Transactional = 0x8,
+	RF_ClassDefaultObject = 0x10,
+	RF_ArchetypeObject = 0x20,
+	RF_Transient = 0x40,
+	RF_MarkAsRootSet = 0x80,
+	RF_TagGarbageTemp = 0x100,
+	RF_NeedInitialization = 0x200,
+	RF_NeedLoad = 0x400,
+	RF_KeepForCooker = 0x800,
+	RF_NeedPostLoad = 0x1000,
+	RF_NeedPostLoadSubobjects = 0x2000,
+	RF_NewerVersionExists = 0x4000,
+	RF_BeginDestroyed = 0x8000,
+	RF_FinishDestroyed = 0x10000,
+	RF_BeingRegenerated = 0x20000,
+	RF_DefaultSubObject = 0x40000,
+	RF_WasLoaded = 0x80000,
+	RF_TextExportTransient = 0x100000,
+	RF_LoadCompleted = 0x200000,
+	RF_InheritableComponentTemplate = 0x400000,
+	RF_DuplicateTransient = 0x800000,
+	RF_StrongRefOnFrame = 0x1000000,
+	RF_NonPIEDuplicateTransient = 0x2000000,
+	RF_Dynamic = 0x4000000,
+	RF_WillBeLoaded = 0x8000000,
+};
+
+
 // Class CoreUObject.Object
 // 0x0038
 class UObject
@@ -25,7 +59,7 @@ public:
 	static FUObjectArray* GObjects;
 
 	uint64_t*                                          Vtable;                                                   // 0x0000(0x0008) NOT AUTO-GENERATED PROPERTY
-	int32_t                                            ObjectFlags;                                              // 0x0008(0x0004) NOT AUTO-GENERATED PROPERTY
+	EObjectFlags                                       ObjectFlags;                                              // 0x0008(0x0004) NOT AUTO-GENERATED PROPERTY
 	int32_t                                            InternalIndex;                                            // 0x000C(0x0004) NOT AUTO-GENERATED PROPERTY
 	class UClass*                                      Class;                                                    // 0x0010(0x0008) NOT AUTO-GENERATED PROPERTY
 	FName                                              Name;                                                     // 0x0018(0x0008) NOT AUTO-GENERATED PROPERTY
