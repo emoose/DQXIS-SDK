@@ -62,7 +62,7 @@ bool FPakPlatformFile__IsNonPakFilenameAllowed_Hook(void* thisptr, const FString
   return 1;
 }
 
-typedef UTripleCheatManager*(*FTripleModule__GetCheatManager_Fn)(FTripleModule*);
+typedef UTripleCheatManager* (*FTripleModule__GetCheatManager_Fn)(FTripleModule* thisptr);
 FTripleModule__GetCheatManager_Fn FTripleModule__GetCheatManager_Orig;
 UTripleCheatManager* FTripleModule__GetCheatManager_Hook(FTripleModule* thisptr)
 {
@@ -75,24 +75,24 @@ UTripleCheatManager* FTripleModule__GetCheatManager_Hook(FTripleModule* thisptr)
   return FTripleModule__GetCheatManager_Orig(thisptr);
 }
 
-typedef void*(*Triple_CharWalk_Fn)(uint8_t*);
+typedef void* (*Triple_CharWalk_Fn)(uint8_t* thisptr);
 Triple_CharWalk_Fn Triple_CharWalk_Orig;
-void* Triple_CharWalk_Hook(uint8_t* a1)
+void* Triple_CharWalk_Hook(uint8_t* thisptr)
 {
-  float* runSpeed = reinterpret_cast<float*>(a1 + 0x20);
-  float curRunSpeed = *runSpeed;
+  auto runSpeed = reinterpret_cast<float*>(thisptr + 0x20);
+  auto curRunSpeed = *runSpeed;
 
   // cheat command variable
-  bool tripleRunRate_IsSet = *reinterpret_cast<bool*>(mBaseAddress + GameAddrs->TripleRunRate_IsSet);
+  auto tripleRunRate_IsSet = *reinterpret_cast<bool*>(mBaseAddress + GameAddrs->TripleRunRate_IsSet);
   if (tripleRunRate_IsSet)
   {
-    float tripleRunRate = *reinterpret_cast<float*>(mBaseAddress + GameAddrs->TripleRunRate_Value);
+    auto tripleRunRate = *reinterpret_cast<float*>(mBaseAddress + GameAddrs->TripleRunRate_Value);
 
     // Multiply the run speed variable used in CharWalk
     *runSpeed = *runSpeed * tripleRunRate;
   }
 
-  auto res = Triple_CharWalk_Orig(a1);
+  auto res = Triple_CharWalk_Orig(thisptr);
 
   // Set var back to what it was
   *runSpeed = curRunSpeed;

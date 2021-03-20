@@ -30,8 +30,7 @@ public:
 	class UClass*                                      Class;                                                    // 0x0010(0x0008) NOT AUTO-GENERATED PROPERTY
 	FName                                              Name;                                                     // 0x0018(0x0008) NOT AUTO-GENERATED PROPERTY
 	class UObject*                                     Outer;                                                    // 0x0020(0x0008) NOT AUTO-GENERATED PROPERTY
-	uint32_t                                           UnknownData28;                                            // 0x0028(0x0004)
-	uint32_t                                           UnknownData2C;                                            // 0x002C(0x0004)
+	TWeakObjectPtr<class UObject>                      MaybeDefaultObject;                                       // 0x0028(0x0008) sometimes points to Class.ClassDefaultObject, but not always?
 	bool                                               UnknownData30;                                            // 0x0030(0x0001) (set to 1 in every UObject I checked?)
 	unsigned char                                      UnknownData31[0x7];                                       // 0x0031(0x0007) (padding?)
 
@@ -346,15 +345,33 @@ struct FRepRecord
 	unsigned char PaddingC[0x4];
 };
 
+class FClassBaseChain
+{
+protected:
+	FClassBaseChain(const FClassBaseChain&) = delete;
+	FClassBaseChain& operator=(const FClassBaseChain&) = delete;
+
+	inline bool IsAUsingClassArray(const FClassBaseChain& Parent) const
+	{
+		auto NumParentClassBasesInChainMinusOne = Parent.NumClassBasesInChainMinusOne;
+		return NumParentClassBasesInChainMinusOne <= NumClassBasesInChainMinusOne && ClassBaseChainArray[NumParentClassBasesInChainMinusOne] == &Parent;
+	}
+
+private:
+	FClassBaseChain** ClassBaseChainArray;
+	int32_t NumClassBasesInChainMinusOne;
+	unsigned char PaddingC[0x4];
+
+	friend class UClass;
+};
+
 // Class CoreUObject.Class
 // 0x0198 (0x0230 - 0x0098)
-class UClass : public UStruct
+class UClass : public UStruct, public FClassBaseChain
 {
 public:
-	unsigned char                                      UnknownData98[0x10];                                     // 0x0098(0x0010) MISSED OFFSET
-
 	typedef void (*ClassConstructorType)(void*);
-	typedef UObject*(*ClassVTableHelperCtorCallerType)(void* Helper);
+	typedef UObject* (*ClassVTableHelperCtorCallerType)(void* Helper);
 	typedef void (*ClassAddReferencedObjectsType)(UObject*, class FReferenceCollector&);
 	typedef UClass* (*StaticClassFunctionType)();
 
