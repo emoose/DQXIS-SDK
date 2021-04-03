@@ -4,6 +4,7 @@ GameAddresses GameAddrs_Steam =
 {
   .CheckDataAddr = 0xD8,   // NtHeader.FileHeader.TimeDateStamp
   .CheckData = 1607981102, // 2020/12/14 21:25:02
+  .CheckDataJP = 1607969596, // 2020/12/14 18:13:16
 
   .GUObjectArray = 0x5D83BF8,
   .Names = 0x5D7AE20,
@@ -62,6 +63,7 @@ GameAddresses GameAddrs_UWP =
 {
   .CheckDataAddr = 0x1F0, // NtHeader.FileHeader.TimeDateStamp
   .CheckData = 1603439301, // 2020/10/23 07:48:21
+  .CheckDataJP = 0, // unknown
 
   .GUObjectArray = 0x5CE48B8,
   .Names = 0x5E21158,
@@ -121,7 +123,10 @@ bool GameAddresses::CheckDataValid()
 {
   if (!mBaseAddress)
     return false;
-  return CheckData == *reinterpret_cast<unsigned int*>(mBaseAddress + CheckDataAddr);
+
+  auto checkDataValue = *reinterpret_cast<unsigned int*>(mBaseAddress + CheckDataAddr);
+
+  return CheckData == checkDataValue || (CheckDataJP != 0 && CheckDataJP == checkDataValue);
 }
 
 bool UpdateGameAddrs()

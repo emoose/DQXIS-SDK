@@ -30,6 +30,7 @@ struct GameAddresses
   // Check data
   uintptr_t CheckDataAddr;
   unsigned int CheckData;
+  unsigned int CheckDataJP; // JP version seems to use a different build-date, but code is pretty much identical
 
   // Variables
   uintptr_t GUObjectArray; // aka GObjects

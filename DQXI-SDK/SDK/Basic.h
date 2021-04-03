@@ -48,7 +48,7 @@ public:
 	EInternalObjectFlags Flags;
 	int ClusterIndex;
 	int SerialNumber;
-	unsigned char Unknown_00[4];
+	unsigned char Padding14[0x4];
 
 	inline bool IsUnreachable() const 
 	{
