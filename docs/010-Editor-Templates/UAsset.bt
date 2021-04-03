@@ -1,0 +1,639 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: UE4 UAsset
+//   Authors: emoose
+//   Version: 4.26.1
+//   Purpose: Parse UE4 UAsset headers
+//  Category: Game
+// File Mask: *.uasset
+//  ID Bytes: C1 83 2A 9E
+//   History: 
+//
+// Currently supports up to FileVersionUE4 <= 522 (4.26.1)
+// TODO: SearchableNamesOffset, ThumbnailTableOffset
+// Need to check: F(Enum/Guid)CustomVersion, FAssetRegistry, SoftPackageReferencesOffset
+//------------------------------------------------
+
+// UNVERSIONED_VERSION: the UE4 version to use for unversioned files (cooked files are usually unversioned)
+// You can find this from the games GPackageFileUE4Version value
+// Known versions:
+//   DQXIS: 514
+
+local int UNVERSIONED_VERSION = 514;
+
+// WITH_EDITORONLY_DATA: Don't think this can be inferred, so change this to 1 if you're working with non-shipping data
+local int WITH_EDITORONLY_DATA = 0;
+
+local int64 fileSize = FileSize();
+local int fileVersionUE4;
+
+typedef union
+{
+    int Value<format=hex>;
+    struct
+    {        
+	    int RF_Public : 1;
+	    int RF_Standalone : 1;
+	    int RF_MarkAsNative : 1;
+	    int RF_Transactional : 1;
+	    int RF_ClassDefaultObject : 1;
+	    int RF_ArchetypeObject : 1;
+	    int RF_Transient : 1;
+	    int RF_MarkAsRootSet : 1;
+	    int RF_TagGarbageTemp : 1;
+	    int RF_NeedInitialization : 1;
+	    int RF_NeedLoad : 1;
+	    int RF_KeepForCooker : 1;
+	    int RF_NeedPostLoad : 1;
+	    int RF_NeedPostLoadSubobjects : 1;
+	    int RF_NewerVersionExists : 1;
+	    int RF_BeginDestroyed : 1;
+	    int RF_FinishDestroyed : 1;
+	    int RF_BeingRegenerated : 1;
+	    int RF_DefaultSubObject : 1;
+	    int RF_WasLoaded : 1;
+	    int RF_TextExportTransient : 1;
+	    int RF_LoadCompleted : 1;
+	    int RF_InheritableComponentTemplate : 1;
+	    int RF_DuplicateTransient : 1;
+	    int RF_StrongRefOnFrame : 1;
+	    int RF_NonPIEDuplicateTransient : 1;
+	    int RF_Dynamic : 1;
+	    int RF_WillBeLoaded : 1;
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int RF_HasExternalPackage : 1;
+    } Flags;
+} EObjectFlags<read=ReadEObjectFlags>;
+
+wstring ReadEObjectFlags(EObjectFlags& val)
+{
+    string s;
+    SPrintf(s, "%Xh", val.Value);
+    return s;
+}
+
+typedef union
+{
+    int Value<format=hex>;
+    struct
+    {
+        int PKG_NewlyCreated : 1;
+        int PKG_ClientOptional : 1;
+        int PKG_ServerSideOnly : 1;
+        int Unused_0x8 : 1;
+        int PKG_CompiledIn : 1;
+        int PKG_ForDiffing : 1;
+        int PKG_EditorOnly : 1;
+        int PKG_Developer : 1;
+
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int PKG_UncookedOnly : 1;
+        else
+            int Unused_0x100 : 1;
+
+        int Unused_0x200 : 1;
+        int Unused_0x400 : 1;
+        int Unused_0x800 : 1;
+        int Unused_0x1000 : 1;
+
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int PKG_UnversionedProperties : 1;
+        else
+            int Unused_0x2000 : 1;
+
+        int PKG_ContainsMapData : 1;
+        int PKG_Need : 1;
+        int PKG_Compiling : 1;
+        int PKG_ContainsMap : 1;
+        int PKG_RequiresLocalizationGather : 1;
+        int PKG_DisallowLazyLoading : 1;
+        int PKG_PlayInEditor : 1;
+        int PKG_ContainsScript : 1;
+
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int PKG_DisallowExport : 1;
+        else
+            int Unused_0x400000 : 1;
+
+        int Unused_0x800000 : 1;
+        int Unused_0x1000000 : 1;
+        int Unused_0x2000000 : 1;
+        int Unused_0x4000000 : 1;
+        int Unused_0x8000000 : 1;
+
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+        {
+            int PKG_DynamicImports : 1;
+            int PKG_RuntimeGenerated : 1;
+        }
+        else
+        {
+            int Unused_0x10000000 : 1;
+            int Unused_0x20000000 : 1;
+        }
+        int PKG_ReloadingForCooker : 1;
+        int PKG_FilterEditorOnly : 1;
+    } Flags;
+} EPackageFlags<read=ReadEPackageFlags>;
+
+wstring ReadEPackageFlags(EPackageFlags& val)
+{
+    string s;
+    SPrintf(s, "%Xh", val.Value);
+    return s;
+}
+
+typedef union
+{
+    int Value<format=hex>;
+    struct
+    {
+        int COMPRESS_ZLIB : 1;
+        int COMPRESS_GZIP : 1;
+
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int COMPRESS_Custom : 1;
+        else
+            int Unused_0x4 : 1;
+
+        int Unused_0x8 : 1;
+
+        int COMPRESS_BiasMemory : 1;
+        int COMPRESS_BiasSpeed : 1;
+        int Unused_0x40 : 1;
+        if (fileVersionUE4 > 514) // not in 4.18.3 / 514
+            int COMPRESS_SourceIsPadded : 1;
+        else
+            int Unused_0x80 : 1;
+    } Flags;
+} ECompressionFlags<read=ReadECompressionFlags>;
+
+wstring ReadECompressionFlags(ECompressionFlags& val)
+{
+    string s;
+    SPrintf(s, "%Xh", val.Value);
+    return s;
+}
+
+typedef struct
+{
+    byte Value[0x10];
+} FGuid<read=ReadFGuid>;
+
+// TODO: read this in actual guid form
+wstring ReadFGuid(FGuid& val)
+{
+    string s; int x;
+    for (x = 0; x < 0x10; x++)
+        SPrintf(s, "%s%02X", s, val.Value[x] & 0xFF);
+    return s;
+}
+
+typedef struct 
+{
+    int Size;
+    if (Size < 0)
+    {
+        local int realSize = -Size;
+        wchar_t Value[realSize] <optimize=false>;
+    }
+    else
+        char Value[Size] <optimize=false>;
+} FString<read=ReadFString>;
+
+wstring ReadFString(FString& val)
+{
+    if (val.Size == 0)
+        return "";
+    
+    return val.Value;
+}
+
+typedef struct
+{
+    FString Name;
+    if (fileVersionUE4 >= 504) // VER_UE4_NAME_HASHES_SERIALIZED
+    {
+        ushort NonCasePreservingHash;
+        ushort CasePreservingHash;
+    }
+} FNameEntry<read=ReadFNameEntry>;
+
+wstring ReadFNameEntry(FNameEntry& val)
+{
+    return ReadFString(val.Name);
+}
+
+typedef struct
+{
+    int Index;
+    int InstanceNum;
+} FName<read=ReadFName>;
+
+wstring ReadFName(FName& val)
+{
+    wstring s = ReadFNameEntry(Names[val.Index]);
+    if (val.InstanceNum == 0)
+        return s;
+
+    string instance;
+    SPrintf(instance, "++%d++", val.InstanceNum);
+
+    return s + instance;
+}
+
+typedef struct
+{
+    int Index;
+} FPackageIndex<read=ReadFPackageIndex>;
+
+wstring ReadFPackageIndex(FPackageIndex& val)
+{
+    local int importIndex = (-val.Index);
+    local int exportIndex = val.Index;
+    importIndex--;
+    exportIndex--;
+    if (val.Index == 0)
+        return "n/a";
+    if (val.Index < 0)
+        return "IMPORT: " + ReadFObjectImport(ImportMap[importIndex]);
+    else
+        return "EXPORT: " + ReadFObjectExport(ExportMap[exportIndex]);
+}
+
+wstring ReadFPackageIndexShort(FPackageIndex& val)
+{
+    local int importIndex = (-val.Index);
+    local int exportIndex = val.Index;
+    importIndex--;
+    exportIndex--;
+    if (val.Index == 0)
+        return "";
+    if (val.Index < 0)
+        return ReadFObjectImportShort(ImportMap[importIndex]);
+    else
+        return ReadFObjectExportShort(ExportMap[exportIndex]);
+}
+
+typedef struct
+{
+    FName ClassPackage;
+    FName ClassName;
+
+    FPackageIndex OuterIndex;
+    FName ObjectName;
+
+    if (fileVersionUE4 >= 520 && WITH_EDITORONLY_DATA != 0) // VER_UE4_NON_OUTER_PACKAGE_IMPORT
+        FName PackageName;
+ 
+} FObjectImport<read=ReadFObjectImport>;
+
+wstring ReadFObjectImport(FObjectImport& val)
+{
+    return ReadFName(val.ClassName) + ": " + ReadFName(val.ObjectName);
+}
+
+wstring ReadFObjectImportShort(FObjectImport& val)
+{
+    return ReadFName(val.ObjectName);
+}
+
+typedef struct
+{
+    FPackageIndex ClassIndex;
+    FPackageIndex SuperIndex;
+    if (fileVersionUE4 >= 508) // VER_UE4_TemplateIndex_IN_COOKED_EXPORTS
+        FPackageIndex TemplateIndex;
+
+    FPackageIndex OuterIndex;
+    FName ObjectName;
+
+    EObjectFlags ObjectFlags;
+
+    if (fileVersionUE4 >= 511) // VER_UE4_64BIT_EXPORTMAP_SERIALSIZES
+    {
+        int64 SerialSize;
+        int64 SerialOffset;
+    }
+    else
+    {
+        int SerialSize;
+        int SerialOffset;
+    }
+    int bForcedExport;
+    int bNotForClient;
+    int bNotForServer;
+    FGuid PackageGuid;
+    EPackageFlags PackageFlags;
+    if (fileVersionUE4 >= 365) // VER_UE4_LOAD_FOR_EDITOR_GAME
+        int bNotAlwaysLoadedForEditorGame;
+
+    if (fileVersionUE4 >= 485) // VER_UE4_COOKED_ASSETS_IN_EDITOR_SUPPORT
+        int bIsAsset;
+
+    if (fileVersionUE4 >= 507) // VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS
+    {
+        int FirstExportDependency;
+        int SerializationBeforeSerializationDependencies;
+        int CreateBeforeSerializationDependencies;
+        int SerializationBeforeCreateDependencies;
+        int CreateBeforeCreateDependencies;
+    }
+} FObjectExport<read=ReadFObjectExport>;
+
+wstring ReadFObjectExport(FObjectExport& val)
+{
+    return ReadFPackageIndexShort(val.ClassIndex) + ": " + ReadFName(val.ObjectName);
+}
+
+wstring ReadFObjectExportShort(FObjectExport& val)
+{
+    return ReadFName(val.ObjectName);
+}
+
+struct FGenerationInfo
+{
+    int ExportCount;
+    int NameCount;
+};
+
+typedef struct
+{
+    ushort Major;
+    ushort Minor;
+    ushort Patch;
+    uint Changelist;
+    FString Branch;
+} FEngineVersion<read=ReadFEngineVersion>;
+
+wstring ReadFEngineVersion(FEngineVersion& val)
+{
+    string s;
+    SPrintf(s, "v%d.%d.%d", val.Major, val.Minor, val.Patch);
+    if (val.Changelist != 0)
+        SPrintf(s, "%s (CL %d)", s, val.Changelist);
+
+    wstring ret = s;
+    if (val.Branch.Size != 0)
+    {
+        ret += " (";
+        ret += ReadFString(val.Branch);
+        ret += ")";
+    }
+    return ret;
+}
+
+struct FCompressedChunk
+{
+    int UncompressedOffset;
+    int UncompressedSize;
+    int CompressedOffset;
+    int CompressedSize;
+};
+
+typedef struct
+{
+    uint32 Tag;
+    int Version;
+} FEnumCustomVersion<read=ReadFEnumCustomVersion>;
+
+wstring ReadFEnumCustomVersion(FEnumCustomVersion& val)
+{
+    string s;
+    SPrintf(s, "EnumTag%u v%d", val.Tag, val.Version);
+    return s;
+}
+
+typedef struct
+{
+    FGuid Key;
+    int Version;
+    FString FriendlyName;
+} FGuidCustomVersion<read=ReadFGuidCustomVersion>;
+
+wstring ReadFGuidCustomVersion(FGuidCustomVersion& val)
+{
+    string s = ReadFGuid(val.Key);
+    SPrintf(s, " v%d (%s)", val.Version, s);
+
+    wstring ret = s;
+    ret = ReadFString(val.FriendlyName) + ret;
+    return ret;
+}
+
+typedef struct
+{
+    FGuid Key;
+    int Version;
+} FCustomVersion<read=ReadFCustomVersion>;
+
+wstring ReadFCustomVersion(FCustomVersion& val)
+{
+    string s = ReadFGuid(val.Key);
+    SPrintf(s, "%s v%d", s, val.Version);
+    return s;
+}
+
+struct FPackageFileSummary
+{
+    uint Tag <format=hex>;
+    int LegacyFileVersion;
+    int LegacyUE3Version;
+    int FileVersionUE4;
+    int FileVersionLicenseeUE4;
+
+    fileVersionUE4 = FileVersionUE4;
+    if (FileVersionUE4 == 0 && FileVersionLicenseeUE4 == 0)
+        fileVersionUE4 = UNVERSIONED_VERSION;
+
+    int CustomVersionCount;
+
+    // TODO: need to check all these are parsing properly
+    if (LegacyFileVersion == -2)
+        FEnumCustomVersion CustomVersions[CustomVersionCount];
+    else if (LegacyFileVersion < -2 && LegacyFileVersion >= -5)
+        FGuidCustomVersion CustomVersions[CustomVersionCount];
+    else if (LegacyFileVersion < -5)
+        FCustomVersion CustomVersions[CustomVersionCount];
+
+    int TotalHeaderSize <format=hex>;
+    FString FolderName;
+
+    EPackageFlags PackageFlags;
+    int NameCount;
+    int NameOffset <format=hex>;
+
+    if (fileVersionUE4 >= 516) // VER_UE4_ADDED_PACKAGE_SUMMARY_LOCALIZATION_ID
+        FString LocalizationId;
+
+    if (fileVersionUE4 >= 459) // VER_UE4_SERIALIZE_TEXT_IN_PACKAGES
+    {
+        int GatherableTextDataCount;
+        int GatherableTextDataOffset <format=hex>;
+    }
+    int ExportCount;
+    int ExportOffset <format=hex>;
+    int ImportCount;
+    int ImportOffset <format=hex>;
+    int DependsOffset <format=hex>;
+    if (fileVersionUE4 >= 214) // VER_UE4_OLDEST_LOADABLE_PACKAGE
+    {
+        if (fileVersionUE4 >= 384) // VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP
+        {
+            int SoftPackageReferencesCount;
+            int SoftPackageReferencesOffset <format=hex>;
+        }
+    
+        if (fileVersionUE4 >= 510) // VER_UE4_ADDED_SEARCHABLE_NAMES
+            int SearchableNamesOffset <format=hex>;
+    
+        int ThumbnailTableOffset <format=hex>;
+    
+        FGuid Guid;
+        
+        if (fileVersionUE4 >= 518) // VER_UE4_ADDED_PACKAGE_OWNER
+        {
+            FGuid PersistentGuid;
+
+            if (fileVersionUE4 < 520) // removed in VER_UE4_NON_OUTER_PACKAGE_IMPORT
+                FGuid OwnerPersistentGuid;
+        }
+    
+        int GenerationCount;
+        FGenerationInfo Generations[GenerationCount];
+        
+        if (fileVersionUE4 >= 336) // VER_UE4_ENGINE_VERSION_OBJECT
+            FEngineVersion SavedByEngineVersion;
+        else
+            int SavedByEngineVersion; // changelist
+    
+        if (fileVersionUE4 >= 444) // VER_UE4_PACKAGE_SUMMARY_HAS_COMPATIBLE_ENGINE_VERSION
+            FEngineVersion CompatibleWithEngineVersion;
+    
+        ECompressionFlags CompressionFlags;
+        
+        int CompressedChunkCount;
+        FCompressedChunk CompressedChunks[CompressedChunkCount];
+        
+        uint PackageSource <format=hex>;
+        
+        int AdditionalPackagesToCookCount;
+        FString AdditionalPackagesToCookCount[AdditionalPackagesToCookCount];
+        
+        if (LegacyFileVersion > -7)
+            int NumTextureAllocations;
+    
+        int AssetRegistryDataOffset <format=hex>;
+        int64 BulkDataStartOffset <format=hex>;
+    
+        if (fileVersionUE4 >= 224) // VER_UE4_WORLD_LEVEL_INFO
+            int WorldTileInfoDataOffset <format=hex>;
+        
+        if (fileVersionUE4 >= 326) // VER_UE4_CHANGED_CHUNKID_TO_BE_AN_ARRAY_OF_CHUNKIDS
+        {
+            int ChunkIdCount;
+            int ChunkIds[ChunkIdCount];
+        }
+        else
+        {
+            if (fileVersionUE4 >= 278) // VER_UE4_ADDED_CHUNKID_TO_ASSETDATA_AND_UPACKAGE
+                int ChunkId;
+        }
+        
+        if (fileVersionUE4 >= 507) // VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS
+        {
+            int PreloadDependencyCount;
+            int PreloadDependencyOffset <format=hex>;
+        }
+    }
+};
+
+typedef struct
+{
+    FString Key;
+    FString Value;
+} FAssetDataTag<read=ReadFAssetDataTag>;
+
+wstring ReadFAssetDataTag(FAssetDataTag& val)
+{
+    return ReadFString(val.Key) + ": " + ReadFString(val.Value);
+}
+
+struct FAssetData
+{
+    FString ObjectPath;
+    FString ObjectClassName;
+    int TagCount;
+    FAssetDataTag TagMap; 
+};
+
+struct FSearchableName
+{
+    FPackageIndex Key;
+    int ValueCount;
+    FName Values[ValueCount];
+};
+
+/* FILE READ BEGINS HERE */
+
+FPackageFileSummary Header;
+
+if (Header.NameCount > 0)
+{
+    FSeek(Header.NameOffset);
+    FNameEntry Names[Header.NameCount] <optimize=false, hidden=true>;
+}
+
+if (Header.ImportCount > 0)
+{
+    FSeek(Header.ImportOffset);
+    FObjectImport ImportMap[Header.ImportCount];
+}
+
+if (Header.ExportCount > 0)
+{
+    FSeek(Header.ExportOffset);
+    FObjectExport ExportMap[Header.ExportCount];
+}
+
+if (Header.DependsOffset > 0)
+{
+    FSeek(Header.DependsOffset);
+    FPackageIndex DependsMap[Header.ExportCount];
+}
+
+// TODO: need to find a UAsset that uses this...
+if (fileVersionUE4 >= 384 && Header.SoftPackageReferencesOffset > 0) // VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP
+{
+    FSeek(Header.SoftPackageReferencesOffset);
+    if (fileVersionUE4 >= 514) // VER_UE4_ADDED_SOFT_OBJECT_PATH
+        FName SoftPackageReferenceList[Header.SoftPackageReferencesCount];
+    else
+        FString SoftPackageReferenceList[Header.SoftPackageReferencesCount] <optimize=false>;
+}
+
+// TODO: need to find a UAsset that uses this...
+if (fileVersionUE4 >= 510 && Header.SearchableNamesOffset > 0) // VER_UE4_ADDED_SEARCHABLE_NAMES
+{
+    FSeek(Header.SearchableNamesOffset);
+
+    // No idea if this is how TMap<FPackageIndex, TArray<FName>> is serialized...
+    int SearchableNamesCount <hidden=true>;
+    FSearchableName SearchableNames[SearchableNamesCount];
+}
+
+// TODO: need to find a UAsset that uses this...
+if (Header.AssetRegistryDataOffset > 0)
+{
+    FSeek(Header.AssetRegistryDataOffset);
+
+    int AssetRegistryObjectCount <hidden=true>;
+    FAssetData AssetDataList[AssetRegistryObjectCount] <optimize=false>;
+}
+
+if (fileVersionUE4 >= 507 && Header.PreloadDependencyOffset > 0) // VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS
+{
+    FSeek(Header.PreloadDependencyOffset);
+    FPackageIndex PreloadDependency[Header.PreloadDependencyCount];
+}
