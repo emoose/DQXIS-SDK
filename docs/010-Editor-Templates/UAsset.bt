@@ -11,8 +11,9 @@
 //   History: 
 //
 // Currently supports up to FileVersionUE4 <= 522 (4.26.1)
-// TODO: SearchableNamesOffset, ThumbnailTableOffset
-// Need to check: F(Enum/Guid)CustomVersion, FAssetRegistry, SoftPackageReferencesOffset
+// TODO (need to check): 
+//   F(Enum/Guid)CustomVersion, SoftPackageReferencesOffset, SearchableNamesOffset, WorldTileInfoDataOffset
+// (also need to check the above against latest UE 4.26.1)
 //------------------------------------------------
 
 // UNVERSIONED_VERSION: the UE4 version to use for unversioned files (cooked files are usually unversioned)
@@ -291,7 +292,7 @@ typedef struct
 
 wstring ReadFObjectImport(FObjectImport& val)
 {
-    return ReadFName(val.ClassName) + ": " + ReadFName(val.ObjectName);
+    return ReadFName(val.ClassName) + " " + ReadFName(val.ObjectName);
 }
 
 wstring ReadFObjectImportShort(FObjectImport& val)
@@ -344,7 +345,7 @@ typedef struct
 
 wstring ReadFObjectExport(FObjectExport& val)
 {
-    return ReadFPackageIndexShort(val.ClassIndex) + ": " + ReadFName(val.ObjectName);
+    return ReadFPackageIndexShort(val.ClassIndex) + " " + ReadFName(val.ObjectName);
 }
 
 wstring ReadFObjectExportShort(FObjectExport& val)
@@ -560,19 +561,144 @@ wstring ReadFAssetDataTag(FAssetDataTag& val)
     return ReadFString(val.Key) + ": " + ReadFString(val.Value);
 }
 
-struct FAssetData
+typedef struct
 {
     FString ObjectPath;
     FString ObjectClassName;
     int TagCount;
-    FAssetDataTag TagMap; 
-};
+    FAssetDataTag TagMap[TagCount] <optimize=false>;
+} FAssetData<read=ReadFAssetData>;
+
+wstring ReadFAssetData(FAssetData& val)
+{
+    return ReadFString(val.ObjectClassName) + " " + ReadFString(val.ObjectPath);
+}
 
 struct FSearchableName
 {
     FPackageIndex Key;
     int ValueCount;
     FName Values[ValueCount];
+};
+
+struct FObjectThumbnail
+{
+    int ImageWidth;
+    int ImageHeight;
+    int CompressedImageDataSize;
+    byte CompressedImageData[CompressedImageDataSize];
+};
+
+typedef struct
+{
+    FString ObjectClassName;
+    FString ObjectPathWithoutPackageName;
+    int FileOffset;
+
+    if(fileSize > FileOffset) // thumb is part of this uasset :)
+    {
+        local int64 pos = FTell();
+        FSeek(FileOffset);
+        FObjectThumbnail FileData;
+        FSeek(pos);
+    }
+} FObjectFullNameAndThumbnail<read=ReadFObjectFullNameAndThumbnail>;
+
+wstring ReadFObjectFullNameAndThumbnail(FObjectFullNameAndThumbnail& val)
+{
+    return ReadFString(val.ObjectClassName) + " " + ReadFString(val.ObjectPathWithoutPackageName);
+}
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} FVector<read=ReadFVector>;
+
+wstring ReadFVector(FVector& val)
+{
+    string s;
+    SPrintf(s, "%f,%f,%f", val.X, val.Y, val.Z);
+    return s;
+}
+
+typedef struct
+{
+    FVector Min;
+    FVector Max;
+    byte IsValid;
+} FBox<read=ReadFBox>;
+
+wstring ReadFBox(FBox& val)
+{
+    if (IsValid == 0)
+        return "invalid";
+    return "min: " + ReadFVector(val.Min) + " max: " + ReadFVector(val.Max);
+}
+
+struct FWorldTileLayer
+{
+    FString Name;
+    int Reserved0;
+    int Reserved1;
+
+    if (fileVersionUE4 >= 268) // VER_UE4_WORLD_LEVEL_INFO_UPDATED
+        int StreamingDistance;
+
+    if (fileVersionUE4 >= 329) // VER_UE4_WORLD_LAYER_ENABLE_DISTANCE_STREAMING
+        int bDistanceStreamingEnabled;
+};
+
+typedef struct
+{
+    int RelativeStreamingDistance;
+    float Reserved0;
+    float Reserved1;
+    int Reserved2;
+    int Reserved3;
+} FWorldTileLODInfo<read=ReadFWorldTileLODInfo>;
+
+wstring ReadFWorldTileLODInfo(FWorldTileLODInfo& val)
+{
+    string s;
+    SPrintf(s, "%d", val.RelativeStreamingDistance);
+    return s;
+}
+
+typedef struct
+{
+    int X;
+    int Y;
+} FIntPoint<read=ReadFIntPoint>;
+
+wstring ReadFIntPoint(FIntPoint& val)
+{
+    string s;
+    SPrintf(s, "(%d,%d)", val.X, val.Y);
+    return s;
+}
+
+struct FWorldTileInfo
+{
+    FIntPoint Position;
+    FBox Bounds;
+    FWorldTileLayer Layer;
+
+    if (fileVersionUE4 >= 268) // VER_UE4_WORLD_LEVEL_INFO_UPDATED
+    {
+        int bHideInTileView;
+        FString ParentTilePackageName;
+    }
+
+    if (fileVersionUE4 >= 316) // VER_UE4_WORLD_LEVEL_INFO_LOD_LIST
+    {
+        int LODListCount;
+        FWorldTileLODInfo LODList[LODListCount] <optimize=false>;
+    }
+
+`   if (fileVersionUE4 >= 319) // VER_UE4_WORLD_LEVEL_INFO_ZORDER
+        int ZOrder;
 };
 
 /* FILE READ BEGINS HERE */
@@ -604,6 +730,21 @@ if (Header.DependsOffset > 0)
 }
 
 // TODO: need to find a UAsset that uses this...
+if (Header.ThumbnailTableOffset > 0)
+{
+    FSeek(Header.ThumbnailTableOffset);
+    int ThumbnailTableCount <hidden=true>;
+    FObjectFullNameAndThumbnail ThumbnailInfoArray[ThumbnailTableCount] <optimize=false>;
+}
+
+// TODO: need to find a UAsset that uses this...
+if (fileVersionUE4 >= 224 && Header.WorldTileInfoDataOffset > 0) // VER_UE4_WORLD_LEVEL_INFO
+{
+    FSeek(Header.WorldTileInfoDataOffset);
+    FWorldTileInfo WorldTileInfo;
+}
+
+// TODO: need to find a UAsset that uses this...
 if (fileVersionUE4 >= 384 && Header.SoftPackageReferencesOffset > 0) // VER_UE4_ADD_STRING_ASSET_REFERENCES_MAP
 {
     FSeek(Header.SoftPackageReferencesOffset);
@@ -632,7 +773,7 @@ if (Header.AssetRegistryDataOffset > 0)
     FAssetData AssetDataList[AssetRegistryObjectCount] <optimize=false>;
 }
 
-if (fileVersionUE4 >= 507 && Header.PreloadDependencyOffset > 0) // VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS
+if (fileVersionUE4 >= 507 && Header.PreloadDependencyOffset > 0 && Header.PreloadDependencyCount > 0) // VER_UE4_PRELOAD_DEPENDENCIES_IN_COOKED_EXPORTS
 {
     FSeek(Header.PreloadDependencyOffset);
     FPackageIndex PreloadDependency[Header.PreloadDependencyCount];
