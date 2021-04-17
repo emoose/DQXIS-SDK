@@ -6,6 +6,12 @@ bool FileExists(const WCHAR* Filename)
   return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+bool DirExists(const WCHAR* DirPath)
+{
+  DWORD dwAttrib = GetFileAttributesW(DirPath);
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
+}
+
 // Code to get main window HWND from https://stackoverflow.com/questions/1888863/how-to-get-main-window-handle-from-process-id
 struct handle_data {
   DWORD process_id;

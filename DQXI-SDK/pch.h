@@ -130,6 +130,7 @@ void Init_FirstPerson();
 
 // Utility.cpp
 bool FileExists(const WCHAR* Filename);
+bool DirExists(const WCHAR* DirPath);
 HWND FindMainWindow(DWORD process_id);
 
 template <typename T>

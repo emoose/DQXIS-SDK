@@ -287,6 +287,9 @@ bool TryLoadINIOptions(const WCHAR* IniFilePath)
 
 bool TrySearchINI(const std::wstring_view& FolderPath)
 {
+  if (!DirExists(FolderPath.data()))
+    return false;
+
   for (const auto& entry : std::filesystem::recursive_directory_iterator(FolderPath))
   {
     if (entry.path().filename().generic_wstring() == L"DQXIS-SDK.ini")
