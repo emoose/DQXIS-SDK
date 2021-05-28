@@ -32,6 +32,11 @@ struct GameAddresses
   unsigned int CheckData;
   unsigned int CheckDataJP; // JP version seems to use a different build-date, but code is pretty much identical
 
+  // If neither CheckData/CheckDataJP match, check one other offset
+  // (Denuvo can change timestamp addr/value, even though Denuvo/non-Denuvo EXE pretty much match)
+  uintptr_t AltCheckDataAddr;
+  unsigned int AltCheckData;
+
   // Variables
   uintptr_t GUObjectArray; // aka GObjects
   uintptr_t Names; // aka GNames, "TNameEntryArray* Names"

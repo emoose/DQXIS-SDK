@@ -6,6 +6,16 @@ GameAddresses GameAddrs_Steam =
   .CheckData = 1607981102, // 2020/12/14 21:25:02
   .CheckDataJP = 1607969596, // 2020/12/14 18:13:16
 
+  // 2021/05/28 non-Denuvo update - offsets pretty much match Denuvo version
+  // Timestamp addr was moved though, so can't use CheckDataAddr above...
+  // .CheckDataAddr = 0x1D8, // NtHeader.FileHeader.TimeDateStamp
+  // .CheckData = 1607948570, // 2020/12/14 12:22:50
+
+  // Check against random string in .rdata, since I don't have JP timestamp to check with
+  // Hopefully this'll catch both WW & JP versions
+  .AltCheckDataAddr = 0x3F093D8,
+  .AltCheckData = 0x6F006E, // "not available in shipping" string
+
   .GUObjectArray = 0x5D83BF8,
   .Names = 0x5D7AE20,
 
@@ -64,6 +74,9 @@ GameAddresses GameAddrs_UWP =
   .CheckDataAddr = 0x1F0, // NtHeader.FileHeader.TimeDateStamp
   .CheckData = 1603439301, // 2020/10/23 07:48:21
   .CheckDataJP = 0, // unknown
+
+  .AltCheckDataAddr = 0,
+  .AltCheckData = 0,
 
   .GUObjectArray = 0x5CE48B8,
   .Names = 0x5E21158,
@@ -126,17 +139,24 @@ bool GameAddresses::CheckDataValid()
 
   auto checkDataValue = *reinterpret_cast<unsigned int*>(mBaseAddress + CheckDataAddr);
 
-  return CheckData == checkDataValue || (CheckDataJP != 0 && CheckDataJP == checkDataValue);
+  if (CheckData == checkDataValue || (CheckDataJP != 0 && CheckDataJP == checkDataValue))
+    return true;
+
+  if (AltCheckDataAddr == 0)
+    return false;
+
+  auto altCheckDataValue = *reinterpret_cast<unsigned int*>(mBaseAddress + AltCheckDataAddr);
+  return AltCheckData == altCheckDataValue;
 }
 
 bool UpdateGameAddrs()
 {
   GameAddrs = nullptr;
 
-  if (GameAddrs_Steam.CheckDataValid())
-    GameAddrs = &GameAddrs_Steam;
-  else if (GameAddrs_UWP.CheckDataValid())
+  if (GameAddrs_UWP.CheckDataValid())
     GameAddrs = &GameAddrs_UWP;
+  else if (GameAddrs_Steam.CheckDataValid())
+    GameAddrs = &GameAddrs_Steam;
 
   return GameAddrs != nullptr;
 }
