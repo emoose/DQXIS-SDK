@@ -11,10 +11,10 @@ GameAddresses GameAddrs_Steam =
   // .CheckDataAddr = 0x1D8, // NtHeader.FileHeader.TimeDateStamp
   // .CheckData = 1607948570, // 2020/12/14 12:22:50
 
-  // Check against random string in .rdata, since I don't have JP timestamp to check with
+  // Since I don't have JP timestamp to check with, check against some data in .rdata
   // Hopefully this'll catch both WW & JP versions
-  .AltCheckDataAddr = 0x3F093D8,
-  .AltCheckData = 0x6F006E, // "not available in shipping" string
+  .AltCheckDataAddr = 0x36835D0,
+  .AltCheckData = 0x37353A38313A3132, // "21:18:57", build time?
 
   .GUObjectArray = 0x5D83BF8,
   .Names = 0x5D7AE20,
@@ -68,6 +68,75 @@ GameAddresses GameAddrs_Steam =
   .AJackBattleManager__BattleFinalize = 0x4D6A50
 };
 
+// Epic Games Store
+GameAddresses GameAddrs_EGS =
+{
+  .CheckDataAddr = 0xE8,   // NtHeader.FileHeader.TimeDateStamp
+  .CheckData = 1607685241, // 2020/12/11 11:14:01
+  .CheckDataJP = 0, // unknown
+
+  // 2021/05/28 non-Denuvo update - offsets pretty much match Denuvo version
+  // Timestamp addr was moved though, so can't use CheckDataAddr above...
+  // .CheckDataAddr = 0x1D8, // NtHeader.FileHeader.TimeDateStamp
+  // .CheckData = 1607662965, // 2020/12/11 05:02:45
+
+  // Since I don't have JP timestamp to check with, check against some data in .rdata
+  // Hopefully this'll catch both WW & JP versions
+  .AltCheckDataAddr = 0x3682C30,
+  .AltCheckData = 0x34333A35353A3331, // "13:55:34", build time?
+
+  .GUObjectArray = 0x5C4D6F8,
+  .Names = 0x5E871A8,
+
+  .Cvar_ScreenPercentage = 0x5D54C50,
+  .Cvar_DisableMovementModeOptimization = 0x5C028D8,
+  .Cvar_DisableDitherHidden = 0x5C02908,
+  .Cvar_ShadowFilterMethod = 0x5CE29D0,
+
+  .ExcludedDebugPackage_1 = 0x3686660,
+  .ExcludedDebugPackage_2 = 0x36867E8,
+
+  .RenderScaleDefault_Width = 0x5894EE0,
+  .RenderScaleDefault_Height = 0x5894EE4,
+
+  .TripleRunRate_Value = 0x59DFBF0,
+  .TripleRunRate_IsSet = 0x5F0828A,
+
+  .UObject__ProcessEvent = 0xE0CA90,
+  .UInputComponent__BindAction = 0x685D30,
+  .FName__Ctor = 0x1F44030,
+  .FString__Printf__VA = 0x1E8BC40,
+  .StaticConstructObject_Internal = 0xE31CD0,
+  .FWeakObjectPtr__OperatorEquals = 0xE37100,
+
+  .SetsCharacterViewerResolution = 0x918210,
+  .AJackFieldPlayerController__InitActionMappings = 0x62BE50,
+  .GetSourceIniFilename = 0x1F0AE00,
+  .FPaths__GeneratedConfigDir = 0x1F2AD90,
+  .AActor__InitActionMappingsUI = 0x91E7D0,
+  .AJackTripleManager__SetupPlayerInputComponent = 0x918A70,
+  .FTripleModule__GetCheatManager = 0x21654F0,
+  .Triple_CharWalk = 0x212AB00,
+
+  .GenerateActionMappings_1 = 0x75C6A0,
+  .GenerateActionMappings_2 = 0x7D4040,
+
+  .USceneCaptureComponent2D__Ctor_ShowFlags_AND = 0x18F02F5,
+  .AJackTriplePlayerController__ProcessConsoleExec_result_AND = 0x915E69,
+
+  .UGameViewportClient__SetupInitialLocalPlayer = 0x19C31E0,
+  .FPakPlatformFile__FindFileInPakFiles = 0x1F6B6F0,
+  .FPakPlatformFile__IsNonPakFilenameAllowed = 0x1F6E6D0,
+
+  .AJackPlayerController__PushCameraMode = 0x6550A0,
+  .AJackPlayerController__PopCameraMode = 0x6544A0,
+  .CameraInterpolate = 0x630EE0,
+  .UJackGamePlayer__UpdateRidingVehicle = 0x747950,
+  .APawn__RecalculateBaseEyeHeight = 0x1B68830,
+  .AJackBattleManager__BattleInitialize = 0x4D9C80,
+  .AJackBattleManager__BattleFinalize = 0x4D96F0
+};
+
 // UWP/MS Store
 GameAddresses GameAddrs_UWP =
 {
@@ -75,8 +144,8 @@ GameAddresses GameAddrs_UWP =
   .CheckData = 1603439301, // 2020/10/23 07:48:21
   .CheckDataJP = 0, // unknown
 
-  .AltCheckDataAddr = 0,
-  .AltCheckData = 0,
+  .AltCheckDataAddr = 0x36ED920,
+  .AltCheckData = 0x31303A33343A3631,
 
   .GUObjectArray = 0x5CE48B8,
   .Names = 0x5E21158,
@@ -145,7 +214,7 @@ bool GameAddresses::CheckDataValid()
   if (AltCheckDataAddr == 0)
     return false;
 
-  auto altCheckDataValue = *reinterpret_cast<unsigned int*>(mBaseAddress + AltCheckDataAddr);
+  auto altCheckDataValue = *reinterpret_cast<uint64_t*>(mBaseAddress + AltCheckDataAddr);
   return AltCheckData == altCheckDataValue;
 }
 
@@ -155,6 +224,8 @@ bool UpdateGameAddrs()
 
   if (GameAddrs_UWP.CheckDataValid())
     GameAddrs = &GameAddrs_UWP;
+  else if (GameAddrs_EGS.CheckDataValid())
+    GameAddrs = &GameAddrs_EGS;
   else if (GameAddrs_Steam.CheckDataValid())
     GameAddrs = &GameAddrs_Steam;
 
