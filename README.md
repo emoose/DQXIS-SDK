@@ -15,6 +15,11 @@ An XInput/DXGI wrapper DLL bringing several enhancements to DQXIS, via an SDK ge
 
 The SDK also has a huge amount of the games classes/structs mapped out, giving a nice view into the games internals, including things like the structures of DataTables used by the game!
 
+## Development
+If you want to look into adding any features/improvements to DQXIS-SDK, please make your changes against the latest Steam version (as of 2021/05/29) - since this now has Denuvo removed it's probably the easiest to work with, and as it's probably the most popular version people own, it'd be best for new features to work with this version before any others.
+
+Seeing that DQXIS-SDK supports 3+ different versions of DQXIS might scare some off, but don't worry about trying to port to them all yourself: as long as the change works on one of the versions I'm happy to try porting it across to the others for you.
+
 ## Thanks
 Huge thanks to idkicarus for providing me a copy of DQXIS!
 
