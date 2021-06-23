@@ -68,6 +68,70 @@ GameAddresses GameAddrs_Steam =
   .AJackBattleManager__BattleFinalize = 0x4D6A50
 };
 
+// Epic Games Store v1.0.3.0W
+GameAddresses GameAddrs_EGS_1030 =
+{
+  .CheckDataAddr = 0x1D8,   // NtHeader.FileHeader.TimeDateStamp
+  .CheckData = 1622535378, // 2021/06/01 08:16:18
+  .CheckDataJP = 0, // unknown
+
+  // Since I don't have JP timestamp to check with, check against some data in .rdata
+  // Hopefully this'll catch both WW & JP versions
+  .AltCheckDataAddr = 0x3682C30,
+  .AltCheckData = 0x34323A39303A3731, // "17:09:24", build time?
+
+  .GUObjectArray = 0x5C4D6F8,
+  .Names = 0x5E871A8,
+
+  .Cvar_ScreenPercentage = 0x5D54C50,
+  .Cvar_DisableMovementModeOptimization = 0x5C028D8,
+  .Cvar_DisableDitherHidden = 0x5C02908,
+  .Cvar_ShadowFilterMethod = 0x5CE29D0,
+
+  .ExcludedDebugPackage_1 = 0x3686660,
+  .ExcludedDebugPackage_2 = 0x36867E8,
+
+  .RenderScaleDefault_Width = 0x5894EE0,
+  .RenderScaleDefault_Height = 0x5894EE4,
+
+  .TripleRunRate_Value = 0x59DFBF0,
+  .TripleRunRate_IsSet = 0x5F0828A,
+
+  .UObject__ProcessEvent = 0xE0C960,
+  .UInputComponent__BindAction = 0x6857E0,
+  .FName__Ctor = 0x1F43EF0,
+  .FString__Printf__VA = 0x1E8BB00,
+  .StaticConstructObject_Internal = 0xE31BA0,
+  .FWeakObjectPtr__OperatorEquals = 0xE36FD0,
+
+  .SetsCharacterViewerResolution = 0x9182A0,
+  .AJackFieldPlayerController__InitActionMappings = 0x62B960,
+  .GetSourceIniFilename = 0x1F0ACC0,
+  .FPaths__GeneratedConfigDir = 0x1F2AC50,
+  .AActor__InitActionMappingsUI = 0x91E860,
+  .AJackTripleManager__SetupPlayerInputComponent = 0x918B00,
+  .FTripleModule__GetCheatManager = 0x2165370,
+  .Triple_CharWalk = 0x212A980,
+
+  .GenerateActionMappings_1 = 0x75C130,
+  .GenerateActionMappings_2 = 0x7D3810,
+
+  .USceneCaptureComponent2D__Ctor_ShowFlags_AND = 0x18F0195,
+  .AJackTriplePlayerController__ProcessConsoleExec_result_AND = 0x915EF9,
+
+  .UGameViewportClient__SetupInitialLocalPlayer = 0x19C30D0,
+  .FPakPlatformFile__FindFileInPakFiles = 0x1F6B5B0,
+  .FPakPlatformFile__IsNonPakFilenameAllowed = 0x1F6E590,
+
+  .AJackPlayerController__PushCameraMode = 0x654B50,
+  .AJackPlayerController__PopCameraMode = 0x653F50,
+  .CameraInterpolate = 0x6309F0,
+  .UJackGamePlayer__UpdateRidingVehicle = 0x7473E0,
+  .APawn__RecalculateBaseEyeHeight = 0x1B68720,
+  .AJackBattleManager__BattleInitialize = 0x4D9490,
+  .AJackBattleManager__BattleFinalize = 0x4D8F00,
+};
+
 // Epic Games Store
 GameAddresses GameAddrs_EGS =
 {
@@ -294,6 +358,8 @@ bool UpdateGameAddrs()
     GameAddrs = &GameAddrs_UWP_1040;
   else if (GameAddrs_UWP_1060.CheckDataValid())
     GameAddrs = &GameAddrs_UWP_1060;
+  else if (GameAddrs_EGS_1030.CheckDataValid())
+    GameAddrs = &GameAddrs_EGS_1030;
   else if (GameAddrs_EGS.CheckDataValid())
     GameAddrs = &GameAddrs_EGS;
   else if (GameAddrs_Steam.CheckDataValid())
