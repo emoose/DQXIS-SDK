@@ -201,6 +201,71 @@ GameAddresses GameAddrs_EGS =
   .AJackBattleManager__BattleFinalize = 0x4D96F0
 };
 
+// UWP/MS Store v1.0.6.0+ (newer than 1.0.6.0 by ~13 days)
+// Latest version as of 2021/10/02
+GameAddresses GameAddrs_UWP_latest =
+{
+  .CheckDataAddr = 0x1F0, // NtHeader.FileHeader.TimeDateStamp
+  .CheckData = 1622096240, // 2021/05/27 06:17:20
+  .CheckDataJP = 0, // unknown
+
+  // Since I don't have JP timestamp to check with, check against some data in .rdata
+  // Hopefully this'll catch both WW & JP versions
+  .AltCheckDataAddr = 0x36ED920,
+  .AltCheckData = 0x39343A31313A3531,
+
+  .GUObjectArray = 0x5CE48B8,
+  .Names = 0x5E21158,
+
+  .Cvar_ScreenPercentage = 0x5CEEA68,
+  .Cvar_DisableMovementModeOptimization = 0x5C99AB8,
+  .Cvar_DisableDitherHidden = 0x5C99AE8,
+  .Cvar_ShadowFilterMethod = 0x5EB6530,
+
+  .ExcludedDebugPackage_1 = 0x36F1088,
+  .ExcludedDebugPackage_2 = 0x36F1318,
+
+  .RenderScaleDefault_Width = 0x5930C40,
+  .RenderScaleDefault_Height = 0x5930C44,
+
+  .TripleRunRate_Value = 0x5A731A0,
+  .TripleRunRate_IsSet = 0x5F9C53A,
+
+  .UObject__ProcessEvent = 0xD9CA60,
+  .UInputComponent__BindAction = 0x63D220,
+  .FName__Ctor = 0xE997C0,
+  .FString__Printf__VA = 0xDE02C0,
+  .StaticConstructObject_Internal = 0xDC21A0,
+  .FWeakObjectPtr__OperatorEquals = 0xDC75D0,
+
+  .SetsCharacterViewerResolution = 0x8A76D0,
+  .AJackFieldPlayerController__InitActionMappings = 0x5BC070,
+  .GetSourceIniFilename = 0xE5F960,
+  .FPaths__GeneratedConfigDir = 0xE7FC70,
+  .AActor__InitActionMappingsUI = 0x8ADE00,
+  .AJackTripleManager__SetupPlayerInputComponent = 0x8A7F40,
+  .FTripleModule__GetCheatManager = 0x20F9EE0,
+  .Triple_CharWalk = 0x20BF040,
+
+  .GenerateActionMappings_1 = 0x6ECFE0,
+  .GenerateActionMappings_2 = 0x7635D0,
+
+  .USceneCaptureComponent2D__Ctor_ShowFlags_AND = 0x1967F85,
+  .AJackTriplePlayerController__ProcessConsoleExec_result_AND = 0x8A5429,
+
+  .UGameViewportClient__SetupInitialLocalPlayer = 0x1A3A2A0,
+  .FPakPlatformFile__FindFileInPakFiles = 0x1EFB1F0,
+  .FPakPlatformFile__IsNonPakFilenameAllowed = 0x1EFE490,
+
+  .AJackPlayerController__PushCameraMode = 0x5E5510,
+  .AJackPlayerController__PopCameraMode = 0x5E4920,
+  .CameraInterpolate = 0x5C1100,
+  .UJackGamePlayer__UpdateRidingVehicle = 0x6D8070,
+  .APawn__RecalculateBaseEyeHeight = 0x1BE0230,
+  .AJackBattleManager__BattleInitialize = 0x469C50,
+  .AJackBattleManager__BattleFinalize = 0x4696C0
+};
+
 // UWP/MS Store v1.0.6.0
 GameAddresses GameAddrs_UWP_1060 =
 {
@@ -358,6 +423,8 @@ bool UpdateGameAddrs()
     GameAddrs = &GameAddrs_UWP_1040;
   else if (GameAddrs_UWP_1060.CheckDataValid())
     GameAddrs = &GameAddrs_UWP_1060;
+  else if (GameAddrs_UWP_latest.CheckDataValid())
+    GameAddrs = &GameAddrs_UWP_latest;
   else if (GameAddrs_EGS_1030.CheckDataValid())
     GameAddrs = &GameAddrs_EGS_1030;
   else if (GameAddrs_EGS.CheckDataValid())
