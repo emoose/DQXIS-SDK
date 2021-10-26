@@ -50,7 +50,7 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
 void ToggleMinimap(AJackFieldPlayerController* playerController)
 {
   minimapEnabled = !minimapEnabled;
-  g_JackCheatManager->SetMiniMapVisible(!IsFirstPerson);
+  g_JackCheatManager->SetMiniMapVisible(minimapEnabled);
 }
 
 void EnterPartyChat(AJackFieldPlayerController* playerController)
