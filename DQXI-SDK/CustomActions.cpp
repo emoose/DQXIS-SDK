@@ -92,6 +92,8 @@ void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
   input->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, playerController, EnterPartyChat);
 
   input->BindAction("QuitGame", EInputEvent::IE_Pressed, (AActor*)playerController, QuitGame);
+  
+  input->BindAction("ToggleMinimap", EInputEvent::IE_Pressed, playerController, ToggleMinimap);
 }
 
 void Init_CustomActions_UI(AActor* Actor, UInputComponent* PlayerInputComponent)
