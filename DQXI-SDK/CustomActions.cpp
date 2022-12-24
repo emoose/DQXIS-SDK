@@ -4,6 +4,8 @@
 // For adding to this file, see list of hookable SetupInputComponent funcs at https://gist.github.com/emoose/61be532af247f486902103096da5d38f
 // (indented funcs call into the non-indented func above it, so only that needs hooking to affect all its indented children)
 
+bool minimapEnabled = true;
+
 bool IsPlayerMovementEnabled(AActor* actor)
 {
   auto player = g_StaticFuncs->STATIC_GetJackGamePlayer(actor);
@@ -33,6 +35,7 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
     return; 
 
   IsFirstPerson = !IsFirstPerson; //toggle first person
+  minimapEnabled = !minimapEnabled; //toggle minimap variable (just keeping track)
   if (Options.FirstPersonMovable)
   {
     if (Options.HideMinimap)
@@ -42,6 +45,12 @@ void FirstPersonCamera(AJackFieldPlayerController* playerController)
   }
 
   playerController->Camera(IsFirstPerson ? CamStyle_FirstPersonView : CamStyle_Normal);
+}
+
+void ToggleMinimap(AJackFieldPlayerController* playerController)
+{
+  minimapEnabled = !minimapEnabled;
+  g_JackCheatManager->SetMiniMapVisible(minimapEnabled);
 }
 
 void EnterPartyChat(AJackFieldPlayerController* playerController)
@@ -83,6 +92,8 @@ void Init_CustomActions_Field(AJackFieldPlayerController* playerController)
   input->BindAction("EnterNakamaKaiwa", EInputEvent::IE_Pressed, playerController, EnterPartyChat);
 
   input->BindAction("QuitGame", EInputEvent::IE_Pressed, (AActor*)playerController, QuitGame);
+  
+  input->BindAction("ToggleMinimap", EInputEvent::IE_Pressed, playerController, ToggleMinimap);
 }
 
 void Init_CustomActions_UI(AActor* Actor, UInputComponent* PlayerInputComponent)
